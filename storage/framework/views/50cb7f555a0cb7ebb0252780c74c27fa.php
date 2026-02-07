@@ -2,7 +2,7 @@
 
 <?php $__env->startSection('css'); ?>
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    <link rel="stylesheet" href="/css/custom.css">
+    <link rel="stylesheet" href="<?php echo e(asset('css/custom.css')); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <?php echo $__env->yieldContent('extra_css'); ?>
 <?php $__env->stopSection(); ?>

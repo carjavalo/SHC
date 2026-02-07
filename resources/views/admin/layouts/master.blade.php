@@ -2,7 +2,7 @@
 
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="/css/custom.css">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     @yield('extra_css')
 @stop

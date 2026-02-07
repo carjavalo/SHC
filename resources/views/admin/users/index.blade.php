@@ -198,7 +198,7 @@
 @stop
 
 @section('extra_css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
+    <link rel="stylesheet" href="{{ asset('css/admin_custom.css') }}">
     <style>
         /* Evitar que los botones de DataTables se envuelvan a la siguiente línea */
         .dt-buttons {
