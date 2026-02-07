@@ -16,14 +16,14 @@
     <?php endif; ?>>
 
     
-    <img src="<?php echo e(asset(config('adminlte.logo_img', 'vendor/adminlte/dist/img/AdminLTELogo.png'))); ?>"
-         alt="<?php echo e(config('adminlte.logo_img_alt', 'AdminLTE')); ?>"
-         class="<?php echo e(config('adminlte.logo_img_class', 'brand-image img-circle elevation-3')); ?>"
-         style="opacity:.8">
+        <img src="<?php echo e(asset(config('adminlte.logo_img', 'vendor/adminlte/dist/img/AdminLTELogo.png'))); ?>"
+            alt="HuvEduca"
+            class="<?php echo e(config('adminlte.logo_img_class', 'brand-image img-circle elevation-3')); ?>"
+            style="opacity:.8">
 
     
-    <span class="brand-text font-weight-light <?php echo e(config('adminlte.classes_brand_text')); ?>">
-        <?php echo config('adminlte.logo', '<b>Admin</b>LTE'); ?>
+        <span class="brand-text font-weight-light <?php echo e(config('adminlte.classes_brand_text')); ?>">
+        <?php echo 'HuvEduca'; ?>
 
     </span>
 

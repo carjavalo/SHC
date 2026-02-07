@@ -32,7 +32,7 @@
             <a href="{{ $dashboardUrl }}">
 
                 {{-- Logo Image --}}
-                @if (config('adminlte.auth_logo.enabled', false))
+                     @if (config('adminlte.auth_logo.enabled', false))
                     <img src="{{ asset(config('adminlte.auth_logo.img.path')) }}"
                          alt="{{ config('adminlte.auth_logo.img.alt') }}"
                          @if (config('adminlte.auth_logo.img.class', null))
@@ -45,12 +45,12 @@
                             height="{{ config('adminlte.auth_logo.img.height') }}"
                          @endif>
                 @else
-                    <img src="{{ asset(config('adminlte.logo_img')) }}"
-                         alt="{{ config('adminlte.logo_img_alt') }}" height="50">
+                          <img src="{{ asset(config('adminlte.logo_img')) }}"
+                                 alt="HuvEduca" height="50">
                 @endif
 
                 {{-- Logo Label --}}
-                {!! config('adminlte.logo', '<b>Admin</b>LTE') !!}
+                     {!! 'HuvEduca' !!}
 
             </a>
         </div>

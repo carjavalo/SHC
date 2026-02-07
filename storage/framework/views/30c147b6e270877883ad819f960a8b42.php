@@ -15,7 +15,7 @@
     
     <title>
         <?php echo $__env->yieldContent('title_prefix', config('adminlte.title_prefix', '')); ?>
-        <?php echo $__env->yieldContent('title', config('adminlte.title', 'AdminLTE 3')); ?>
+        <?php echo $__env->yieldContent('title', 'HuvEduca'); ?>
         <?php echo $__env->yieldContent('title_postfix', config('adminlte.title_postfix', '')); ?>
     </title>
 
