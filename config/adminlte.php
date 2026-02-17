@@ -432,6 +432,12 @@ return [
                     'can' => 'asignar-cursos',
                 ],
                 [
+                    'text' => 'Editor de Certificados',
+                    'url' => 'configuracion/editor-certificados',
+                    'icon' => 'fas fa-fw fa-certificate',
+                    'active' => ['configuracion/editor-certificados', 'configuracion/editor-certificados/*'],
+                ],
+                [
                     'text' => 'Publicidad y Productos',
                     'url' => 'configuracion/publicidad-productos',
                     'icon' => 'fas fa-fw fa-bullhorn',

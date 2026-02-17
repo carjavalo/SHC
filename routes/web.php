@@ -16,6 +16,7 @@ use App\Http\Controllers\ServicioAreaController;
 use App\Http\Controllers\VinculacionContratoController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\PublicidadProductoController;
+use App\Http\Controllers\CertificadoEditorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -164,6 +165,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Sedes
             Route::get('sedes/data', [SedeController::class, 'getData'])->name('sedes.data');
             Route::resource('sedes', SedeController::class);
+        });
+
+        // Rutas de Editor de Certificados
+        Route::prefix('editor-certificados')->name('editor-certificados.')->group(function () {
+            Route::get('/', [CertificadoEditorController::class, 'index'])->name('index');
         });
 
         // Rutas de Publicidad y Productos

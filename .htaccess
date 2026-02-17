@@ -39,7 +39,7 @@ LimitRequestBody 629145600
 
 <Files "composer.lock">
     Order allow,deny
-    Deny from all
+    Deny from allÑ
 </Files>
 
 # Bloquear acceso a directorios sensibles (NO vendor/ ni storage/ que son públicos)
