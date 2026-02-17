@@ -5,6 +5,10 @@
 /storage/*.key
 /storage/pail
 /vendor
+/storage/*.key
+/storage/framework/
+/storage/logs/
+/vendor/
 .env
 .env.backup
 .env.production
