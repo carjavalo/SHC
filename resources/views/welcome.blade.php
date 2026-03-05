@@ -433,20 +433,20 @@
                     <div class="col-md-5 card-left">
                         <div class="hospital-info">
                             <h1>Hospital Universitario del Valle</h1>
-                            <p>Sistema de Gestión Hospitalaria</p>
+                            <p>Sistema de Gestión Educativa</p>
 
                             <div class="features">
                                 <div class="feature-item">
-                                    <i class="fas fa-user-md"></i> Gestión de Pacientes
+                                    <i class="fas fa-user-md"></i> Gestión de Usuarios
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-procedures"></i> Control de Procedimientos
+                                    <i class="fas fa-procedures"></i> Actividades y Evaluaciones 
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-clipboard-list"></i> Historial Clínico
+                                    <i class="fas fa-clipboard-list"></i> Seguimiento del Procesos
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-pills"></i> Administración de Medicamentos
+                                    <i class="fas fa-pills"></i> Certificacion
                                 </div>
                             </div>
                         </div>
