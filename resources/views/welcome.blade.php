@@ -433,7 +433,7 @@
                     <div class="col-md-5 card-left">
                         <div class="hospital-info">
                             <h1>Hospital Universitario del Valle</h1>
-                            <p>Sistema de Gestión Educativa</p>
+                            <p>Gestión Educativa</p>
 
                             <div class="features">
                                 <div class="feature-item">
