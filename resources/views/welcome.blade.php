@@ -43,20 +43,19 @@
         }
         
         .auth-card {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             width: 100%;
-            max-width: 480px;
+            max-width: 640px; /* formularios con ancho cómodo */
             flex-shrink: 0;
+            margin-left: 0; /* centrar el card dentro del contenedor */
         }
 
-        /* Contenedor independiente del carrusel */
+        /* Banner eliminado — ocultar cualquier contenedor previo */
         .carousel-wrapper {
-            flex-shrink: 0;
-            width: 650px;
-            max-width: 650px;
+            display: none;
         }
         
         .card-left {
@@ -322,6 +321,7 @@
 
             .auth-card {
                 max-width: 90%;
+                margin-left: 0; /* quitar desplazamiento en tablet/ móvil */
             }
 
             .carousel-wrapper {
@@ -373,6 +373,7 @@
 
             .auth-card {
                 max-width: 100%;
+                margin-left: 0; /* asegurar sin desplazamiento en pantallas pequeñas */
             }
         }
 
