@@ -339,7 +339,911 @@
         font-family: 'Inter', sans-serif;
     }
     .certificate-canvas {
-        aspect-ratio: 1.414 / 1;
+        aspect-ratio: unset;
+        width: var(--cert-width, 960px);
+        height: var(--cert-height, 680px);
+        max-width: 100%;
+        max-height: 100vh;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    .draggable-element {
+        cursor: move;
+        user-select: none;
+        transition: outline 0.1s ease;
+    }
+    .draggable-element:hover {
+        outline: 2px dashed var(--primary-huv);
+        outline-offset: 4px;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .card::-webkit-scrollbar {
+        width: 5px;
+    }
+    .card::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .card::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    .custom-range::-webkit-slider-thumb {
+        background: #1e3a8a;
+    }
+    /* Menú contextual personalizado */
+    .custom-context-menu {
+        position: absolute;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(30,58,138,0.08);
+        padding: 8px 0;
+        min-width: 140px;
+        font-size: 14px;
+        display: none;
+    }
+    .custom-context-menu .menu-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        color: #1e3a8a;
+        transition: background 0.2s;
+    }
+    .custom-context-menu .menu-item:hover {
+        background: #e2e8f0;
+    }
+</style>
+@stop
+
+@section('js')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ===== Meses en español para formateo =====
+    const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+    function formatearFecha(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        const d = parseInt(parts[2], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parts[0];
+        return d + ' de ' + meses[m] + ' de ' + y;
+    }
+
+    // ===== Selección de usuario → llena campos de identidad =====
+    const selectUsuario = document.getElementById('selectUsuario');
+    selectUsuario.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!this.value) {
+            document.getElementById('inputNombres').value = '';
+            document.getElementById('inputApellido1').value = '';
+            document.getElementById('inputApellido2').value = '';
+            document.getElementById('inputDocumento').value = '';
+            actualizarCertificado();
+            return;
+        }
+        document.getElementById('inputNombres').value = opt.dataset.name || '';
+        document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
+        document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
+        document.getElementById('inputDocumento').value = opt.dataset.documento || '';
+        actualizarCertificado();
+    });
+
+    // ===== Selección de curso → llena campos de contenido =====
+    const selectCurso = document.getElementById('selectCurso');
+    selectCurso.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!this.value) {
+            document.getElementById('inputCursoNombre').value = '';
+            document.getElementById('inputHoras').value = '';
+            document.getElementById('inputFechaInicio').value = '';
+            document.getElementById('inputFechaFin').value = '';
+            actualizarCertificado();
+            return;
+        }
+        document.getElementById('inputCursoNombre').value = opt.dataset.titulo || '';
+        document.getElementById('inputHoras').value = opt.dataset.duracion || '';
+        document.getElementById('inputFechaInicio').value = opt.dataset.fechaInicio || '';
+        document.getElementById('inputFechaFin').value = opt.dataset.fechaFin || '';
+        actualizarCertificado();
+    });
+
+    // ===== Actualizar vista previa del certificado en tiempo real =====
+    function actualizarCertificado() {
+        const nombres = document.getElementById('inputNombres').value || 'NOMBRE';
+        const ap1 = document.getElementById('inputApellido1').value || 'APELLIDO1';
+        const ap2 = document.getElementById('inputApellido2').value || 'APELLIDO2';
+        const doc = document.getElementById('inputDocumento').value || '00.000.000';
+        const curso = document.getElementById('inputCursoNombre').value || 'NOMBRE DEL CURSO';
+        const horas = document.getElementById('inputHoras').value || '40';
+        const fInicio = document.getElementById('inputFechaInicio').value;
+        const fFin = document.getElementById('inputFechaFin').value;
+        const firmaNombre = document.getElementById('inputFirmaNombre').value || 'FIRMACOR';
+        const firmaCargo = document.getElementById('inputFirmaCargo').value || 'CARGOCOR';
+
+        document.getElementById('certNombreCompleto').textContent = (nombres + ' ' + ap1 + ' ' + ap2).toUpperCase();
+        document.getElementById('certDocumento').textContent = 'C.C. ' + doc + ' de Cali';
+        document.getElementById('certCursoNombre').textContent = curso;
+        document.getElementById('certHoras').textContent = horas;
+        document.getElementById('certFechaInicio').textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
+        document.getElementById('certFechaFin').textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
+        document.getElementById('certFirmaNombre').textContent = firmaNombre.toUpperCase();
+        document.getElementById('certFirmaCargo').textContent = firmaCargo.toUpperCase();
+    }
+
+    // Escuchar cambios en los campos editables (firma, detalle)
+    ['inputFirmaNombre', 'inputFirmaCargo', 'inputDetalle'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', actualizarCertificado);
+    });
+
+    // ===== Tamaño de tipografía =====
+    const fontRange = document.getElementById('fontSizeRange');
+    const fontLabel = document.getElementById('fontSizeLabel');
+    fontRange.addEventListener('input', function() {
+        fontLabel.textContent = this.value + 'px';
+        document.getElementById('certNombreCompleto').style.fontSize = this.value + 'px';
+    });
+
+    // ===== Carga de imagen de fondo =====
+    document.getElementById('inputFondo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('certificate').style.backgroundImage = 'url(' + ev.target.result + ')';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== Carga de logotipos =====
+    document.getElementById('inputLogo1').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const el = document.getElementById('logoHUV');
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            el.classList.add('draggable-element');
+            makeDraggable(el);
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('inputLogo2').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const el = document.getElementById('logoInstitucion');
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            el.classList.add('draggable-element');
+            makeDraggable(el);
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== Ancho de logotipos =====
+    document.getElementById('logo1Ancho').addEventListener('input', function() {
+        document.getElementById('logoHUV').style.width = this.value + 'px';
+    });
+    document.getElementById('logo2Ancho').addEventListener('input', function() {
+        document.getElementById('logoInstitucion').style.width = this.value + 'px';
+    });
+
+    // ===== Drag & drop para elementos del certificado =====
+    function makeDraggable(el) {
+        el.onmousedown = function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            let shiftX = e.clientX - el.getBoundingClientRect().left;
+            let shiftY = e.clientY - el.getBoundingClientRect().top;
+            el.style.position = 'absolute';
+            el.style.zIndex = 1000;
+            function moveAt(pageX, pageY) {
+                const canvas = document.getElementById('certificate');
+                const canvasRect = canvas.getBoundingClientRect();
+                let x = pageX - canvasRect.left - shiftX;
+                let y = pageY - canvasRect.top - shiftY;
+                x = Math.max(0, Math.min(x, canvasRect.width - el.offsetWidth));
+                y = Math.max(0, Math.min(y, canvasRect.height - el.offsetHeight));
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+            }
+            function onMouseMove(e) {
+                moveAt(e.clientX, e.clientY);
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.onmouseup = function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = null;
+                el.style.zIndex = '';
+            };
+            e.preventDefault();
+        };
+        el.ondragstart = function() { return false; };
+    }
+    function applyDraggableToAll() {
+        document.querySelectorAll('.draggable-element').forEach(function(el) {
+            makeDraggable(el);
+        });
+    }
+    applyDraggableToAll();
+    // Permitir que los nuevos elementos también sean movibles
+    const observer = new MutationObserver(applyDraggableToAll);
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+
+    // ===== Zoom =====
+    let zoomLevel = 100;
+    document.getElementById('btnZoomIn').addEventListener('click', function() {
+        zoomLevel = Math.min(200, zoomLevel + 10);
+        applyZoom();
+    });
+    document.getElementById('btnZoomOut').addEventListener('click', function() {
+        zoomLevel = Math.max(50, zoomLevel - 10);
+        applyZoom();
+    });
+    function applyZoom() {
+        document.getElementById('zoomLabel').textContent = zoomLevel + '%';
+        document.getElementById('certificate').style.transform = 'scale(' + (zoomLevel / 100) + ')';
+        document.getElementById('certificate').style.transformOrigin = 'top center';
+    }
+
+    // ===== Vista previa (abrir en nueva pestaña) =====
+    document.getElementById('btnVistaPrevia').addEventListener('click', function() {
+        const certEl = document.getElementById('certificate');
+        const win = window.open('', '_blank');
+        win.document.write('<html><head><title>Vista Previa Certificado</title>');
+        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;aspect-ratio:1.414/1;background-size:cover;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
+        win.document.write('</head><body>');
+        win.document.write('<div class="cert">' + certEl.innerHTML + '</div>');
+        win.document.write('</body></html>');
+        win.document.close();
+    });
+
+    // ===== Generar certificado (print) =====
+    document.getElementById('btnGenerarCertificado').addEventListener('click', function() {
+        const certEl = document.getElementById('certificate');
+        const win = window.open('', '_blank');
+        win.document.write('<html><head><title>Certificado</title>');
+        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:cover;background-position:center;position:relative;}</style>');
+        win.document.write('</head><body>');
+        win.document.write('<div class="cert" style="background-image:' + certEl.style.backgroundImage + '">' + certEl.innerHTML + '</div>');
+        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},500);</scr' + 'ipt>');
+        win.document.write('</body></html>');
+        win.document.close();
+    });
+
+    // Inicializar
+    actualizarCertificado();
+
+    // ===== Menú contextual para eliminar elementos =====
+    // Crear menú contextual
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'custom-context-menu';
+    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
+    document.body.appendChild(contextMenu);
+
+    let elementoSeleccionado = null;
+
+    // Mostrar menú contextual al hacer clic derecho en cualquier draggable
+    function applyContextMenuToAll() {
+        document.querySelectorAll('.draggable-element').forEach(function(el) {
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        });
+    }
+    applyContextMenuToAll();
+    // Permitir que los nuevos elementos también tengan menú contextual
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    observer.disconnect();
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    // Reaplicar menú contextual cuando haya cambios
+    observer.disconnect();
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    observer.takeRecords();
+    applyContextMenuToAll();
+
+    // Ocultar menú contextual al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Eliminar elemento seleccionado
+    document.getElementById('menuEliminar').addEventListener('click', function() {
+        if (elementoSeleccionado) {
+            elementoSeleccionado.remove();
+            contextMenu.style.display = 'none';
+            elementoSeleccionado = null;
+        }
+    });
+});
+</script>
+@stop
+
+<!-- Ajuste manual del tamaño del certificado -->
+<div class="d-flex align-items-center mb-3">
+    <label class="mr-2">Ancho:</label>
+    <input type="number" id="certWidth" value="960" min="400" max="2000" style="width:80px;" class="form-control form-control-sm mr-3">
+    <label class="mr-2">Alto:</label>
+    <input type="number" id="certHeight" value="680" min="400" max="2000" style="width:80px;" class="form-control form-control-sm">
+</div>
+<div id="certificateWrapper" style="overflow:auto; max-height: calc(100vh - 310px);">
+    <div id="certificate" class="certificate-canvas bg-white position-relative mx-auto" style="width:100%;max-width:960px;box-shadow: 0 20px 50px -12px rgba(0,0,0,0.25);">
+        {{-- Logo HUV --}}
+        <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
+             id="logoHUV"
+             style="top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+            <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
+            <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo HUV</span>
+        </div>
+
+        {{-- Logo Institución --}}
+        <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
+             id="logoInstitucion"
+             style="top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+            <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
+            <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo Institución</span>
+        </div>
+
+        {{-- Contenido central del certificado --}}
+        <div class="position-absolute d-flex flex-column align-items-center justify-content-center text-center" style="inset:0;padding:80px 96px;">
+
+            <div class="draggable-element mb-2 px-3 py-2">
+                <h2 class="text-uppercase font-weight-bold" style="color:#1e3a8a;font-size:16px;letter-spacing:4px;">El Hospital Universitario del Valle</h2>
+                <p class="text-muted font-italic" style="font-size:13px;">"Evaristo García" E.S.E.</p>
+            </div>
+
+            <div class="draggable-element my-3">
+                <p class="text-muted" style="font-size:13px;">Otorga el presente certificado a:</p>
+            </div>
+
+            <div class="draggable-element mb-4">
+                <h1 class="text-uppercase font-weight-bold" id="certNombreCompleto" style="font-size:2.8rem;color:#1e293b;letter-spacing:1px;">NOMBRE APELLIDO1 APELLIDO2</h1>
+                <div style="height:4px;width:96px;background:rgba(30,58,138,0.2);border-radius:4px;" class="mx-auto mt-1"></div>
+                <p class="text-muted font-weight-bold mt-1" id="certDocumento" style="font-size:13px;">C.C. 00.000.000 de Cali</p>
+            </div>
+
+            <div class="draggable-element mb-5" style="max-width:640px;">
+                <p class="text-secondary" style="line-height:1.7;font-size:14px;padding:0 40px;">
+                    Por haber participado y aprobado satisfactoriamente las actividades académicas del curso
+                    <span class="font-weight-bold font-italic" style="color:#1e3a8a;" id="certCursoNombre">NOMBRE DEL CURSO</span>, con una intensidad horaria de
+                    <span class="font-weight-bold" id="certHoras">40</span> horas cronológicas, desarrollado bajo la modalidad presencial en las instalaciones del hospital.
+                </p>
+            </div>
+
+            <div class="draggable-element mb-4">
+                <p class="text-muted" style="font-size:13px;">
+                    Realizado del <span class="font-weight-bold text-dark" id="certFechaInicio">01 de Enero</span> al <span class="font-weight-bold text-dark" id="certFechaFin">15 de Febrero de 2024</span>
+                </p>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-center w-100">
+                <div class="draggable-element d-flex flex-column align-items-center" style="width:320px;">
+                    <div class="w-100 border-bottom mb-2" style="opacity:0.5;"></div>
+                    <p class="text-uppercase font-weight-bold mb-0" style="font-size:13px;letter-spacing:3px;" id="certFirmaNombre">FIRMACOR</p>
+                    <p class="text-uppercase text-muted font-weight-bold" style="font-size:9px;letter-spacing:2px;" id="certFirmaCargo">CARGOCOR</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Pie de página --}}
+        {{-- Pie de página (eliminado por solicitud) --}}
+
+        {{-- Marca lateral --}}
+        <div class="position-absolute" style="right:24px;top:50%;transform:rotate(-90deg);transform-origin:right center;">
+            <span class="text-uppercase font-weight-bold" style="font-size:8px;color:#cbd5e1;letter-spacing:4px;">Certificación Académica V3.0 - 2024</span>
+        </div>
+    </div>
+</div>
+
+{{-- Nota inferior --}}
+<div class="d-flex align-items-center bg-white rounded-pill shadow-sm px-4 py-2 mt-3 mx-auto" style="max-width:600px;">
+    <i class="fas fa-info-circle mr-2" style="color:#1e3a8a;"></i>
+    <p class="text-muted mb-0" style="font-size:11px;">
+        Todos los elementos (logos y textos) se pueden arrastrar para ajustar su posición sobre el fondo.
+    </p>
+</div>
+@stop
+
+@section('css')
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-huv: #1e3a8a;
+        --silver-huv: #e2e8f0;
+        --accent-huv: #0f172a;
+    }
+    #editor-certificados-app {
+        font-family: 'Inter', sans-serif;
+    }
+    .certificate-canvas {
+        aspect-ratio: unset;
+        width: var(--cert-width, 960px);
+        height: var(--cert-height, 680px);
+        max-width: 100%;
+        max-height: 100vh;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    .draggable-element {
+        cursor: move;
+        user-select: none;
+        transition: outline 0.1s ease;
+    }
+    .draggable-element:hover {
+        outline: 2px dashed var(--primary-huv);
+        outline-offset: 4px;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .card::-webkit-scrollbar {
+        width: 5px;
+    }
+    .card::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .card::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    .custom-range::-webkit-slider-thumb {
+        background: #1e3a8a;
+    }
+    /* Menú contextual personalizado */
+    .custom-context-menu {
+        position: absolute;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(30,58,138,0.08);
+        padding: 8px 0;
+        min-width: 140px;
+        font-size: 14px;
+        display: none;
+    }
+    .custom-context-menu .menu-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        color: #1e3a8a;
+        transition: background 0.2s;
+    }
+    .custom-context-menu .menu-item:hover {
+        background: #e2e8f0;
+    }
+</style>
+@stop
+
+@section('js')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ===== Meses en español para formateo =====
+    const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+    function formatearFecha(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        const d = parseInt(parts[2], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parts[0];
+        return d + ' de ' + meses[m] + ' de ' + y;
+    }
+
+    // ===== Selección de usuario → llena campos de identidad =====
+    const selectUsuario = document.getElementById('selectUsuario');
+    selectUsuario.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!this.value) {
+            document.getElementById('inputNombres').value = '';
+            document.getElementById('inputApellido1').value = '';
+            document.getElementById('inputApellido2').value = '';
+            document.getElementById('inputDocumento').value = '';
+            actualizarCertificado();
+            return;
+        }
+        document.getElementById('inputNombres').value = opt.dataset.name || '';
+        document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
+        document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
+        document.getElementById('inputDocumento').value = opt.dataset.documento || '';
+        actualizarCertificado();
+    });
+
+    // ===== Selección de curso → llena campos de contenido =====
+    const selectCurso = document.getElementById('selectCurso');
+    selectCurso.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (!this.value) {
+            document.getElementById('inputCursoNombre').value = '';
+            document.getElementById('inputHoras').value = '';
+            document.getElementById('inputFechaInicio').value = '';
+            document.getElementById('inputFechaFin').value = '';
+            actualizarCertificado();
+            return;
+        }
+        document.getElementById('inputCursoNombre').value = opt.dataset.titulo || '';
+        document.getElementById('inputHoras').value = opt.dataset.duracion || '';
+        document.getElementById('inputFechaInicio').value = opt.dataset.fechaInicio || '';
+        document.getElementById('inputFechaFin').value = opt.dataset.fechaFin || '';
+        actualizarCertificado();
+    });
+
+    // ===== Actualizar vista previa del certificado en tiempo real =====
+    function actualizarCertificado() {
+        const nombres = document.getElementById('inputNombres').value || 'NOMBRE';
+        const ap1 = document.getElementById('inputApellido1').value || 'APELLIDO1';
+        const ap2 = document.getElementById('inputApellido2').value || 'APELLIDO2';
+        const doc = document.getElementById('inputDocumento').value || '00.000.000';
+        const curso = document.getElementById('inputCursoNombre').value || 'NOMBRE DEL CURSO';
+        const horas = document.getElementById('inputHoras').value || '40';
+        const fInicio = document.getElementById('inputFechaInicio').value;
+        const fFin = document.getElementById('inputFechaFin').value;
+        const firmaNombre = document.getElementById('inputFirmaNombre').value || 'FIRMACOR';
+        const firmaCargo = document.getElementById('inputFirmaCargo').value || 'CARGOCOR';
+
+        document.getElementById('certNombreCompleto').textContent = (nombres + ' ' + ap1 + ' ' + ap2).toUpperCase();
+        document.getElementById('certDocumento').textContent = 'C.C. ' + doc + ' de Cali';
+        document.getElementById('certCursoNombre').textContent = curso;
+        document.getElementById('certHoras').textContent = horas;
+        document.getElementById('certFechaInicio').textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
+        document.getElementById('certFechaFin').textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
+        document.getElementById('certFirmaNombre').textContent = firmaNombre.toUpperCase();
+        document.getElementById('certFirmaCargo').textContent = firmaCargo.toUpperCase();
+    }
+
+    // Escuchar cambios en los campos editables (firma, detalle)
+    ['inputFirmaNombre', 'inputFirmaCargo', 'inputDetalle'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', actualizarCertificado);
+    });
+
+    // ===== Tamaño de tipografía =====
+    const fontRange = document.getElementById('fontSizeRange');
+    const fontLabel = document.getElementById('fontSizeLabel');
+    fontRange.addEventListener('input', function() {
+        fontLabel.textContent = this.value + 'px';
+        document.getElementById('certNombreCompleto').style.fontSize = this.value + 'px';
+    });
+
+    // ===== Carga de imagen de fondo =====
+    document.getElementById('inputFondo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('certificate').style.backgroundImage = 'url(' + ev.target.result + ')';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== Carga de logotipos =====
+    document.getElementById('inputLogo1').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const el = document.getElementById('logoHUV');
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            el.classList.add('draggable-element');
+            makeDraggable(el);
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('inputLogo2').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const el = document.getElementById('logoInstitucion');
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            el.classList.add('draggable-element');
+            makeDraggable(el);
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== Ancho de logotipos =====
+    document.getElementById('logo1Ancho').addEventListener('input', function() {
+        document.getElementById('logoHUV').style.width = this.value + 'px';
+    });
+    document.getElementById('logo2Ancho').addEventListener('input', function() {
+        document.getElementById('logoInstitucion').style.width = this.value + 'px';
+    });
+
+    // ===== Drag & drop para elementos del certificado =====
+    function makeDraggable(el) {
+        el.onmousedown = function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            let shiftX = e.clientX - el.getBoundingClientRect().left;
+            let shiftY = e.clientY - el.getBoundingClientRect().top;
+            el.style.position = 'absolute';
+            el.style.zIndex = 1000;
+            function moveAt(pageX, pageY) {
+                const canvas = document.getElementById('certificate');
+                const canvasRect = canvas.getBoundingClientRect();
+                let x = pageX - canvasRect.left - shiftX;
+                let y = pageY - canvasRect.top - shiftY;
+                x = Math.max(0, Math.min(x, canvasRect.width - el.offsetWidth));
+                y = Math.max(0, Math.min(y, canvasRect.height - el.offsetHeight));
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+            }
+            function onMouseMove(e) {
+                moveAt(e.clientX, e.clientY);
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.onmouseup = function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.onmouseup = null;
+                el.style.zIndex = '';
+            };
+            e.preventDefault();
+        };
+        el.ondragstart = function() { return false; };
+    }
+    function applyDraggableToAll() {
+        document.querySelectorAll('.draggable-element').forEach(function(el) {
+            makeDraggable(el);
+        });
+    }
+    applyDraggableToAll();
+    // Permitir que los nuevos elementos también sean movibles
+    const observer = new MutationObserver(applyDraggableToAll);
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+
+    // ===== Zoom =====
+    let zoomLevel = 100;
+    document.getElementById('btnZoomIn').addEventListener('click', function() {
+        zoomLevel = Math.min(200, zoomLevel + 10);
+        applyZoom();
+    });
+    document.getElementById('btnZoomOut').addEventListener('click', function() {
+        zoomLevel = Math.max(50, zoomLevel - 10);
+        applyZoom();
+    });
+    function applyZoom() {
+        document.getElementById('zoomLabel').textContent = zoomLevel + '%';
+        document.getElementById('certificate').style.transform = 'scale(' + (zoomLevel / 100) + ')';
+        document.getElementById('certificate').style.transformOrigin = 'top center';
+    }
+
+    // ===== Vista previa (abrir en nueva pestaña) =====
+    document.getElementById('btnVistaPrevia').addEventListener('click', function() {
+        const certEl = document.getElementById('certificate');
+        const win = window.open('', '_blank');
+        win.document.write('<html><head><title>Vista Previa Certificado</title>');
+        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;aspect-ratio:1.414/1;background-size:cover;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
+        win.document.write('</head><body>');
+        win.document.write('<div class="cert">' + certEl.innerHTML + '</div>');
+        win.document.write('</body></html>');
+        win.document.close();
+    });
+
+    // ===== Generar certificado (print) =====
+    document.getElementById('btnGenerarCertificado').addEventListener('click', function() {
+        const certEl = document.getElementById('certificate');
+        const win = window.open('', '_blank');
+        win.document.write('<html><head><title>Certificado</title>');
+        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:cover;background-position:center;position:relative;}</style>');
+        win.document.write('</head><body>');
+        win.document.write('<div class="cert" style="background-image:' + certEl.style.backgroundImage + '">' + certEl.innerHTML + '</div>');
+        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},500);</scr' + 'ipt>');
+        win.document.write('</body></html>');
+        win.document.close();
+    });
+
+    // Inicializar
+    actualizarCertificado();
+
+    // ===== Menú contextual para eliminar elementos =====
+    // Crear menú contextual
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'custom-context-menu';
+    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
+    document.body.appendChild(contextMenu);
+
+    let elementoSeleccionado = null;
+
+    // Mostrar menú contextual al hacer clic derecho en cualquier draggable
+    function applyContextMenuToAll() {
+        document.querySelectorAll('.draggable-element').forEach(function(el) {
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                elementoSeleccionado = el;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        });
+    }
+    applyContextMenuToAll();
+    // Permitir que los nuevos elementos también tengan menú contextual
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    observer.disconnect();
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    // Reaplicar menú contextual cuando haya cambios
+    observer.disconnect();
+    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
+    observer.takeRecords();
+    applyContextMenuToAll();
+
+    // Ocultar menú contextual al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Eliminar elemento seleccionado
+    document.getElementById('menuEliminar').addEventListener('click', function() {
+        if (elementoSeleccionado) {
+            elementoSeleccionado.remove();
+            contextMenu.style.display = 'none';
+            elementoSeleccionado = null;
+        }
+    });
+});
+</script>
+@stop
+
+<!-- Ajuste manual del tamaño del certificado -->
+<div class="d-flex align-items-center mb-3">
+    <label class="mr-2">Ancho:</label>
+    <input type="number" id="certWidth" value="960" min="400" max="2000" style="width:80px;" class="form-control form-control-sm mr-3">
+    <label class="mr-2">Alto:</label>
+    <input type="number" id="certHeight" value="680" min="400" max="2000" style="width:80px;" class="form-control form-control-sm">
+</div>
+<div id="certificateWrapper" style="overflow:auto; max-height: calc(100vh - 310px);">
+    <div id="certificate" class="certificate-canvas bg-white position-relative mx-auto" style="width:100%;max-width:960px;box-shadow: 0 20px 50px -12px rgba(0,0,0,0.25);">
+        {{-- Logo HUV --}}
+        <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
+             id="logoHUV"
+             style="top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+            <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
+            <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo HUV</span>
+        </div>
+
+        {{-- Logo Institución --}}
+        <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
+             id="logoInstitucion"
+             style="top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+            <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
+            <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo Institución</span>
+        </div>
+
+        {{-- Contenido central del certificado --}}
+        <div class="position-absolute d-flex flex-column align-items-center justify-content-center text-center" style="inset:0;padding:80px 96px;">
+
+            <div class="draggable-element mb-2 px-3 py-2">
+                <h2 class="text-uppercase font-weight-bold" style="color:#1e3a8a;font-size:16px;letter-spacing:4px;">El Hospital Universitario del Valle</h2>
+                <p class="text-muted font-italic" style="font-size:13px;">"Evaristo García" E.S.E.</p>
+            </div>
+
+            <div class="draggable-element my-3">
+                <p class="text-muted" style="font-size:13px;">Otorga el presente certificado a:</p>
+            </div>
+
+            <div class="draggable-element mb-4">
+                <h1 class="text-uppercase font-weight-bold" id="certNombreCompleto" style="font-size:2.8rem;color:#1e293b;letter-spacing:1px;">NOMBRE APELLIDO1 APELLIDO2</h1>
+                <div style="height:4px;width:96px;background:rgba(30,58,138,0.2);border-radius:4px;" class="mx-auto mt-1"></div>
+                <p class="text-muted font-weight-bold mt-1" id="certDocumento" style="font-size:13px;">C.C. 00.000.000 de Cali</p>
+            </div>
+
+            <div class="draggable-element mb-5" style="max-width:640px;">
+                <p class="text-secondary" style="line-height:1.7;font-size:14px;padding:0 40px;">
+                    Por haber participado y aprobado satisfactoriamente las actividades académicas del curso
+                    <span class="font-weight-bold font-italic" style="color:#1e3a8a;" id="certCursoNombre">NOMBRE DEL CURSO</span>, con una intensidad horaria de
+                    <span class="font-weight-bold" id="certHoras">40</span> horas cronológicas, desarrollado bajo la modalidad presencial en las instalaciones del hospital.
+                </p>
+            </div>
+
+            <div class="draggable-element mb-4">
+                <p class="text-muted" style="font-size:13px;">
+                    Realizado del <span class="font-weight-bold text-dark" id="certFechaInicio">01 de Enero</span> al <span class="font-weight-bold text-dark" id="certFechaFin">15 de Febrero de 2024</span>
+                </p>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-center w-100">
+                <div class="draggable-element d-flex flex-column align-items-center" style="width:320px;">
+                    <div class="w-100 border-bottom mb-2" style="opacity:0.5;"></div>
+                    <p class="text-uppercase font-weight-bold mb-0" style="font-size:13px;letter-spacing:3px;" id="certFirmaNombre">FIRMACOR</p>
+                    <p class="text-uppercase text-muted font-weight-bold" style="font-size:9px;letter-spacing:2px;" id="certFirmaCargo">CARGOCOR</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Pie de página --}}
+        {{-- Pie de página (eliminado por solicitud) --}}
+
+        {{-- Marca lateral --}}
+        <div class="position-absolute" style="right:24px;top:50%;transform:rotate(-90deg);transform-origin:right center;">
+            <span class="text-uppercase font-weight-bold" style="font-size:8px;color:#cbd5e1;letter-spacing:4px;">Certificación Académica V3.0 - 2024</span>
+        </div>
+    </div>
+</div>
+
+{{-- Nota inferior --}}
+<div class="d-flex align-items-center bg-white rounded-pill shadow-sm px-4 py-2 mt-3 mx-auto" style="max-width:600px;">
+    <i class="fas fa-info-circle mr-2" style="color:#1e3a8a;"></i>
+    <p class="text-muted mb-0" style="font-size:11px;">
+        Todos los elementos (logos y textos) se pueden arrastrar para ajustar su posición sobre el fondo.
+    </p>
+</div>
+@stop
+
+@section('css')
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-huv: #1e3a8a;
+        --silver-huv: #e2e8f0;
+        --accent-huv: #0f172a;
+    }
+    #editor-certificados-app {
+        font-family: 'Inter', sans-serif;
+    }
+    .certificate-canvas {
+        aspect-ratio: unset;
+        width: var(--cert-width, 960px);
+        height: var(--cert-height, 680px);
+        max-width: 100%;
+        max-height: 100vh;
         background-size: cover;
         background-position: center;
         position: relative;
