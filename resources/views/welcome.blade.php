@@ -390,70 +390,12 @@
     </style>
 </head>
 <body>
-    <div class="overlay">
-        <div class="auth-container">
-            <!-- Carrusel Independiente a la Izquierda -->
-            <div class="carousel-wrapper">
-                <div class="carousel-container" id="imageCarousel">
-                    <div class="carousel-slide active">
-                        <img src="{{ asset('images/inicio/img1.jpg') }}" alt="Imagen 1 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img2.jpg') }}" alt="Imagen 2 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img3.jpg') }}" alt="Imagen 3 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img4.jpg') }}" alt="Imagen 4 - Hospital Universitario del Valle">
-                    </div>
-
-                    <!-- Controles de navegación -->
-                    <button class="carousel-controls carousel-prev" onclick="changeSlide(-1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-controls carousel-next" onclick="changeSlide(1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-
-                    <!-- Indicadores -->
-                    <div class="carousel-indicators">
-                        <div class="carousel-indicator active" onclick="currentSlide(1)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(2)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(3)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(4)"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card de Autenticación a la Derecha -->
-            <div class="auth-card">
-                <div class="row g-0">
-                    <!-- Lado izquierdo - Información del Hospital -->
-                    <div class="col-md-5 card-left">
-                        <div class="hospital-info">
-                            <h1>Hospital Universitario del Valle</h1>
-                            <p>Sistema de Gestión Hospitalaria</p>
-
-                            <div class="features">
-                                <div class="feature-item">
-                                    <i class="fas fa-user-md"></i> Gestión de Pacientes
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-procedures"></i> Control de Procedimientos
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-clipboard-list"></i> Historial Clínico
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fas fa-pills"></i> Administración de Medicamentos
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Lado derecho - Formularios de Autenticación -->
-                    <div class="col-md-7 card-right">
+    <div class="overlay" style="display:flex; align-items:center; min-height: 100vh;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 offset-md-6">
+                    <!-- FORMULARIO y Pestañas van aquí, envueltos opcionalmente en su card-right de fondo blanco -->
+                    <div class="card-right" style="background-color: rgba(255,255,255,0.95); border-radius: 10px; padding: 20px;">
                         <ul class="nav nav-tabs" id="authTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Iniciar Sesión</button>
@@ -678,77 +620,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Carrusel JavaScript -->
-    <script>
-        let currentSlideIndex = 0;
-        const slides = document.querySelectorAll('.carousel-slide');
-        const indicators = document.querySelectorAll('.carousel-indicator');
-        const totalSlides = slides.length;
-        let autoSlideInterval;
-
-        // Función para mostrar una diapositiva específica
-        function showSlide(index) {
-            // Ocultar todas las diapositivas
-            slides.forEach(slide => slide.classList.remove('active'));
-            indicators.forEach(indicator => indicator.classList.remove('active'));
-
-            // Mostrar la diapositiva actual
-            slides[index].classList.add('active');
-            indicators[index].classList.add('active');
-        }
-
-        // Función para cambiar diapositiva (anterior/siguiente)
-        function changeSlide(direction) {
-            currentSlideIndex += direction;
-
-            if (currentSlideIndex >= totalSlides) {
-                currentSlideIndex = 0;
-            } else if (currentSlideIndex < 0) {
-                currentSlideIndex = totalSlides - 1;
-            }
-
-            showSlide(currentSlideIndex);
-            resetAutoSlide();
-        }
-
-        // Función para ir a una diapositiva específica
-        function currentSlide(index) {
-            currentSlideIndex = index - 1;
-            showSlide(currentSlideIndex);
-            resetAutoSlide();
-        }
-
-        // Función para avanzar automáticamente
-        function autoSlide() {
-            currentSlideIndex++;
-            if (currentSlideIndex >= totalSlides) {
-                currentSlideIndex = 0;
-            }
-            showSlide(currentSlideIndex);
-        }
-
-        // Función para reiniciar el auto-slide
-        function resetAutoSlide() {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(autoSlide, 5000);
-        }
-
-        // Inicializar el carrusel
-        document.addEventListener('DOMContentLoaded', function() {
-            // Iniciar auto-slide cada 5 segundos
-            autoSlideInterval = setInterval(autoSlide, 5000);
-
-            // Pausar auto-slide cuando el mouse está sobre el carrusel
-            const carousel = document.getElementById('imageCarousel');
-            carousel.addEventListener('mouseenter', function() {
-                clearInterval(autoSlideInterval);
-            });
-
-            // Reanudar auto-slide cuando el mouse sale del carrusel
-            carousel.addEventListener('mouseleave', function() {
-                autoSlideInterval = setInterval(autoSlide, 5000);
-            });
-        });
-    </script>
+    <!-- JS -->
 </body>
 </html>
