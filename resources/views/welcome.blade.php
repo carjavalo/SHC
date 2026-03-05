@@ -437,16 +437,16 @@
 
                             <div class="features">
                                 <div class="feature-item">
-                                    <i class="fas fa-user-md"></i> Gestión de Usuarios
+                                    <i class="fas fa-user-md"></i> Gestión de Pacientes
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-procedures"></i> Actividades y Evaluaciones 
+                                    <i class="fas fa-procedures"></i> Control de Procedimientos
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-clipboard-list"></i> Seguimiento del Procesos
+                                    <i class="fas fa-clipboard-list"></i> Historial Clínico
                                 </div>
                                 <div class="feature-item">
-                                    <i class="fas fa-pills"></i> Certificacion
+                                    <i class="fas fa-pills"></i> Administración de Medicamentos
                                 </div>
                             </div>
                         </div>
