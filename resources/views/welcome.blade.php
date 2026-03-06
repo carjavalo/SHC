@@ -31,81 +31,6 @@
             width: 100%;
             position: fixed;
         }
-
-        /* Top navigation (corporate style) */
-        .topbar {
-            position: relative;
-            width: 100%;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: transparent;
-            z-index: 5;
-        }
-
-        .topbar .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #fff;
-        }
-
-        .topbar .brand .logo-box {
-            background: #1152d4; /* color corporativo */
-            padding: 8px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .topbar .nav-links a {
-            color: rgba(255,255,255,0.95);
-            margin-left: 18px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Hero section (overlayed card) */
-        .hero-section {
-            max-width: 1200px;
-            margin: 24px auto;
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            z-index: 3;
-            position: relative;
-        }
-
-        .hero-card {
-            background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(6px);
-            border-radius: 16px;
-            padding: 18px;
-            color: #fff;
-            flex: 1 1 65%;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .multimedia-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin-top: 12px;
-        }
-
-        .multimedia-grid img { width: 100%; height: 100%; object-fit: cover; display:block; }
-
-        .hero-aside {
-            width: 320px;
-            min-width: 240px;
-            background: rgba(17,82,212,0.9);
-            border-radius: 12px;
-            padding: 14px;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
         
         .auth-container {
             min-height: 100vh;
@@ -466,52 +391,6 @@
 </head>
 <body>
     <div class="overlay">
-        <!-- Top navigation inserted respecting existing background -->
-        <header class="topbar">
-            <div class="brand">
-                <div class="logo-box">
-                    <i class="fas fa-hospital text-white" style="font-size:20px"></i>
-                </div>
-                <div>
-                    <div style="font-weight:800;letter-spacing:1px;color:#fff">HUV</div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.8)">Hospital Universitario del Valle</div>
-                </div>
-            </div>
-            <nav class="nav-links">
-                <a href="#">Inicio</a>
-                <a href="#">Especialidades</a>
-                <a href="#">Pacientes</a>
-                <a href="#">Contacto</a>
-            </nav>
-            <div class="actions">
-                <button class="btn btn-sm" style="background:#e63946;color:#fff;border-radius:8px;padding:6px 10px;font-weight:700">EMERGENCIAS</button>
-            </div>
-        </header>
-
-        <!-- Hero and multimedia block placed above auth card -->
-        <div class="hero-section">
-            <div class="hero-card">
-                <div style="font-size:12px;color:#9fb2ff;font-weight:700;letter-spacing:1px">Cuadro 1: Excelencia Institucional</div>
-                <h2 style="margin-top:6px;color:#fff;font-size:28px;font-weight:800">Innovación Médica de Vanguardia</h2>
-                <p style="color:rgba(255,255,255,0.9);max-width:70%">Contamos con los equipos más avanzados del país para garantizar diagnósticos precisos y tratamientos efectivos.</p>
-                <div class="multimedia-grid">
-                    <div style="grid-column:1 / span 2;min-height:180px;overflow:hidden;border-radius:10px">
-                        <img src="{{ asset('images/inicio/img1.jpg') }}" alt="Hero Image">
-                    </div>
-                    <div><img src="{{ asset('images/inicio/img2.jpg') }}" alt="img"></div>
-                    <div><img src="{{ asset('images/inicio/img3.jpg') }}" alt="img"></div>
-                </div>
-            </div>
-            <aside class="hero-aside">
-                <h4 style="margin:0 0 8px 0;font-weight:800">Noticias y Multimedia</h4>
-                <p style="font-size:13px;opacity:0.95">Explora nuestra galería institucional y avances recientes.</p>
-                <div style="margin-top:12px;display:flex;gap:8px">
-                    <button class="btn btn-light" style="flex:1">Ver Galería</button>
-                    <button class="btn btn-outline-light" style="flex:1;color:#fff;border-color:rgba(255,255,255,0.2)">Más</button>
-                </div>
-            </aside>
-        </div>
-
         <div class="auth-container">
             <!-- Carrusel Independiente a la Izquierda -->
             <div class="carousel-wrapper">
