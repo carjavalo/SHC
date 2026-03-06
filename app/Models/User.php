@@ -63,7 +63,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public static function getAvailableRoles(): array
     {
-        return ['Super Admin', 'Administrador', 'Docente', 'Estudiante', 'Registrado', 'Operador'];
+        // Añadir 'Instructor GYM' para que aparezca en los selects donde se listan roles
+        return ['Super Admin', 'Administrador', 'Docente', 'Instructor GYM', 'Estudiante', 'Registrado', 'Operador'];
     }
 
     /**
