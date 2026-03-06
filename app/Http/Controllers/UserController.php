@@ -46,10 +46,10 @@ class UserController extends Controller
     {
         $availableRoles = User::getAvailableRoles();
         
-        // Si el usuario autenticado es Operador, excluir Super Admin y Administrador de los roles disponibles
+        // Si el usuario autenticado es Operador, solo puede asignar Registrado, Operador o Instructor GYM
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return !in_array($role, ['Super Admin', 'Administrador']);
+                return in_array($role, ['Registrado', 'Operador', 'Instructor GYM']);
             }));
         }
         
@@ -86,10 +86,10 @@ class UserController extends Controller
             'sede_id' => ['nullable', 'exists:sedes,id'],
         ]);
         
-        // Validación adicional: Operadores no pueden asignar roles Super Admin ni Administrador
-        if (auth()->user()->role === 'Operador' && in_array($request->role, ['Super Admin', 'Administrador'])) {
+        // Validación adicional: Operadores solo pueden asignar Registrado, Operador o Instructor GYM
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Registrado', 'Operador', 'Instructor GYM'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar los roles Super Admin o Administrador.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Registrado, Operador e Instructor GYM.'])
                 ->withInput();
         }
 
@@ -128,10 +128,10 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $availableRoles = User::getAvailableRoles();
         
-        // Si el usuario autenticado es Operador, excluir Super Admin y Administrador de los roles disponibles
+        // Si el usuario autenticado es Operador, solo puede asignar Registrado, Operador o Instructor GYM
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return !in_array($role, ['Super Admin', 'Administrador']);
+                return in_array($role, ['Registrado', 'Operador', 'Instructor GYM']);
             }));
         }
         
@@ -170,10 +170,10 @@ class UserController extends Controller
             'sede_id' => ['nullable', 'exists:sedes,id'],
         ]);
         
-        // Validación adicional: Operadores no pueden asignar roles Super Admin ni Administrador
-        if (auth()->user()->role === 'Operador' && in_array($request->role, ['Super Admin', 'Administrador'])) {
+        // Validación adicional: Operadores solo pueden asignar Registrado, Operador o Instructor GYM
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Registrado', 'Operador', 'Instructor GYM'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar los roles Super Admin o Administrador.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Registrado, Operador e Instructor GYM.'])
                 ->withInput();
         }
 
