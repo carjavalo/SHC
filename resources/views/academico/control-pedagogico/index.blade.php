@@ -779,6 +779,9 @@
 
 @section('js')
 <script>
+    const userRole = {!! json_encode(auth()->user()->role) !!};
+    const canResetActivity = ['Super Admin', 'Administrador', 'Operador'].includes(userRole);
+
     $(document).ready(function() {
         // Cambiar curso
         $('#cursoSelector').on('change', function() {
@@ -955,6 +958,18 @@
             }
         }
 
+        // Agregar botón de reset para roles permitidos si hay una entrega
+        if (typeof canResetActivity !== 'undefined' && canResetActivity && entrega && !('entrega' in entrega && entrega.entrega === null)) {
+            contenidoHTML += `
+                <div class="mt-4 pt-3 border-top text-right">
+                    <button type="button" class="btn btn-warning btn-sm" onclick="habilitarReintento(${datos.cursoId}, ${datos.estudianteId}, ${datos.actividadId})">
+                        <i class="fas fa-redo"></i> Permitir Reintento (Limpiar Entrega)
+                    </button>
+                    <small class="d-block text-muted mt-1 text-right">Esto eliminará la calificación actual y permitirá al estudiante intentar de nuevo.</small>
+                </div>
+            `;
+        }
+
         // Mostrar modal
         Swal.fire({
             title: 'Detalle de Calificación',
@@ -1074,6 +1089,63 @@
                     title: 'Error',
                     text: 'No se pudo guardar la calificación',
                     confirmButtonColor: '#2c4370'
+                });
+            }
+        });
+    }
+
+    // Función para habilitar reintento (eliminar entrega)
+    function habilitarReintento(cursoId, estudianteId, actividadId) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esto eliminará la entrega actual. El estudiante podrá realizar la actividad (Quiz, Evaluación o Tarea) de nuevo.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, habilitar reintento',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Procesando...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '{{ route("academico.control-pedagogico.reset-actividad") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        curso_id: cursoId,
+                        estudiante_id: estudianteId,
+                        actividad_id: actividadId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Listo!',
+                                text: response.mensaje,
+                                confirmButtonColor: '#2c4370'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', response.mensaje || 'Error desconocido', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.error || 'No se pudo habilitar el reintento',
+                            confirmButtonColor: '#2c4370'
+                        });
+                    }
                 });
             }
         });

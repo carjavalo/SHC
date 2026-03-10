@@ -119,6 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Control Pedagógico (Gradebook)
         Route::get('control-pedagogico', [ControlPedagogicoController::class, 'index'])->name('control-pedagogico.index');
         Route::post('control-pedagogico/guardar-calificacion', [ControlPedagogicoController::class, 'guardarCalificacionPublic'])->name('control-pedagogico.guardar-calificacion');
+        Route::post('control-pedagogico/reset-actividad', [ControlPedagogicoController::class, 'resetActividad'])->name('control-pedagogico.reset-actividad');
         
         // Cursos disponibles para estudiantes
         Route::get('cursos-disponibles', [AcademicoController::class, 'cursosDisponibles'])->name('cursos.disponibles');

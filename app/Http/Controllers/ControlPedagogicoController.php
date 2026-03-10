@@ -144,6 +144,40 @@ class ControlPedagogicoController extends Controller
     {
         return $this->guardarCalificacion($request);
     }
+
+    /**
+     * Habilitar reintento de una actividad (eliminar entrega)
+     */
+    public function resetActividad(Request $request)
+    {
+        $user = Auth::user();
+        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador'])) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+
+        $cursoId = $request->get('curso_id');
+        $estudianteId = $request->get('estudiante_id');
+        $actividadId = $request->get('actividad_id');
+
+        $entrega = DB::table('curso_actividad_entrega')
+            ->where('curso_id', $cursoId)
+            ->where('actividad_id', $actividadId)
+            ->where('user_id', $estudianteId)
+            ->first();
+
+        if (!$entrega) {
+            return response()->json(['error' => 'No se encontró la entrega'], 404);
+        }
+
+        DB::table('curso_actividad_entrega')
+            ->where('id', $entrega->id)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'mensaje' => 'La actividad ha sido reseteada, el estudiante puede volver a enviarla.'
+        ]);
+    }
     
     /**
      * Guardar calificación de una actividad
