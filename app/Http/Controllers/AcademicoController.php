@@ -236,9 +236,10 @@ class AcademicoController extends Controller
         
         // Roles que pueden ver todos los cursos
         $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        // Verificar acceso: roles privilegiados o estar inscrito
-        if (!in_array($userRole, $rolesVerTodos) && !$curso->tieneEstudiante($user->id)) {
+        // Verificar acceso: roles privilegiados, instructor del curso o estar inscrito
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             abort(403, 'No tienes acceso a este curso');
         }
 
@@ -277,8 +278,9 @@ class AcademicoController extends Controller
         
         // Roles que pueden ver todos los cursos
         $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        if (!in_array($userRole, $rolesVerTodos) && !$curso->tieneEstudiante($user->id)) {
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             abort(403, 'No tienes acceso a este curso');
         }
 
@@ -307,8 +309,9 @@ class AcademicoController extends Controller
         
         // Roles que pueden ver todos los cursos
         $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        if (!in_array($userRole, $rolesVerTodos) && !$curso->tieneEstudiante($user->id)) {
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             abort(403, 'No tienes acceso a este curso');
         }
 
@@ -332,8 +335,11 @@ class AcademicoController extends Controller
     public function verEvaluaciones(Curso $curso): View|RedirectResponse
     {
         $user = Auth::user();
+        $userRole = $user->role;
+        $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        if (!$curso->tieneEstudiante($user->id)) {
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             abort(403, 'No tienes acceso a este curso');
         }
 
@@ -359,8 +365,11 @@ class AcademicoController extends Controller
     public function marcarMaterialVisto(Request $request, Curso $curso, CursoMaterial $material): JsonResponse
     {
         $user = Auth::user();
+        $userRole = $user->role;
+        $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        if (!$curso->tieneEstudiante($user->id)) {
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             return response()->json(['success' => false, 'message' => 'No tienes acceso a este curso'], 403);
         }
 
@@ -406,8 +415,11 @@ class AcademicoController extends Controller
     public function entregarActividad(Request $request, Curso $curso, CursoActividad $actividad): JsonResponse
     {
         $user = Auth::user();
+        $userRole = $user->role;
+        $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
         
-        if (!$curso->tieneEstudiante($user->id)) {
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             return response()->json(['success' => false, 'message' => 'No tienes acceso a este curso'], 403);
         }
 
@@ -514,9 +526,12 @@ class AcademicoController extends Controller
     public function resolverQuiz(Request $request, Curso $curso, CursoActividad $actividad): JsonResponse
     {
         $user = Auth::user();
+        $userRole = $user->role;
+        $rolesVerTodos = ['Super Admin', 'Admin', 'Administrador', 'Operador'];
+        $esInstructor = $curso->instructor_id == $user->id;
 
-        // Verificar que el usuario esté inscrito
-        if (!$curso->tieneEstudiante($user->id)) {
+        // Verificar que el usuario tenga acceso al curso (inscrito, rol privilegiado o instructor)
+        if (!in_array($userRole, $rolesVerTodos) && !$esInstructor && !$curso->tieneEstudiante($user->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Debes estar inscrito en el curso para resolver esta actividad'
