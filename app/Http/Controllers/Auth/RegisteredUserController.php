@@ -81,12 +81,14 @@ class RegisteredUserController extends Controller
                 now()->addHours(24),
                 ['id' => $user->id, 'hash' => sha1($user->email)]
             );
-            
+
             \Illuminate\Support\Facades\Mail::to($user->email)->send(
                 new \App\Mail\VerificarCuenta($user, $verificationUrl)
             );
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error al enviar correo de verificación: ' . $e->getMessage());
+            // Mostramos un mensaje claro para que los administradores identifiquen el error de SMTP
+            session()->flash('error', 'Registro exitoso, pero hubo un error con el servidor de correo. La configuración SMTP de credenciales de Google es incorrecta. Por favor contacta al administrador.');
         }
 
         Auth::login($user);
