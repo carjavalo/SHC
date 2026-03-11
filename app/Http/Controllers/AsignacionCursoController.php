@@ -562,7 +562,17 @@ class AsignacionCursoController extends Controller
                     
                     // Reiniciar progreso del estudiante en el curso
                     $this->reiniciarProgresoCurso($request->curso_id, $estudiante->id);
-                    
+
+                    // Enviar correo de reasignación al estudiante
+                    try {
+                        $inscripcionUrl = route('academico.curso.inscribirse', $request->curso_id);
+                        \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
+                            new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
+                        );
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Error al enviar correo de reasignación masiva a ' . $estudiante->email . ': ' . $e->getMessage());
+                    }
+
                     $reasignados++;
                     continue;
                 }
@@ -575,6 +585,27 @@ class AsignacionCursoController extends Controller
                     'estado' => 'activo',
                     'fecha_asignacion' => now(),
                 ]);
+
+                // Enviar correo de asignación al estudiante
+                try {
+                    $inscripcionUrl = route('academico.curso.inscribirse', $request->curso_id);
+                    \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
+                        new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
+                    );
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Error al enviar correo de asignación masiva a ' . $estudiante->email . ': ' . $e->getMessage());
+                }
+
+                // Enviar correo al instructor si existe
+                if ($curso && $curso->instructor) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($curso->instructor->email)->send(
+                            new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso)
+                        );
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Error al enviar correo al instructor (masivo): ' . $e->getMessage());
+                    }
+                }
 
                 $asignados++;
             }
