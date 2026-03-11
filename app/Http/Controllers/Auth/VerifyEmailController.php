@@ -66,12 +66,13 @@ class VerifyEmailController extends Controller
 
             // Verificar que el hash coincida con el email del usuario
             if (sha1($user->email) !== $hash) {
-                return redirect()->route('verification.notice')
+                return redirect()->route('login')
                     ->with('error', 'El enlace de verificación no es válido.');
             }
 
             // Verificar si el usuario ya está verificado
             if ($user->hasVerifiedEmail()) {
+                auth()->login($user);
                 return redirect()->route('dashboard')
                     ->with('status', 'Email ya verificado. ¡Bienvenido!');
             }
@@ -79,7 +80,7 @@ class VerifyEmailController extends Controller
             // Marcar el email como verificado
             if ($user->markEmailAsVerified()) {
                 event(new Verified($user));
-                
+
                 // Enviar correo de bienvenida
                 try {
                     $dashboardUrl = route('dashboard');
@@ -97,14 +98,14 @@ class VerifyEmailController extends Controller
                 auth()->login($user);
 
                 return redirect()->route('dashboard')
-                    ->with('status', '¡Email verificado exitosamente! Bienvenido al sistema.');
+                    ->with('success', '¡Email verificado exitosamente! Bienvenido al sistema.');
             }
 
-            return redirect()->route('verification.notice')
+            return redirect()->route('login')
                 ->with('error', 'No se pudo verificar el email. Por favor, intenta nuevamente.');
 
         } catch (\Exception $e) {
-            return redirect()->route('verification.notice')
+            return redirect()->route('login')
                 ->with('error', 'Hubo un problema con la verificación. Por favor, solicita un nuevo enlace.');
         }
     }

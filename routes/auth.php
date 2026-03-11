@@ -35,18 +35,19 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
+// Ruta de verificación de email pública (sin middleware auth ni signed) para evitar problemas de proxy
+Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, 'verifyAlternative'])
+    ->middleware(['throttle:6,1'])
+    ->name('verification.verify');
+
+// Ruta alternativa para casos donde el middleware signed falla
+Route::get('verify-email-alt/{id}/{hash}', [VerifyEmailController::class, 'verifyAlternative'])
+    ->middleware(['throttle:6,1'])
+    ->name('verification.verify.alt');
+
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    // Ruta alternativa para casos donde el middleware signed falla
-    Route::get('verify-email-alt/{id}/{hash}', [VerifyEmailController::class, 'verifyAlternative'])
-        ->middleware(['throttle:6,1'])
-        ->name('verification.verify.alt');
 
     Route::get('verification-error', [VerifyEmailController::class, 'showError'])
         ->name('verification.error');
