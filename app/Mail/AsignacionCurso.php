@@ -37,7 +37,7 @@ class AsignacionCurso extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Te han asignado un curso - ' . $this->curso->nombre,
+            subject: 'Te han asignado un curso - ' . $this->curso->titulo,
         );
     }
 

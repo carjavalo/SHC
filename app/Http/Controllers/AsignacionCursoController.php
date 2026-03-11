@@ -151,7 +151,7 @@ class AsignacionCursoController extends Controller
         $categoria = $request->get('categoria', '');
 
         $query = Curso::with(['area.categoria', 'instructor'])
-            ->whereIn('estado', ['activo', 'borrador']);
+            ->where('estado', 'activo'); // Solo cursos activos son asignables (borrador no aparece en cursos-disponibles)
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -357,7 +357,17 @@ class AsignacionCursoController extends Controller
                         $curso->titulo ?? 'Curso #' . $cursoId,
                         $estudiante->name . ' ' . $estudiante->apellido1
                     );
-                    
+
+                    // Enviar correo al estudiante también en reasignaciones
+                    try {
+                        $inscripcionUrl = route('academico.curso.inscribirse', $cursoId);
+                        \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
+                            new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
+                        );
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Error al enviar correo de reasignación: ' . $e->getMessage());
+                    }
+
                     $reasignados++;
                     continue;
                 }
@@ -467,14 +477,14 @@ class AsignacionCursoController extends Controller
             // Marcar asignación como inactiva
             $asignacion->update(['estado' => 'inactivo']);
 
-            // Eliminar todos los datos del estudiante en el curso (inscripción, progreso, entregas, etc.)
-            $this->eliminarDatosEstudianteCurso($cursoId, $estudianteId);
+            // Mantenemos la inscripción y todo el progreso del estudiante en este curso
+            // $this->eliminarDatosEstudianteCurso($cursoId, $estudianteId);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Asignación removida correctamente. Se eliminó la inscripción y todo el progreso del estudiante en este curso.'
+                'message' => 'Asignación removida correctamente. Se mantuvo la inscripción y todo el progreso del estudiante en este curso.'
             ]);
 
         } catch (\Exception $e) {

@@ -8,7 +8,7 @@
     <p>Nos complace informarte que has sido asignado al siguiente curso de capacitación:</p>
     
     <div class="info-box">
-        <p><strong>📚 Curso:</strong> {{ $curso->nombre }}</p>
+        <p><strong>📚 Curso:</strong> {{ $curso->titulo }}</p>
         @if($curso->instructor)
             <p><strong>👨‍🏫 Instructor:</strong> {{ $curso->instructor->name }}</p>
         @endif
