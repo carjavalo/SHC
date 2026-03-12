@@ -44,7 +44,7 @@ class CursoClassroomController extends Controller
         ]);
 
         $user = Auth::user();
-        $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+        $esInstructor = $curso->esGestorODocente($user);
         $esEstudiante = $curso->tieneEstudiante($user->id);
         $progreso = $esEstudiante ? $curso->getProgresoEstudiante($user->id) : 0;
 
@@ -54,7 +54,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaña de materiales
+     * Mostrar la pestaÃ±a de materiales
      */
     public function materiales(Curso $curso)
     {
@@ -67,7 +67,7 @@ class CursoClassroomController extends Controller
                 ->get();
 
             $user = Auth::user();
-            $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+            $esInstructor = $curso->esGestorODocente($user);
 
             // Agregar headers para forzar no-cache
             return response()
@@ -78,7 +78,7 @@ class CursoClassroomController extends Controller
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
         } catch (\Exception $e) {
-            // Si es una petición AJAX, retornar JSON
+            // Si es una peticiÃ³n AJAX, retornar JSON
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -106,14 +106,14 @@ class CursoClassroomController extends Controller
 
         // Solo el instructor, admin u operador pueden subir materiales
         $user = Auth::user();
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para subir materiales'
             ], 403);
         }
 
-        // Limpiar url_externa si está vacía para evitar problemas de validación
+        // Limpiar url_externa si estÃ¡ vacÃ­a para evitar problemas de validaciÃ³n
         $datosValidacion = $request->all();
         if (empty($datosValidacion['url_externa'])) {
             unset($datosValidacion['url_externa']);
@@ -182,15 +182,15 @@ class CursoClassroomController extends Controller
                 $extension = strtolower($file->getClientOriginalExtension());
                 $mimeType = $file->getMimeType();
                 
-                // Verificar que la extensión coincida con el MIME type
+                // Verificar que la extensiÃ³n coincida con el MIME type
                 if (!isset($allowedMimes[$extension]) || $allowedMimes[$extension] !== $mimeType) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Tipo de archivo no válido o sospechoso'
+                        'message' => 'Tipo de archivo no vÃ¡lido o sospechoso'
                     ], 422);
                 }
                 
-                // Generar nombre único para evitar conflictos
+                // Generar nombre Ãºnico para evitar conflictos
                 $fileName = time() . '_' . Str::random(10) . '.' . $extension;
                 $path = $file->storeAs('cursos/' . $curso->id . '/materiales', $fileName, 'public');
                 
@@ -200,12 +200,12 @@ class CursoClassroomController extends Controller
                 $data['archivo_size'] = $file->getSize();
             }
 
-            // Establecer orden automático si no se especifica
+            // Establecer orden automÃ¡tico si no se especifica
             if (!isset($data['orden'])) {
                 $data['orden'] = CursoMaterial::where('curso_id', $curso->id)->max('orden') + 1;
             }
 
-            // Establecer como público por defecto
+            // Establecer como pÃºblico por defecto
             $data['es_publico'] = true;
 
             $material = CursoMaterial::create($data);
@@ -225,13 +225,13 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener material para edición
+     * Obtener material para ediciÃ³n
      */
     public function obtenerMaterial(Curso $curso, CursoMaterial $material): JsonResponse
     {
-        // Solo el instructor, admin u operador pueden obtener materiales para edición
+        // Solo el instructor, admin u operador pueden obtener materiales para ediciÃ³n
         $user = Auth::user();
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para ver este material'
@@ -270,7 +270,7 @@ class CursoClassroomController extends Controller
     {
         // Solo el instructor, admin u operador pueden eliminar materiales
         $user = Auth::user();
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para eliminar materiales'
@@ -286,7 +286,7 @@ class CursoClassroomController extends Controller
         }
 
         try {
-            // Eliminar archivo físico si existe
+            // Eliminar archivo fÃ­sico si existe
             if ($material->archivo_path && file_exists(public_path('storage/' . $material->archivo_path))) {
                 unlink(public_path('storage/' . $material->archivo_path));
             }
@@ -314,7 +314,7 @@ class CursoClassroomController extends Controller
     {
         // Solo el instructor, admin u operador pueden actualizar materiales
         $user = Auth::user();
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para actualizar materiales'
@@ -346,7 +346,7 @@ class CursoClassroomController extends Controller
         }
 
         try {
-            // Actualizar datos básicos
+            // Actualizar datos bÃ¡sicos
             $material->titulo = $request->titulo;
             $material->descripcion = $request->descripcion;
             $material->tipo = $request->tipo;
@@ -363,7 +363,7 @@ class CursoClassroomController extends Controller
             // Actualizar prerrequisito
             if ($request->has('prerequisite_id')) {
                 $prerequisiteId = $request->prerequisite_id;
-                // Verificar que no se vincule a sí mismo
+                // Verificar que no se vincule a sÃ­ mismo
                 if ($prerequisiteId && $prerequisiteId != $material->id) {
                     $material->prerequisite_id = $prerequisiteId;
                 } else {
@@ -371,12 +371,12 @@ class CursoClassroomController extends Controller
                 }
             }
             
-            // Actualizar URL externa si se proporcionó
+            // Actualizar URL externa si se proporcionÃ³
             if ($request->has('url_externa') && !empty($request->url_externa)) {
                 $material->url_externa = $request->url_externa;
             }
 
-            // Manejar nuevo archivo si se subió
+            // Manejar nuevo archivo si se subiÃ³
             if ($request->hasFile('archivo')) {
                 $file = $request->file('archivo');
                 
@@ -404,11 +404,11 @@ class CursoClassroomController extends Controller
                 $extension = strtolower($file->getClientOriginalExtension());
                 $mimeType = $file->getMimeType();
                 
-                // Verificar que la extensión coincida con el MIME type
+                // Verificar que la extensiÃ³n coincida con el MIME type
                 if (!isset($allowedMimes[$extension]) || $allowedMimes[$extension] !== $mimeType) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Tipo de archivo no válido o sospechoso'
+                        'message' => 'Tipo de archivo no vÃ¡lido o sospechoso'
                     ], 422);
                 }
                 
@@ -417,7 +417,7 @@ class CursoClassroomController extends Controller
                     Storage::disk('public')->delete($material->archivo_path);
                 }
                 
-                // Generar nombre único para evitar conflictos
+                // Generar nombre Ãºnico para evitar conflictos
                 $fileName = time() . '_' . Str::random(10) . '.' . $extension;
                 $path = $file->storeAs('cursos/' . $curso->id . '/materiales', $fileName, 'public');
                 
@@ -444,7 +444,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaña de foros
+     * Mostrar la pestaÃ±a de foros
      */
     public function foros(Curso $curso)
     {
@@ -458,7 +458,7 @@ class CursoClassroomController extends Controller
             ->paginate(10);
 
         $user = Auth::user();
-        $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+        $esInstructor = $curso->esGestorODocente($user);
 
         // Agregar headers para forzar no-cache
         return response()
@@ -498,7 +498,7 @@ class CursoClassroomController extends Controller
 
             // Solo el instructor, admin u operador pueden crear anuncios y fijar posts
             $user = Auth::user();
-            $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+            $esInstructor = $curso->esGestorODocente($user);
             if (!$esInstructor) {
                 $data['es_anuncio'] = false;
                 $data['es_fijado'] = false;
@@ -507,7 +507,7 @@ class CursoClassroomController extends Controller
             $post = CursoForo::create($data);
             $post->load('usuario');
 
-            // Registrar operación de publicación en foro
+            // Registrar operaciÃ³n de publicaciÃ³n en foro
             OperationLogger::logForumPost($post->id, $curso->titulo, 'post');
 
             return response()->json([
@@ -553,7 +553,7 @@ class CursoClassroomController extends Controller
 
             $respuesta->load('usuario');
 
-            // Registrar operación de respuesta en foro
+            // Registrar operaciÃ³n de respuesta en foro
             OperationLogger::logForumPost($respuesta->id, $curso->titulo, 'reply');
 
             return response()->json([
@@ -571,7 +571,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaña de actividades
+     * Mostrar la pestaÃ±a de actividades
      */
     public function actividades(Curso $curso)
     {
@@ -582,7 +582,7 @@ class CursoClassroomController extends Controller
             ->get();
 
         $user = Auth::user();
-        $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+        $esInstructor = $curso->esGestorODocente($user);
 
         // Agregar headers para forzar no-cache
         return response()
@@ -595,7 +595,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaña de participantes
+     * Mostrar la pestaÃ±a de participantes
      */
     public function participantes(Curso $curso)
     {
@@ -607,7 +607,7 @@ class CursoClassroomController extends Controller
             ->get();
 
         $user = Auth::user();
-        $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+        $esInstructor = $curso->esGestorODocente($user);
 
         // Agregar headers para forzar no-cache
         return response()
@@ -628,7 +628,7 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
 
         // Verificar que sea instructor, admin u operador
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permiso para crear actividades en este curso'
@@ -701,7 +701,7 @@ class CursoClassroomController extends Controller
                 if ($totalPuntos > 5.0) {
                     return response()->json([
                         'success' => false,
-                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede la nota máxima de 5.0"
+                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede la nota mÃ¡xima de 5.0"
                     ], 422);
                 }
             }
@@ -757,11 +757,11 @@ class CursoClassroomController extends Controller
             ], 400);
         }
 
-        // Verificar que la actividad esté abierta
+        // Verificar que la actividad estÃ© abierta
         if ($actividad->estado !== 'abierta') {
             return response()->json([
                 'success' => false,
-                'message' => 'La actividad no está disponible para entrega'
+                'message' => 'La actividad no estÃ¡ disponible para entrega'
             ], 400);
         }
 
@@ -836,27 +836,27 @@ class CursoClassroomController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar si el curso está activo
+        // Verificar si el curso estÃ¡ activo
         if ($curso->estado !== 'activo') {
             return response()->json([
                 'success' => false,
-                'message' => 'El curso no está disponible para inscripciones'
+                'message' => 'El curso no estÃ¡ disponible para inscripciones'
             ], 400);
         }
 
-        // Verificar límite de estudiantes
+        // Verificar lÃ­mite de estudiantes
         if ($curso->max_estudiantes && $curso->estudiantes_count >= $curso->max_estudiantes) {
             return response()->json([
                 'success' => false,
-                'message' => 'El curso ha alcanzado el límite máximo de estudiantes'
+                'message' => 'El curso ha alcanzado el lÃ­mite mÃ¡ximo de estudiantes'
             ], 400);
         }
 
-        // Verificar si ya está inscrito
+        // Verificar si ya estÃ¡ inscrito
         if ($curso->tieneEstudiante($user->id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ya estás inscrito en este curso'
+                'message' => 'Ya estÃ¡s inscrito en este curso'
             ], 400);
         }
 
@@ -889,7 +889,7 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
         
         // Solo instructor, admin u operador pueden habilitar actividades
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para modificar actividades'
@@ -928,36 +928,36 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Resolver quiz o evaluación
+     * Resolver quiz o evaluaciÃ³n
      */
     public function resolverQuiz(Request $request, Curso $curso, CursoActividad $actividad): JsonResponse
     {
         $this->verificarAccesoCurso($curso);
         $user = Auth::user();
 
-        // Verificar que sea un quiz o evaluación
+        // Verificar que sea un quiz o evaluaciÃ³n
         if (!in_array($actividad->tipo, ['quiz', 'evaluacion'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Esta actividad no es un quiz ni una evaluación'
+                'message' => 'Esta actividad no es un quiz ni una evaluaciÃ³n'
             ], 400);
         }
 
-        $tipoLabel = $actividad->tipo === 'quiz' ? 'quiz' : 'evaluación';
+        $tipoLabel = $actividad->tipo === 'quiz' ? 'quiz' : 'evaluaciÃ³n';
 
-        // Verificar que el quiz/evaluación esté habilitado
+        // Verificar que el quiz/evaluaciÃ³n estÃ© habilitado
         if (!$actividad->habilitado) {
             return response()->json([
                 'success' => false,
-                'message' => "Esta $tipoLabel no está habilitada"
+                'message' => "Esta $tipoLabel no estÃ¡ habilitada"
             ], 400);
         }
 
-        // Verificar que el quiz/evaluación esté abierto
+        // Verificar que el quiz/evaluaciÃ³n estÃ© abierto
         if ($actividad->estado !== 'abierta') {
             return response()->json([
                 'success' => false,
-                'message' => "Esta $tipoLabel no está disponible"
+                'message' => "Esta $tipoLabel no estÃ¡ disponible"
             ], 400);
         }
 
@@ -978,7 +978,7 @@ class CursoClassroomController extends Controller
             $quizData = $actividad->contenido_json;
             $preguntas = $quizData['questions'] ?? [];
             
-            // Calcular calificación
+            // Calcular calificaciÃ³n
             $puntosObtenidos = 0;
             $puntosMaximos = $quizData['totalPoints'] ?? 0;
             $resultados = [];
@@ -996,7 +996,7 @@ class CursoClassroomController extends Controller
                 $respuestaCorrectaTexto = '';
                 
                 if ($esMultiple) {
-                    // Para preguntas de múltiple respuesta
+                    // Para preguntas de mÃºltiple respuesta
                     $respuestasEstudianteArray = is_array($respuestaEstudiante) ? $respuestaEstudiante : [];
                     sort($respuestasEstudianteArray);
                     sort($respuestasCorrectas);
@@ -1013,7 +1013,7 @@ class CursoClassroomController extends Controller
                         return $r . ') ' . ($pregunta['options'][$r] ?? '');
                     }, $respuestasCorrectas));
                 } else {
-                    // Para preguntas de respuesta única
+                    // Para preguntas de respuesta Ãºnica
                     $respuestaCorrecta = $respuestasCorrectas[0] ?? '';
                     $esCorrecta = ($respuestaEstudiante === $respuestaCorrecta);
                     
@@ -1080,14 +1080,14 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener datos de una actividad para edición (solo instructor)
+     * Obtener datos de una actividad para ediciÃ³n (solo instructor)
      */
     public function obtenerActividad(Curso $curso, CursoActividad $actividad): JsonResponse
     {
         $user = Auth::user();
         
         // Solo instructor, admin u operador pueden obtener datos de actividades
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para ver esta actividad'
@@ -1106,7 +1106,7 @@ class CursoClassroomController extends Controller
             // Cargar relaciones necesarias
             $actividad->load('material');
             
-            // Preparar datos seguros para JSON (sin accessors problemáticos)
+            // Preparar datos seguros para JSON (sin accessors problemÃ¡ticos)
             $actividadData = [
                 'id' => $actividad->id,
                 'curso_id' => $actividad->curso_id,
@@ -1149,7 +1149,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener datos de quiz/evaluación para iniciar (sin accessors problemáticos)
+     * Obtener datos de quiz/evaluaciÃ³n para iniciar (sin accessors problemÃ¡ticos)
      */
     public function obtenerDatosQuiz(Curso $curso, CursoActividad $actividad): JsonResponse
     {
@@ -1183,7 +1183,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener materiales y actividades disponibles (para modales de edición)
+     * Obtener materiales y actividades disponibles (para modales de ediciÃ³n)
      */
     public function obtenerDatosDisponibles(Curso $curso): JsonResponse
     {
@@ -1235,8 +1235,8 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
         
         // Solo instructor, admin u operador pueden actualizar actividades
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
-            \Log::warning('Usuario sin permisos intentó actualizar actividad');
+        if (!$curso->esGestorODocente($user)) {
+            \Log::warning('Usuario sin permisos intentÃ³ actualizar actividad');
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para modificar actividades'
@@ -1263,7 +1263,7 @@ class CursoClassroomController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::warning('Validación falló', ['errors' => $validator->errors()]);
+            \Log::warning('ValidaciÃ³n fallÃ³', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -1289,7 +1289,7 @@ class CursoClassroomController extends Controller
                 $updateData['fecha_cierre'] = $request->fecha_cierre;
             }
 
-            // Solo agregar puntos y duración si fueron enviados
+            // Solo agregar puntos y duraciÃ³n si fueron enviados
             if ($request->has('puntos_maximos') && !empty($request->puntos_maximos)) {
                 $updateData['puntos_maximos'] = (int)$request->puntos_maximos;
             }
@@ -1303,7 +1303,7 @@ class CursoClassroomController extends Controller
                 $updateData['intentos_permitidos'] = (int)$request->intentos_permitidos;
             }
             
-            // Actualizar contenido_json para quiz/evaluación
+            // Actualizar contenido_json para quiz/evaluaciÃ³n
             if ($request->has('contenido_json') && $request->contenido_json) {
                 $contenidoJson = $request->contenido_json;
                 // Si viene como string JSON, decodificarlo
@@ -1320,7 +1320,7 @@ class CursoClassroomController extends Controller
                 if (is_string($prereqActivities)) {
                     $prereqActivities = json_decode($prereqActivities, true);
                 }
-                // Guardar como array (el modelo lo convertirá a JSON automáticamente por el cast)
+                // Guardar como array (el modelo lo convertirÃ¡ a JSON automÃ¡ticamente por el cast)
                 if (is_array($prereqActivities)) {
                     $updateData['prerequisite_activity_ids'] = $prereqActivities;
                 } else {
@@ -1338,7 +1338,7 @@ class CursoClassroomController extends Controller
                 $updateData['porcentaje_curso'] = (float)$request->porcentaje_curso;
             }
             
-            // Actualizar nota mínima de aprobación
+            // Actualizar nota mÃ­nima de aprobaciÃ³n
             if ($request->has('nota_minima_aprobacion')) {
                 $updateData['nota_minima_aprobacion'] = (float)$request->nota_minima_aprobacion;
             }
@@ -1377,7 +1377,7 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
         
         // Solo instructor, admin u operador pueden eliminar actividades
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para eliminar actividades'
@@ -1421,7 +1421,7 @@ class CursoClassroomController extends Controller
         $this->verificarAccesoCurso($curso);
         
         $user = Auth::user();
-        $esInstructor = $curso->instructor_id === $user->id || $user->tienePermisoGestion();
+        $esInstructor = $curso->esGestorODocente($user);
         
         if (!$esInstructor) {
             abort(403, 'Solo los instructores pueden ver las entregas');
@@ -1479,7 +1479,7 @@ class CursoClassroomController extends Controller
             }
         });
 
-        // Calcular estadísticas
+        // Calcular estadÃ­sticas
         $entregasRealizadas = $entregasCompletas->where('estado', '!=', 'pendiente')->count();
         $entregasPendientes = $entregasCompletas->where('estado', 'pendiente')->count();
         $entregasATiempo = $entregasCompletas->where('estado', 'entregado')->count();
@@ -1488,7 +1488,7 @@ class CursoClassroomController extends Controller
         $calificaciones = $entregasCompletas->whereNotNull('calificacion')->pluck('calificacion');
         $promedioCalificacion = $calificaciones->count() > 0 ? $calificaciones->average() : 0;
 
-        // Distribución de calificaciones
+        // DistribuciÃ³n de calificaciones
         $distribucionCalificaciones = [
             $calificaciones->filter(fn($c) => $c >= 0 && $c < 61)->count(),
             $calificaciones->filter(fn($c) => $c >= 61 && $c <= 70)->count(),
@@ -1530,7 +1530,7 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
         
         // El instructor siempre tiene acceso
-        if ($curso->instructor_id === $user->id) {
+        if ($curso->esGestorODocente($user)) {
             return;
         }
 
@@ -1561,7 +1561,7 @@ class CursoClassroomController extends Controller
         }
         
         // Verificar permisos para ver calificaciones de otros
-        if ($estudianteId != $user->id && $curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if ($estudianteId != $user->id && !$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permiso para ver las calificaciones de este estudiante'
@@ -1646,7 +1646,7 @@ class CursoClassroomController extends Controller
         $user = Auth::user();
         
         // Solo instructor, admin u operador pueden calificar
-        if ($curso->instructor_id !== $user->id && !$user->tienePermisoGestion()) {
+        if (!$curso->esGestorODocente($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permiso para calificar tareas'
@@ -1702,13 +1702,14 @@ class CursoClassroomController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Calificación guardada exitosamente'
+                'message' => 'CalificaciÃ³n guardada exitosamente'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al guardar calificación: ' . $e->getMessage()
+                'message' => 'Error al guardar calificaciÃ³n: ' . $e->getMessage()
             ], 500);
         }
     }
 }
+

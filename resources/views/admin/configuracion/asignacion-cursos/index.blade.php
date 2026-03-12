@@ -351,9 +351,12 @@ $(document).ready(function() {
                     if (response.cursos_asignados.length > 0) {
                         let htmlAsignados = '';
                         response.cursos_asignados.forEach(function(curso) {
+                            let docenteInfo = curso.docente ? `<br><small class="text-info"><i class="fas fa-chalkboard-teacher"></i> ${curso.docente}</small>` : '';
                             htmlAsignados += `
                                 <div class="d-flex justify-content-between align-items-center mb-1 p-2 bg-light rounded">
-                                    <small class="text-truncate" style="max-width: 200px;">${curso.titulo}</small>
+                                    <div class="text-truncate" style="max-width: 200px;">
+                                        <small>${curso.titulo}</small>${docenteInfo}
+                                    </div>
                                     <button type="button" class="btn btn-xs btn-danger btn-remover-asignacion" 
                                             data-curso-id="${curso.curso_id}" title="Remover">
                                         <i class="fas fa-times"></i>
@@ -619,6 +622,8 @@ $(document).ready(function() {
             return;
         }
 
+        const docenteId = $('#docente-asignado').val();
+
         Swal.fire({
             title: '¿Confirmar asignación?',
             html: `Se asignarán <strong>${cursosSeleccionados.length}</strong> curso(s) al estudiante <strong>${estudianteSeleccionado.nombre_completo}</strong>.`,
@@ -630,14 +635,18 @@ $(document).ready(function() {
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
+                let postData = {
+                    _token: '{{ csrf_token() }}',
+                    estudiante_id: estudianteId,
+                    cursos: cursosSeleccionados
+                };
+                if (docenteId) {
+                    postData.docente_id = docenteId;
+                }
                 $.ajax({
                     url: '{{ route("configuracion.asignacion-cursos.asignar") }}',
                     method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        estudiante_id: estudianteId,
-                        cursos: cursosSeleccionados
-                    },
+                    data: postData,
                     success: function(response) {
                         if (response.success) {
                             Swal.fire({
@@ -686,13 +695,18 @@ $(document).ready(function() {
             cancelButtonText: 'Cancelar',
             showLoaderOnConfirm: true,
             preConfirm: () => {
+                let postDataMasivo = {
+                    _token: '{{ csrf_token() }}',
+                    curso_id: cursoId
+                };
+                const docenteIdMasivo = $('#docente-asignado').val();
+                if (docenteIdMasivo) {
+                    postDataMasivo.docente_id = docenteIdMasivo;
+                }
                 return $.ajax({
                     url: '{{ route("configuracion.asignacion-cursos.asignar-todos") }}',
                     method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        curso_id: cursoId
-                    }
+                    data: postDataMasivo
                 }).then(response => {
                     return response;
                 }).catch(error => {

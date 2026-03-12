@@ -13,6 +13,7 @@ class CursoAsignacion extends Model
         'curso_id',
         'estudiante_id',
         'asignado_por',
+        'docente_id',
         'estado',
         'fecha_asignacion',
         'fecha_expiracion',
@@ -48,6 +49,14 @@ class CursoAsignacion extends Model
     public function asignadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'asignado_por');
+    }
+
+    /**
+     * Relación con el docente asignado
+     */
+    public function docente(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'docente_id');
     }
 
     /**

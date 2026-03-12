@@ -44,19 +44,16 @@ class UserOperationController extends Controller
             $query->where('user_operations.user_id', $currentUser->id);
         } elseif ($userRole === 'Docente') {
             // Docentes ven operaciones de estudiantes en sus cursos
-            $estudiantesIds = DB::table('cursos')
-                ->join('curso_estudiantes', 'cursos.id', '=', 'curso_estudiantes.curso_id')
-                ->where('cursos.instructor_id', $currentUser->id)
-                ->pluck('curso_estudiantes.estudiante_id')
-                ->toArray();
+            $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
+                $estudiantesIds = DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
-            // Incluir también las propias operaciones del docente
+            // Incluir tambiÃ©n las propias operaciones del docente
             $estudiantesIds[] = $currentUser->id;
             $query->whereIn('user_operations.user_id', $estudiantesIds);
         }
         // Admin y Super Admin ven todo (sin filtro adicional)
 
-        // Aplicar filtros de búsqueda
+        // Aplicar filtros de bÃºsqueda
         if ($request->filled('operation_type')) {
             $query->where('operation_type', $request->operation_type);
         }
@@ -98,7 +95,7 @@ class UserOperationController extends Controller
                     'view' => '<span class="badge badge-secondary"><i class="fas fa-eye"></i> Ver</span>',
                     'login' => '<span class="badge badge-primary"><i class="fas fa-sign-in-alt"></i> Login</span>',
                     'logout' => '<span class="badge badge-warning"><i class="fas fa-sign-out-alt"></i> Logout</span>',
-                    'enroll' => '<span class="badge badge-success"><i class="fas fa-user-plus"></i> Inscripción</span>',
+                    'enroll' => '<span class="badge badge-success"><i class="fas fa-user-plus"></i> InscripciÃ³n</span>',
                     'submit' => '<span class="badge badge-info"><i class="fas fa-upload"></i> Entrega</span>',
                     'grade' => '<span class="badge badge-primary"><i class="fas fa-star"></i> Calificar</span>',
                     'access' => '<span class="badge badge-info"><i class="fas fa-door-open"></i> Acceso</span>',
@@ -170,24 +167,21 @@ class UserOperationController extends Controller
         $currentUser = auth()->user();
         $userRole = $currentUser->role ?? null;
         
-        // Crear query base según rol
+        // Crear query base segÃºn rol
         $baseQuery = UserOperation::query();
         
         if ($userRole === 'Estudiante') {
-            // Estudiantes solo ven sus propias estadísticas
+            // Estudiantes solo ven sus propias estadÃ­sticas
             $baseQuery->where('user_id', $currentUser->id);
         } elseif ($userRole === 'Docente') {
-            // Docentes ven estadísticas de estudiantes en sus cursos
-            $estudiantesIds = DB::table('cursos')
-                ->join('curso_estudiantes', 'cursos.id', '=', 'curso_estudiantes.curso_id')
-                ->where('cursos.instructor_id', $currentUser->id)
-                ->pluck('curso_estudiantes.estudiante_id')
-                ->toArray();
+            // Docentes ven estadÃ­sticas de estudiantes en sus cursos
+            $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
+                $estudiantesIds = DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
             $estudiantesIds[] = $currentUser->id;
             $baseQuery->whereIn('user_id', $estudiantesIds);
         }
-        // Admin y Super Admin ven todas las estadísticas
+        // Admin y Super Admin ven todas las estadÃ­sticas
 
         $stats = [
             'total_operations' => (clone $baseQuery)->count(),
@@ -203,3 +197,4 @@ class UserOperationController extends Controller
         return response()->json($stats);
     }
 }
+

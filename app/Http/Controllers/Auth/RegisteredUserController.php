@@ -71,6 +71,37 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
         ]);
 
+        // Asignar automáticamente el curso de Inducción Institucional (ID 18)
+        try {
+            $cursoInduccion = \App\Models\Curso::find(18);
+            if ($cursoInduccion) {
+                // Obtener un administrador para asignar el curso, o usar el propio usuario si no hay
+                $adminRole = \App\Models\User::whereIn('role', ['Super Admin', 'Administrador'])->first();
+                $asignadorId = $adminRole ? $adminRole->id : $user->id;
+
+                // Crear la asignación para que pueda inscribirse
+                \App\Models\CursoAsignacion::firstOrCreate(
+                    [
+                        'curso_id' => 18,
+                        'estudiante_id' => $user->id
+                    ],
+                    [
+                        'asignado_por' => $asignadorId,
+                        'estado' => 'activo',
+                        'fecha_asignacion' => now()
+                    ]
+                );
+
+                // Enviar correo de asignación de curso
+                $inscripcionUrl = route('academico.curso.inscribirse', 18);
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                    new \App\Mail\AsignacionCurso($user, $cursoInduccion, $inscripcionUrl)
+                );
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al asignar automáticamente curso Inducción al registrar usuario: ' . $e->getMessage());
+        }
+
         // NO disparar evento Registered para evitar correo automático de Laravel en inglés
         // event(new Registered($user));
 

@@ -61,8 +61,14 @@ class AcademicoController extends Controller
             ->addColumn('area_descripcion', function ($curso) {
                 return $curso->area->descripcion ?? 'Sin área';
             })
-            ->addColumn('instructor_nombre', function ($curso) {
-                return $curso->instructor->full_name ?? 'Sin instructor';
+            ->addColumn('instructor_nombre', function ($curso) use ($user, $userRole, $rolesVerTodos) {
+                if (!in_array($userRole, $rolesVerTodos)) {
+                    $asignacion = \App\Models\CursoAsignacion::with('docente')->where('curso_id', $curso->id)->where('estudiante_id', $user->id)->activas()->first();
+                    if ($asignacion && $asignacion->docente) {
+                        return trim($asignacion->docente->name . ' ' . $asignacion->docente->apellido1);
+                    }
+                }
+                return $curso->instructor->full_name ?? 'Sin docente asignado';
             })
             ->addColumn('progreso', function ($curso) use ($user) {
                 // Solo calcular progreso si está inscrito
@@ -80,7 +86,15 @@ class AcademicoController extends Controller
                 // Verificar si está inscrito (tiene registro en curso_estudiantes)
                 $estudiante = $curso->estudiantes()->where('users.id', $user->id)->first();
                 if ($estudiante && $estudiante->pivot) {
-                    return $estudiante->pivot->estado ?? 'inscrito';
+                    // El pivot estado puede ser 'activo', 'completado', 'inactivo', etc.
+                    // Normalizamos: 'activo' = inscrito, 'completado' = completado, otro = inscrito
+                    $pivotEstado = $estudiante->pivot->estado ?? 'activo';
+                    if ($pivotEstado === 'activo') {
+                        return 'inscrito';
+                    } elseif ($pivotEstado === 'completado') {
+                        return 'completado';
+                    }
+                    return 'inscrito';
                 }
                 
                 // Si no está inscrito pero tiene asignación activa

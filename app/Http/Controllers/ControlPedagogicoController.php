@@ -37,7 +37,17 @@ class ControlPedagogicoController extends Controller
         }
         
         // Obtener estudiantes inscritos con sus calificaciones
-        $estudiantes = $this->getEstudiantesConCalificaciones($cursoActual);
+        // El Docente solo ve los estudiantes que tiene asignados en este curso
+        $estudiantesFiltro = null;
+        if ($user->role === 'Docente') {
+            $estudiantesFiltro = \App\Models\CursoAsignacion::where('curso_id', $cursoId)
+                ->where('docente_id', $user->id)
+                ->where('estado', 'activo')
+                ->pluck('estudiante_id')
+                ->toArray();
+        }
+        
+        $estudiantes = $this->getEstudiantesConCalificaciones($cursoActual, $estudiantesFiltro);
         
         // Obtener estructura de evaluación
         $estructuraEvaluacion = $this->getEstructuraEvaluacion($cursoActual);
@@ -232,10 +242,15 @@ class ControlPedagogicoController extends Controller
             // Admin ve todos los cursos
             return Curso::where('estado', 'activo')->get();
         } elseif ($user->role === 'Docente') {
-            // Docente ve solo sus cursos
-            return Curso::where('instructor_id', $user->id)
-                       ->where('estado', 'activo')
-                       ->get();
+            // Docente solo ve cursos donde fue asignado vía curso_asignaciones.docente_id
+            $cursosAsignado = \App\Models\CursoAsignacion::where('docente_id', $user->id)
+                ->where('estado', 'activo')
+                ->pluck('curso_id')
+                ->unique();
+
+            return Curso::whereIn('id', $cursosAsignado)
+                ->where('estado', 'activo')
+                ->get();
         }
         
         return collect();
@@ -244,16 +259,22 @@ class ControlPedagogicoController extends Controller
     /**
      * Obtener estudiantes con sus calificaciones
      */
-    private function getEstudiantesConCalificaciones($curso)
+    private function getEstudiantesConCalificaciones($curso, $estudiantesFiltro = null)
     {
-        return User::whereHas('inscripciones', function($query) use ($curso) {
-            $query->where('curso_id', $curso->id)
-                  ->where('curso_estudiantes.estado', 'activo'); // Especificar tabla
+        $query = User::whereHas('inscripciones', function($q) use ($curso) {
+            $q->where('curso_id', $curso->id)
+              ->where('curso_estudiantes.estado', 'activo');
         })
-        ->with(['inscripciones' => function($query) use ($curso) {
-            $query->where('curso_id', $curso->id);
-        }])
-        ->get()
+        ->with(['inscripciones' => function($q) use ($curso) {
+            $q->where('curso_id', $curso->id);
+        }]);
+
+        // Si hay un filtro de estudiantes (para docentes asignados), aplicarlo
+        if ($estudiantesFiltro !== null) {
+            $query->whereIn('id', $estudiantesFiltro);
+        }
+
+        return $query->get()
         ->map(function($estudiante) use ($curso) {
             $inscripcion = $estudiante->inscripciones->first();
             

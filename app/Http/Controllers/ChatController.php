@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MensajeChat;
 use App\Models\User;
 use App\Models\Curso;
+use App\Models\CursoAsignacion;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class ChatController extends Controller
 {
     /**
-     * Buscar usuarios según permisos del rol
+     * Buscar usuarios segÃºn permisos del rol
      */
     public function buscarUsuarios(Request $request): JsonResponse
     {
@@ -36,7 +37,7 @@ class ChatController extends Controller
             })
             ->where('id', '!=', $user->id) // Excluir al usuario actual
             ->where(function($q) use ($user) {
-                // Aplicar filtros según rol
+                // Aplicar filtros segÃºn rol
                 if ($user->role === 'Docente') {
                     // Docentes pueden ver: estudiantes de sus cursos + operadores
                     $cursosIds = Curso::where('instructor_id', $user->id)->pluck('id');
@@ -117,11 +118,11 @@ class ChatController extends Controller
 
         $user = Auth::user();
         
-        // Verificar si el estudiante está en Quiz/Evaluación activa
+        // Verificar si el estudiante estÃ¡ en Quiz/EvaluaciÃ³n activa
         if ($user->role === 'Estudiante' && $this->estudianteEnEvaluacion($user->id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'No puedes enviar mensajes mientras estás en una evaluación activa'
+                'message' => 'No puedes enviar mensajes mientras estÃ¡s en una evaluaciÃ³n activa'
             ], 403);
         }
 
@@ -236,7 +237,7 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
-        // Contar no leídos
+        // Contar no leÃ­dos
         $noLeidos = MensajeChat::where('destinatario_id', $user->id)
             ->where('leido', false)
             ->count();
@@ -245,7 +246,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Marcar mensaje como leído
+     * Marcar mensaje como leÃ­do
      */
     public function marcarLeido(Request $request, $mensajeId): JsonResponse
     {
@@ -268,7 +269,7 @@ class ChatController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Mensaje marcado como leído'
+                'message' => 'Mensaje marcado como leÃ­do'
             ]);
             
         } catch (\Exception $e) {
@@ -280,7 +281,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Verificar si un estudiante está en evaluación activa
+     * Verificar si un estudiante estÃ¡ en evaluaciÃ³n activa
      */
     private function estudianteEnEvaluacion(int $estudianteId): bool
     {
@@ -363,20 +364,20 @@ class ChatController extends Controller
             }
             
             // Verificar si es estudiante del mismo curso
-            $esCompañero = DB::table('curso_estudiantes')
+            $esCompaÃ±ero = DB::table('curso_estudiantes')
                 ->whereIn('curso_id', $cursosIds)
                 ->where('estudiante_id', $destinatarioId)
                 ->where('estado', 'activo')
                 ->exists();
                 
-            return $esCompañero;
+            return $esCompaÃ±ero;
         }
 
         return false;
     }
 
     /**
-     * Obtener destinatarios según el grupo seleccionado
+     * Obtener destinatarios segÃºn el grupo seleccionado
      */
     private function obtenerDestinatariosGrupo(User $remitente, string $grupo)
     {
@@ -441,3 +442,4 @@ class ChatController extends Controller
         return $query->get();
     }
 }
+

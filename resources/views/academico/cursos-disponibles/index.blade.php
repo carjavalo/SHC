@@ -37,7 +37,7 @@
                                         <th>Título</th>
                                         <th>Área</th>
                                         <th>Categoría</th>
-                                        <th>Instructor</th>
+                                        <th>Docente</th>
                                         <th>Progreso</th>
                                         <th>Estado</th>
                                         <th>Fecha Inscripción</th>
@@ -75,7 +75,7 @@
                             <p id="view_area"></p>
                         </div>
                         <div class="col-md-6">
-                            <strong>Instructor:</strong>
+                            <strong>Docente:</strong>
                             <p id="view_instructor"></p>
                         </div>
                         <div class="col-md-6">
@@ -168,8 +168,10 @@
                         data: 'estado_inscripcion', 
                         name: 'estado_inscripcion',
                         render: function(data, type, row) {
-                            if (data === 'inscrito') {
+                            if (data === 'inscrito' || data === 'activo') {
                                 return '<span class="badge badge-success badge-estado">Inscrito</span>';
+                            } else if (data === 'completado') {
+                                return '<span class="badge badge-primary badge-estado">Completado</span>';
                             } else if (data === 'no_inscrito') {
                                 return '<span class="badge badge-warning badge-estado">Pendiente</span>';
                             } else if (data === 'acceso_directo') {

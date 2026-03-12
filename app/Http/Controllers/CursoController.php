@@ -241,8 +241,8 @@ class CursoController extends Controller
     public function create()
     {
         $areas = Area::with('categoria')->orderBy('descripcion')->get();
-        // Obtener usuarios con rol Operador o Admin para el campo "Creado por"
-        $creadores = User::whereIn('role', ['Operador', 'Admin'])
+        // Creadores del curso: usuarios con roles administrativos
+        $creadores = User::whereIn('role', ['Super Admin', 'Administrador', 'Admin', 'Operador'])
                            ->orderBy('name')
                            ->get();
 
@@ -399,8 +399,8 @@ class CursoController extends Controller
 
         // Obtener datos para los selects
         $areas = Area::with('categoria')->orderBy('descripcion')->get();
-        // Obtener usuarios con rol Operador o Admin para el campo "Creado por"
-        $creadores = User::whereIn('role', ['Operador', 'Admin'])
+        // Creadores del curso: usuarios con roles administrativos
+        $creadores = User::whereIn('role', ['Super Admin', 'Administrador', 'Admin', 'Operador'])
                            ->orderBy('name')
                            ->get();
 

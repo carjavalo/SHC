@@ -97,6 +97,30 @@ class Curso extends Model
     }
 
     /**
+     * Verifica si un usuario es docente asignado a este curso vía CursoAsignacion
+     */
+    public function esDocente(int $userId): bool
+    {
+        return \App\Models\CursoAsignacion::where('curso_id', $this->id)
+            ->where('docente_id', $userId)
+            ->where('estado', 'activo')
+            ->exists();
+    }
+
+    /**
+     * Verifica si el usuario puede gestionar este curso:
+     * - Es el creador (instructor_id) del curso
+     * - Tiene permisos de gestión (Admin/Operador)
+     * - Es un docente asignado a este curso vía CursoAsignacion
+     */
+    public function esGestorODocente(\App\Models\User $user): bool
+    {
+        return $this->instructor_id === $user->id
+            || $user->tienePermisoGestion()
+            || $this->esDocente($user->id);
+    }
+
+    /**
      * Relación con estudiantes inscritos
      */
     public function estudiantes(): BelongsToMany

@@ -100,7 +100,7 @@ class AsignacionCursoController extends Controller
         }
 
         // Obtener cursos asignados activos
-        $cursosAsignados = CursoAsignacion::with('curso')
+        $cursosAsignados = CursoAsignacion::with(['curso', 'docente'])
             ->where('estudiante_id', $estudiante->id)
             ->activas()
             ->get();
@@ -108,6 +108,7 @@ class AsignacionCursoController extends Controller
         // Obtener cursos inscritos
         $cursosInscritos = $estudiante->cursosInscritos()
             ->withPivot('estado', 'progreso', 'created_at')
+            ->wherePivot('estado', 'activo')
             ->get();
 
         return response()->json([
@@ -125,6 +126,8 @@ class AsignacionCursoController extends Controller
                     'curso_id' => $asig->curso_id,
                     'titulo' => $asig->curso->titulo ?? 'Sin título',
                     'fecha_asignacion' => $asig->fecha_asignacion->format('d/m/Y'),
+                    'docente' => $asig->docente ? ($asig->docente->name . ' ' . ($asig->docente->apellido1 ?? '')) : null,
+                    'docente_id' => $asig->docente_id,
                 ];
             }),
             'cursos_inscritos' => $cursosInscritos->map(function ($curso) {
@@ -181,6 +184,7 @@ class AsignacionCursoController extends Controller
 
             $cursosInscritosIds = DB::table('curso_estudiantes')
                 ->where('estudiante_id', $estudianteId)
+                ->where('estado', 'activo')
                 ->pluck('curso_id')
                 ->toArray();
         }
@@ -263,16 +267,11 @@ class AsignacionCursoController extends Controller
      */
     private function reiniciarProgresoCurso(int $cursoId, int $estudianteId): void
     {
-        // Reiniciar progreso en curso_estudiantes
+        // Eliminar inscripción previa para que el estudiante deba volver a inscribirse manualmente
         DB::table('curso_estudiantes')
             ->where('curso_id', $cursoId)
             ->where('estudiante_id', $estudianteId)
-            ->update([
-                'progreso' => 0,
-                'estado' => 'activo',
-                'ultima_actividad' => null,
-                'updated_at' => now(),
-            ]);
+            ->delete();
 
         // Eliminar materiales vistos
         try {
@@ -305,12 +304,15 @@ class AsignacionCursoController extends Controller
             'estudiante_id' => 'required|exists:users,id',
             'cursos' => 'required|array|min:1',
             'cursos.*' => 'exists:cursos,id',
+            'docente_id' => 'nullable|exists:users,id',
         ], [
             'estudiante_id.required' => 'Debe seleccionar un estudiante',
             'estudiante_id.exists' => 'El estudiante seleccionado no existe',
             'cursos.required' => 'Debe seleccionar al menos un curso',
             'cursos.min' => 'Debe seleccionar al menos un curso',
         ]);
+
+        $docenteId = $request->docente_id;
 
         $estudiante = User::find($request->estudiante_id);
         
@@ -327,6 +329,7 @@ class AsignacionCursoController extends Controller
             $asignados = 0;
             $reasignados = 0;
             $yaAsignados = 0;
+            $emailsParaEnviar = [];
 
             foreach ($request->cursos as $cursoId) {
                 // Verificar si ya tiene asignación (activa o inactiva)
@@ -336,6 +339,10 @@ class AsignacionCursoController extends Controller
 
                 if ($asignacionExistente) {
                     if ($asignacionExistente->estado === 'activo') {
+                        // Actualizar docente_id aunque ya esté activo (el admin puede querer cambiarlo)
+                        if ($docenteId && $asignacionExistente->docente_id !== $docenteId) {
+                            $asignacionExistente->update(['docente_id' => $docenteId]);
+                        }
                         $yaAsignados++;
                         continue;
                     }
@@ -344,6 +351,7 @@ class AsignacionCursoController extends Controller
                         'estado' => 'activo',
                         'asignado_por' => Auth::id(),
                         'fecha_asignacion' => now(),
+                        'docente_id' => $docenteId, // Actualizar docente al reactivar
                     ]);
                     
                     // Reiniciar progreso del estudiante en el curso
@@ -358,14 +366,16 @@ class AsignacionCursoController extends Controller
                         $estudiante->name . ' ' . $estudiante->apellido1
                     );
 
-                    // Enviar correo al estudiante también en reasignaciones
-                    try {
-                        $inscripcionUrl = route('academico.curso.inscribirse', $cursoId);
-                        \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
-                            new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
-                        );
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Error al enviar correo de reasignación: ' . $e->getMessage());
+                    // Programar correos (se enviarán después de la respuesta HTTP)
+                    $emailsParaEnviar[] = ['to' => $estudiante->email, 'mailable' => new \App\Mail\AsignacionCurso($estudiante, $curso, route('academico.curso.inscribirse', $cursoId)), 'error' => 'Error al enviar correo de reasignación'];
+                    if ($curso && $curso->instructor) {
+                        $emailsParaEnviar[] = ['to' => $curso->instructor->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso), 'error' => 'Error al enviar correo de reasignación al instructor'];
+                    }
+                    if ($docenteId) {
+                        $docenteReasignado = User::find($docenteId);
+                        if ($docenteReasignado && ($curso->instructor_id === null || $docenteReasignado->id !== $curso->instructor_id)) {
+                            $emailsParaEnviar[] = ['to' => $docenteReasignado->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($docenteReasignado, $estudiante, $curso), 'error' => 'Error al enviar correo al docente asignado (reasignación)'];
+                        }
                     }
 
                     $reasignados++;
@@ -373,13 +383,17 @@ class AsignacionCursoController extends Controller
                 }
 
                 // Crear nueva asignación
-                CursoAsignacion::create([
+                $asignacionData = [
                     'curso_id' => $cursoId,
                     'estudiante_id' => $request->estudiante_id,
                     'asignado_por' => Auth::id(),
                     'estado' => 'activo',
                     'fecha_asignacion' => now(),
-                ]);
+                ];
+                if ($docenteId) {
+                    $asignacionData['docente_id'] = $docenteId;
+                }
+                CursoAsignacion::create($asignacionData);
 
                 // Registrar operación de asignación
                 $curso = Curso::find($cursoId);
@@ -390,24 +404,15 @@ class AsignacionCursoController extends Controller
                     $estudiante->name . ' ' . $estudiante->apellido1
                 );
 
-                // Enviar correo al estudiante
-                try {
-                    $inscripcionUrl = route('academico.curso.inscribirse', $cursoId);
-                    \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
-                        new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
-                    );
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Error al enviar correo de asignación al estudiante: " . $e->getMessage());
-                }
-
-                // Enviar correo al instructor si existe
+                // Programar correos (se enviarán después de la respuesta HTTP)
+                $emailsParaEnviar[] = ['to' => $estudiante->email, 'mailable' => new \App\Mail\AsignacionCurso($estudiante, $curso, route('academico.curso.inscribirse', $cursoId)), 'error' => 'Error al enviar correo de asignación al estudiante'];
                 if ($curso && $curso->instructor) {
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($curso->instructor->email)->send(
-                            new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso)
-                        );
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error("Error al enviar correo al instructor: " . $e->getMessage());
+                    $emailsParaEnviar[] = ['to' => $curso->instructor->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso), 'error' => 'Error al enviar correo al instructor'];
+                }
+                if ($docenteId) {
+                    $docenteNuevo = User::find($docenteId);
+                    if ($docenteNuevo && ($curso->instructor_id === null || $docenteNuevo->id !== $curso->instructor_id)) {
+                        $emailsParaEnviar[] = ['to' => $docenteNuevo->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($docenteNuevo, $estudiante, $curso), 'error' => 'Error al enviar correo al docente asignado'];
                     }
                 }
 
@@ -415,6 +420,20 @@ class AsignacionCursoController extends Controller
             }
 
             DB::commit();
+
+            // Enviar correos después de la respuesta HTTP (no bloquea al usuario)
+            if (!empty($emailsParaEnviar)) {
+                $correosPendientes = $emailsParaEnviar;
+                \Illuminate\Support\defer(function () use ($correosPendientes) {
+                    foreach ($correosPendientes as $correo) {
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($correo['to'])->send($correo['mailable']);
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error($correo['error'] . ': ' . $e->getMessage());
+                        }
+                    }
+                });
+            }
 
             $mensaje = "";
             if ($asignados > 0) {
@@ -477,7 +496,13 @@ class AsignacionCursoController extends Controller
             // Marcar asignación como inactiva
             $asignacion->update(['estado' => 'inactivo']);
 
-            // Mantenemos la inscripción y todo el progreso del estudiante en este curso
+            // Desactivar la inscripción para que no aparezca en listados de control pedagógico etc.
+            // Mantenemos los datos y todo el progreso del estudiante en este curso
+            DB::table('curso_estudiantes')
+                ->where('curso_id', $cursoId)
+                ->where('estudiante_id', $estudianteId)
+                ->update(['estado' => 'inactivo']);
+
             // $this->eliminarDatosEstudianteCurso($cursoId, $estudianteId);
 
             DB::commit();
@@ -506,6 +531,7 @@ class AsignacionCursoController extends Controller
         
         $request->validate([
             'curso_id' => 'required|exists:cursos,id',
+            'docente_id' => 'nullable|exists:users,id',
         ], [
             'curso_id.required' => 'Debe seleccionar un curso',
             'curso_id.exists' => 'El curso seleccionado no existe',
@@ -515,6 +541,7 @@ class AsignacionCursoController extends Controller
             DB::beginTransaction();
 
             $curso = Curso::find($request->curso_id);
+            $docenteIdMasivo = $request->docente_id;
             
             // Obtener todos los usuarios con rol Estudiante
             $estudiantes = User::where('role', 'Estudiante')->get();
@@ -530,6 +557,7 @@ class AsignacionCursoController extends Controller
             $reasignados = 0;
             $yaAsignados = 0;
             $yaInscritos = 0;
+            $emailsParaEnviar = [];
 
             foreach ($estudiantes as $estudiante) {
                 // Verificar si ya está inscrito en el curso
@@ -550,27 +578,35 @@ class AsignacionCursoController extends Controller
 
                 if ($asignacionExistente) {
                     if ($asignacionExistente->estado === 'activo') {
+                        // Actualizar docente_id aunque ya esté activo
+                        if ($docenteIdMasivo && $asignacionExistente->docente_id !== $docenteIdMasivo) {
+                            $asignacionExistente->update(['docente_id' => $docenteIdMasivo]);
+                        }
                         $yaAsignados++;
                         continue;
                     }
                     // Reactivar asignación inactiva y reiniciar progreso
-                    $asignacionExistente->update([
+                    $updateDataMasivo = [
                         'estado' => 'activo',
                         'asignado_por' => Auth::id(),
                         'fecha_asignacion' => now(),
-                    ]);
+                        'docente_id' => $docenteIdMasivo, // Actualizar docente al reactivar
+                    ];
+                    $asignacionExistente->update($updateDataMasivo);
                     
                     // Reiniciar progreso del estudiante en el curso
                     $this->reiniciarProgresoCurso($request->curso_id, $estudiante->id);
 
-                    // Enviar correo de reasignación al estudiante
-                    try {
-                        $inscripcionUrl = route('academico.curso.inscribirse', $request->curso_id);
-                        \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
-                            new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
-                        );
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Error al enviar correo de reasignación masiva a ' . $estudiante->email . ': ' . $e->getMessage());
+                    // Programar correos (se enviarán después de la respuesta HTTP)
+                    $emailsParaEnviar[] = ['to' => $estudiante->email, 'mailable' => new \App\Mail\AsignacionCurso($estudiante, $curso, route('academico.curso.inscribirse', $request->curso_id)), 'error' => 'Error al enviar correo de reasignación masiva a ' . $estudiante->email];
+                    if ($curso && $curso->instructor) {
+                        $emailsParaEnviar[] = ['to' => $curso->instructor->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso), 'error' => 'Error al enviar correo de reasignación masiva al instructor'];
+                    }
+                    if ($docenteIdMasivo) {
+                        $docenteReasignadoMasivo = User::find($docenteIdMasivo);
+                        if ($docenteReasignadoMasivo && ($curso->instructor_id === null || $docenteReasignadoMasivo->id !== $curso->instructor_id)) {
+                            $emailsParaEnviar[] = ['to' => $docenteReasignadoMasivo->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($docenteReasignadoMasivo, $estudiante, $curso), 'error' => 'Error al enviar correo al docente asignado (reasignación masiva)'];
+                        }
                     }
 
                     $reasignados++;
@@ -578,32 +614,27 @@ class AsignacionCursoController extends Controller
                 }
 
                 // Crear nueva asignación
-                CursoAsignacion::create([
+                $asignacionDataMasivo = [
                     'curso_id' => $request->curso_id,
                     'estudiante_id' => $estudiante->id,
                     'asignado_por' => Auth::id(),
                     'estado' => 'activo',
                     'fecha_asignacion' => now(),
-                ]);
-
-                // Enviar correo de asignación al estudiante
-                try {
-                    $inscripcionUrl = route('academico.curso.inscribirse', $request->curso_id);
-                    \Illuminate\Support\Facades\Mail::to($estudiante->email)->send(
-                        new \App\Mail\AsignacionCurso($estudiante, $curso, $inscripcionUrl)
-                    );
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Error al enviar correo de asignación masiva a ' . $estudiante->email . ': ' . $e->getMessage());
+                ];
+                if ($docenteIdMasivo) {
+                    $asignacionDataMasivo['docente_id'] = $docenteIdMasivo;
                 }
+                CursoAsignacion::create($asignacionDataMasivo);
 
-                // Enviar correo al instructor si existe
+                // Programar correos (se enviarán después de la respuesta HTTP)
+                $emailsParaEnviar[] = ['to' => $estudiante->email, 'mailable' => new \App\Mail\AsignacionCurso($estudiante, $curso, route('academico.curso.inscribirse', $request->curso_id)), 'error' => 'Error al enviar correo de asignación masiva a ' . $estudiante->email];
                 if ($curso && $curso->instructor) {
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($curso->instructor->email)->send(
-                            new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso)
-                        );
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Error al enviar correo al instructor (masivo): ' . $e->getMessage());
+                    $emailsParaEnviar[] = ['to' => $curso->instructor->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($curso->instructor, $estudiante, $curso), 'error' => 'Error al enviar correo al instructor (masivo)'];
+                }
+                if ($docenteIdMasivo) {
+                    $docenteNuevoMasivo = User::find($docenteIdMasivo);
+                    if ($docenteNuevoMasivo && ($curso->instructor_id === null || $docenteNuevoMasivo->id !== $curso->instructor_id)) {
+                        $emailsParaEnviar[] = ['to' => $docenteNuevoMasivo->email, 'mailable' => new \App\Mail\NotificacionInstructorAsignacion($docenteNuevoMasivo, $estudiante, $curso), 'error' => 'Error al enviar correo al docente asignado (masivo)'];
                     }
                 }
 
@@ -611,6 +642,20 @@ class AsignacionCursoController extends Controller
             }
 
             DB::commit();
+
+            // Enviar correos después de la respuesta HTTP (no bloquea al usuario)
+            if (!empty($emailsParaEnviar)) {
+                $correosPendientes = $emailsParaEnviar;
+                \Illuminate\Support\defer(function () use ($correosPendientes) {
+                    foreach ($correosPendientes as $correo) {
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($correo['to'])->send($correo['mailable']);
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error($correo['error'] . ': ' . $e->getMessage());
+                        }
+                    }
+                });
+            }
 
             // Registrar operación masiva
             OperationLogger::log(
