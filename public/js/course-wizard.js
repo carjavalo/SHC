@@ -64,7 +64,7 @@ function showMaterialModal() {
                 <div class="form-group">
                     <label for="material-type">Tipo de Material</label>
                     <select class="form-control" id="material-type" onchange="toggleMaterialTabs()">
-                        <option value="documento">� Docum<ento</option>
+                        <option value="documento">📄 Documento</option>
                         <option value="video">🎥 Video</option>
                         <option value="imagen">🖼️ Imagen</option>
                         <option value="clase_en_linea">🎓 Clase en Línea (Meet)</option>
