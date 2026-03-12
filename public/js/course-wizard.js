@@ -1541,7 +1541,7 @@ function showActivityModal(activityType) {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mb-2">
-                            <label for="activity-porcentaje">Porcentaje del Material (%) *</label>
+                            <label for="activity-porcentaje">Porcentaje de la Actividad (%) *</label>
                             <input type="number" class="form-control" id="activity-porcentaje" 
                                    min="0" max="100" step="0.1" value="0" placeholder="0">
                             <small class="form-text text-muted" id="porcentaje-disponible-info">
@@ -2365,7 +2365,7 @@ function editActivity(activityId) {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mb-2">
-                            <label for="activity-porcentaje">Porcentaje del Material (%) *</label>
+                            <label for="activity-porcentaje">Porcentaje de la Actividad (%) *</label>
                             <input type="number" class="form-control" id="activity-porcentaje" 
                                    min="0" max="${porcentajeDisponibleMaterialEdit}" step="0.1" value="${activity.porcentajeMaterial || 0}" placeholder="0">
                             <small class="form-text text-muted" id="porcentaje-disponible-info-edit">
