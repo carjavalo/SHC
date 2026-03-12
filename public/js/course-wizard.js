@@ -46,6 +46,17 @@ function showMaterialModal() {
     const porcentajeUsado = materialesExistentes.reduce((sum, mat) => sum + (parseFloat(mat.porcentajeCurso) || 0), 0);
     const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado);
     
+    // Bloquear si ya se alcanzó el 100%
+    if (porcentajeUsado >= 100) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Porcentaje completo',
+            html: `Ya se ha asignado el <strong>100%</strong> del porcentaje del curso entre los materiales existentes.<br><br>Para agregar un nuevo material, primero edita o elimina materiales existentes para liberar porcentaje.`,
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
     // Mostrar u ocultar la sección de prerrequisitos
     const mostrarPrerrequisitos = materialesExistentes.length > 0;
     
@@ -83,8 +94,10 @@ function showMaterialModal() {
                                 <div class="form-group mb-2">
                                     <label for="material-porcentaje">Porcentaje del Curso (%) *</label>
                                     <input type="number" class="form-control" id="material-porcentaje" 
-                                           min="0" max="${porcentajeDisponible}" step="0.1" value="0" placeholder="0">
-                                    <small class="form-text text-muted">Disponible: <strong>${porcentajeDisponible.toFixed(1)}%</strong> de 100%</small>
+                                           min="0.1" max="${porcentajeDisponible}" step="0.1" value="" placeholder="0">
+                                    <small class="form-text" id="porcentaje-feedback">
+                                        Disponible: <strong>${porcentajeDisponible.toFixed(1)}%</strong> de 100%
+                                    </small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -97,13 +110,14 @@ function showMaterialModal() {
                             </div>
                         </div>
                         <div class="progress" style="height: 20px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: ${porcentajeUsado}%">
+                            <div class="progress-bar bg-success" role="progressbar" id="barra-porcentaje-usado" style="width: ${porcentajeUsado}%">
                                 ${porcentajeUsado.toFixed(1)}% usado
                             </div>
-                            <div class="progress-bar bg-secondary" role="progressbar" style="width: ${porcentajeDisponible}%">
+                            <div class="progress-bar bg-secondary" role="progressbar" id="barra-porcentaje-disponible" style="width: ${porcentajeDisponible}%">
                                 ${porcentajeDisponible.toFixed(1)}% disponible
                             </div>
                         </div>
+                        <small class="text-muted mt-1 d-block" id="resumen-porcentaje">Total asignado: ${porcentajeUsado.toFixed(1)}% | Máximo: 100%</small>
                     </div>
                 </div>
                 
@@ -198,6 +212,61 @@ function showMaterialModal() {
         cancelButtonText: 'Cancelar',
         width: '700px',
         didOpen: () => {
+            // Validación en tiempo real del porcentaje
+            const porcentajeInput = document.getElementById('material-porcentaje');
+            if (porcentajeInput) {
+                porcentajeInput.addEventListener('input', function() {
+                    const valor = parseFloat(this.value) || 0;
+                    const feedback = document.getElementById('porcentaje-feedback');
+                    const barraUsado = document.getElementById('barra-porcentaje-usado');
+                    const barraDisponible = document.getElementById('barra-porcentaje-disponible');
+                    const resumen = document.getElementById('resumen-porcentaje');
+                    const nuevoTotal = porcentajeUsado + valor;
+                    const nuevoDisponible = Math.max(0, 100 - nuevoTotal);
+                    
+                    if (barraUsado) {
+                        barraUsado.style.width = Math.min(nuevoTotal, 100) + '%';
+                        barraUsado.textContent = nuevoTotal.toFixed(1) + '% usado';
+                    }
+                    if (barraDisponible) {
+                        barraDisponible.style.width = nuevoDisponible + '%';
+                        barraDisponible.textContent = nuevoDisponible.toFixed(1) + '% disponible';
+                    }
+                    if (resumen) {
+                        resumen.textContent = 'Total asignado: ' + nuevoTotal.toFixed(1) + '% | Máximo: 100%';
+                    }
+                    
+                    if (valor > porcentajeDisponible) {
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+                        feedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Excede el disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong></span>';
+                        if (barraUsado) {
+                            barraUsado.classList.remove('bg-success', 'bg-info');
+                            barraUsado.classList.add('bg-danger');
+                        }
+                    } else if (valor > 0) {
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                        feedback.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> OK - Quedará disponible: <strong>' + nuevoDisponible.toFixed(1) + '%</strong></span>';
+                        if (barraUsado) {
+                            barraUsado.classList.remove('bg-danger');
+                            if (nuevoTotal === 100) {
+                                barraUsado.classList.add('bg-success');
+                            } else {
+                                barraUsado.classList.add('bg-info');
+                            }
+                        }
+                    } else {
+                        this.classList.remove('is-valid', 'is-invalid');
+                        feedback.innerHTML = 'Disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong> de 100%';
+                        if (barraUsado) {
+                            barraUsado.classList.remove('bg-danger');
+                            barraUsado.classList.add('bg-success');
+                        }
+                    }
+                });
+            }
+            
             // Función para mostrar/ocultar selector de prerrequisito
             window.togglePrerequisiteSelect = function() {
                 const hasPrerequisite = document.getElementById('material-has-prerequisite').checked;
@@ -278,15 +347,13 @@ function showMaterialModal() {
             }
             
             // Validación de porcentaje
-            // porcentajeDisponible está definido en el scope de showMaterialModal
-            const maxPorcentajeAdd = porcentajeDisponible;
-            if (porcentajeCurso < 0) {
-                Swal.showValidationMessage('El porcentaje no puede ser negativo');
+            if (porcentajeCurso <= 0) {
+                Swal.showValidationMessage('El porcentaje debe ser mayor a 0%. Cada material debe tener un porcentaje asignado.');
                 return false;
             }
             
-            if (porcentajeCurso > maxPorcentajeAdd) {
-                Swal.showValidationMessage('El porcentaje excede el disponible (' + maxPorcentajeAdd.toFixed(1) + '%)');
+            if (porcentajeCurso > porcentajeDisponible) {
+                Swal.showValidationMessage('El porcentaje (' + porcentajeCurso.toFixed(1) + '%) excede el disponible (' + porcentajeDisponible.toFixed(1) + '%). La suma de todos los materiales no puede pasar de 100%.');
                 return false;
             }
             
@@ -613,8 +680,10 @@ function editMaterial(materialId) {
                                 <div class="form-group mb-2">
                                     <label for="material-porcentaje">Porcentaje del Curso (%) *</label>
                                     <input type="number" class="form-control" id="material-porcentaje" 
-                                           min="0" max="${porcentajeDisponible}" step="0.1" value="${porcentajeActual}" placeholder="0">
-                                    <small class="form-text text-muted">Disponible: <strong>${porcentajeDisponible.toFixed(1)}%</strong> de 100%</small>
+                                           min="0.1" max="${porcentajeDisponible}" step="0.1" value="${porcentajeActual}" placeholder="0">
+                                    <small class="form-text" id="porcentaje-feedback">
+                                        Disponible: <strong>${porcentajeDisponible.toFixed(1)}%</strong> de 100% (este material tiene ${porcentajeActual.toFixed(1)}%)
+                                    </small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -626,6 +695,18 @@ function editMaterial(materialId) {
                                 </div>
                             </div>
                         </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-info" role="progressbar" id="barra-porcentaje-otros" style="width: ${porcentajeUsadoOtros}%">
+                                ${porcentajeUsadoOtros.toFixed(1)}% otros
+                            </div>
+                            <div class="progress-bar bg-success" role="progressbar" id="barra-porcentaje-actual" style="width: ${porcentajeActual}%">
+                                ${porcentajeActual.toFixed(1)}% este
+                            </div>
+                            <div class="progress-bar bg-secondary" role="progressbar" id="barra-porcentaje-libre" style="width: ${Math.max(0, 100 - porcentajeUsadoOtros - porcentajeActual)}%">
+                                ${Math.max(0, 100 - porcentajeUsadoOtros - porcentajeActual).toFixed(1)}% libre
+                            </div>
+                        </div>
+                        <small class="text-muted mt-1 d-block" id="resumen-porcentaje">Otros materiales: ${porcentajeUsadoOtros.toFixed(1)}% | Este material: ${porcentajeActual.toFixed(1)}% | Total: ${(porcentajeUsadoOtros + porcentajeActual).toFixed(1)}%</small>
                     </div>
                 </div>
                 
@@ -722,6 +803,53 @@ function editMaterial(materialId) {
         cancelButtonText: 'Cancelar',
         width: '700px',
         didOpen: () => {
+            // Validación en tiempo real del porcentaje en edición
+            const porcentajeInputEdit = document.getElementById('material-porcentaje');
+            if (porcentajeInputEdit) {
+                porcentajeInputEdit.addEventListener('input', function() {
+                    const valor = parseFloat(this.value) || 0;
+                    const feedback = document.getElementById('porcentaje-feedback');
+                    const barraActual = document.getElementById('barra-porcentaje-actual');
+                    const barraLibre = document.getElementById('barra-porcentaje-libre');
+                    const resumen = document.getElementById('resumen-porcentaje');
+                    const nuevoTotal = porcentajeUsadoOtros + valor;
+                    const nuevoLibre = Math.max(0, 100 - nuevoTotal);
+                    
+                    if (barraActual) {
+                        barraActual.style.width = Math.min(valor, porcentajeDisponible) + '%';
+                        barraActual.textContent = valor.toFixed(1) + '% este';
+                    }
+                    if (barraLibre) {
+                        barraLibre.style.width = nuevoLibre + '%';
+                        barraLibre.textContent = nuevoLibre.toFixed(1) + '% libre';
+                    }
+                    if (resumen) {
+                        resumen.textContent = 'Otros materiales: ' + porcentajeUsadoOtros.toFixed(1) + '% | Este material: ' + valor.toFixed(1) + '% | Total: ' + nuevoTotal.toFixed(1) + '%';
+                    }
+                    
+                    if (valor > porcentajeDisponible) {
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+                        feedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Excede el disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong></span>';
+                        if (barraActual) {
+                            barraActual.classList.remove('bg-success', 'bg-info');
+                            barraActual.classList.add('bg-danger');
+                        }
+                    } else if (valor > 0) {
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                        feedback.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> OK - Quedará libre: <strong>' + nuevoLibre.toFixed(1) + '%</strong></span>';
+                        if (barraActual) {
+                            barraActual.classList.remove('bg-danger');
+                            barraActual.classList.add('bg-success');
+                        }
+                    } else {
+                        this.classList.remove('is-valid', 'is-invalid');
+                        feedback.innerHTML = 'Disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong> de 100%';
+                    }
+                });
+            }
+            
             // Función para mostrar/ocultar selector de prerrequisito en edición
             window.togglePrerequisiteSelectEdit = function() {
                 const hasPrerequisite = document.getElementById('material-has-prerequisite').checked;
@@ -811,15 +939,13 @@ function editMaterial(materialId) {
             }
             
             // Validación de porcentaje
-            // porcentajeDisponible está definido en el scope de editMaterial
-            const maxPorcentajeEdit = porcentajeDisponible;
-            if (porcentajeCurso < 0) {
-                Swal.showValidationMessage('El porcentaje no puede ser negativo');
+            if (porcentajeCurso <= 0) {
+                Swal.showValidationMessage('El porcentaje debe ser mayor a 0%. Cada material debe tener un porcentaje asignado.');
                 return false;
             }
             
-            if (porcentajeCurso > maxPorcentajeEdit) {
-                Swal.showValidationMessage('El porcentaje excede el disponible (' + maxPorcentajeEdit.toFixed(1) + '%)');
+            if (porcentajeCurso > porcentajeDisponible) {
+                Swal.showValidationMessage('El porcentaje (' + porcentajeCurso.toFixed(1) + '%) excede el disponible (' + porcentajeDisponible.toFixed(1) + '%). La suma de todos los materiales no puede pasar de 100%.');
                 return false;
             }
             
@@ -2886,6 +3012,18 @@ function submitCourseData() {
         formData.append('imagen_portada', imagenPortada);
     }
 
+    // Validar que el porcentaje total de materiales no exceda 100%
+    const porcentajeTotalMateriales = courseData.materials.reduce((sum, mat) => sum + (parseFloat(mat.porcentajeCurso) || 0), 0);
+    if (porcentajeTotalMateriales > 100) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Porcentaje de materiales excedido',
+            html: `La suma de los porcentajes de los materiales es <strong>${porcentajeTotalMateriales.toFixed(1)}%</strong>.<br>El máximo permitido es <strong>100%</strong>.<br><br>Por favor, ajusta los porcentajes de los materiales antes de crear el curso.`,
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+
     // Limpiar datos de materiales antes de enviar (remover objetos File del JSON)
     const cleanMaterials = courseData.materials.map((mat, index) => ({
         id: mat.id,
@@ -2899,6 +3037,8 @@ function submitCourseData() {
         meetStart: mat.meetStart,
         meetEnd: mat.meetEnd,
         prerequisiteId: mat.prerequisiteId,
+        porcentajeCurso: mat.porcentajeCurso || 0,
+        notaMinimaAprobacion: mat.notaMinimaAprobacion || 3.0,
         file: mat.file ? true : false, // Solo indicar si hay archivo
         fileIndex: mat.file ? index : null
     }));

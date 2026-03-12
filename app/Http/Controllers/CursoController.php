@@ -309,6 +309,27 @@ class CursoController extends Controller
 
             // Procesar materiales del wizard
             if ($request->has('materials_data') && !empty($request->input('materials_data'))) {
+                // Validar que la suma de porcentajes no exceda 100%
+                $materialsDataCheck = json_decode($request->input('materials_data'), true);
+                if (is_array($materialsDataCheck)) {
+                    $totalPorcentaje = array_reduce($materialsDataCheck, function($carry, $mat) {
+                        return $carry + (floatval($mat['porcentajeCurso'] ?? 0));
+                    }, 0);
+                    
+                    if ($totalPorcentaje > 100.0) {
+                        throw new \Exception("La suma de los porcentajes de los materiales ({$totalPorcentaje}%) excede el 100% permitido. Ajusta los porcentajes antes de crear el curso.");
+                    }
+                    
+                    // Validar que cada material tenga porcentaje > 0
+                    foreach ($materialsDataCheck as $index => $matCheck) {
+                        $porcentaje = floatval($matCheck['porcentajeCurso'] ?? 0);
+                        if ($porcentaje <= 0) {
+                            $titulo = $matCheck['title'] ?? 'Material ' . ($index + 1);
+                            throw new \Exception("El material '{$titulo}' tiene porcentaje 0%. Cada material debe tener un porcentaje asignado.");
+                        }
+                    }
+                }
+                
                 try {
                     $this->processMaterials($curso, $request);
                     \Log::info('Materiales procesados para curso: ' . $curso->id);
