@@ -133,6 +133,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('curso/{curso}/materiales', [AcademicoController::class, 'verMateriales'])->name('curso.materiales');
         Route::get('curso/{curso}/actividades', [AcademicoController::class, 'verActividades'])->name('curso.actividades');
         Route::get('curso/{curso}/evaluaciones', [AcademicoController::class, 'verEvaluaciones'])->name('curso.evaluaciones');
+        Route::get('curso/{curso}/certificado', [AcademicoController::class, 'generarCertificado'])->name('curso.certificado');
 
         // Interacciones del estudiante
         Route::match(['get', 'post'], 'curso/{curso}/inscribirse', [AcademicoController::class, 'inscribirseCurso'])->name('curso.inscribirse');
@@ -172,7 +173,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Rutas de Editor de Certificados
         Route::prefix('editor-certificados')->name('editor-certificados.')->group(function () {
-            Route::get('/', [CertificadoEditorController::class, 'index'])->name('index');
+            Route::get('/', [\App\Http\Controllers\CertificadoPlantillaController::class, 'index'])->name('index');
+            Route::post('/guardar', [\App\Http\Controllers\CertificadoPlantillaController::class, 'store'])->name('store');
+            Route::delete('/{plantilla}', [\App\Http\Controllers\CertificadoPlantillaController::class, 'destroy'])->name('destroy');
+            Route::get('/{plantilla}/json', [\App\Http\Controllers\CertificadoPlantillaController::class, 'showJson'])->name('showJson');
         });
 
         // Rutas de Publicidad y Productos

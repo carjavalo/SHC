@@ -234,9 +234,10 @@ class AcademicoController extends Controller
         $progreso = $curso->tieneEstudiante($user->id) ? $curso->getProgresoEstudiante($user->id) : 0;
         $materialesVistos = $this->getMaterialesVistos($curso->id, $user->id);
         $actividadesCompletadas = $this->getActividadesCompletadas($curso->id, $user->id);
+        $resumen = $curso->tieneEstudiante($user->id) ? $curso->getResumenCalificacionesEstudiante($user->id) : ['aprobado' => false];
 
         return view('academico.curso.index', compact(
-            'curso', 'progreso', 'materialesVistos', 'actividadesCompletadas'
+            'curso', 'progreso', 'materialesVistos', 'resumen', 'actividadesCompletadas'
         ));
     }
 
@@ -276,9 +277,10 @@ class AcademicoController extends Controller
         $progreso = $curso->tieneEstudiante($user->id) ? $curso->getProgresoEstudiante($user->id) : 0;
         $materialesVistos = $this->getMaterialesVistos($curso->id, $user->id);
         $actividadesCompletadas = $this->getActividadesCompletadas($curso->id, $user->id);
+        $resumen = $curso->tieneEstudiante($user->id) ? $curso->getResumenCalificacionesEstudiante($user->id) : ['aprobado' => false];
 
         return view('academico.curso.aula-virtual', compact(
-            'curso', 'materiales', 'progreso', 'materialesVistos', 'actividadesCompletadas'
+            'curso', 'materiales', 'resumen', 'progreso', 'materialesVistos', 'actividadesCompletadas'
         ));
     }
 
@@ -310,7 +312,7 @@ class AcademicoController extends Controller
 
         $materialesVistos = $this->getMaterialesVistos($curso->id, $user->id);
 
-        return view('academico.curso.materiales', compact('curso', 'materiales', 'materialesVistos'));
+        return view('academico.curso.materiales', compact('curso', 'materiales', 'resumen', 'materialesVistos'));
     }
 
     /**
@@ -339,6 +341,7 @@ class AcademicoController extends Controller
             ->get();
 
         $actividadesCompletadas = $this->getActividadesCompletadas($curso->id, $user->id);
+        $resumen = $curso->tieneEstudiante($user->id) ? $curso->getResumenCalificacionesEstudiante($user->id) : ['aprobado' => false];
 
         return view('academico.curso.actividades', compact('curso', 'actividades', 'actividadesCompletadas'));
     }
@@ -774,4 +777,42 @@ class AcademicoController extends Controller
             ->pluck('actividad_id')
             ->toArray();
     }
+
+    /**
+     * Generar Certificado para el estudiante
+     */
+    public function generarCertificado(Curso $curso)
+    {
+        $user = Auth::user();
+
+        // Verificar inscripción
+        $inscrito = DB::table('curso_estudiante')
+            ->where('curso_id', $curso->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (!$inscrito) {
+            abort(403, 'No estás inscrito en este curso.');
+        }
+
+        // Obtener resumen y nota final
+        $resumen = $curso->getResumenCalificacionesEstudiante($user->id);
+        $notaFinal = number_format($resumen['nota_final'], 1);
+
+        if (!$resumen['aprobado']) {
+            abort(403, 'Aún no has aprobado este curso.');
+        }
+
+        // Encontrar plantilla
+        $plantilla = $curso->plantillaCertificado;
+        if (!$plantilla) {
+            // Placeholder o Fallback si no tiene plantilla asiganada
+            abort(404, 'Este curso aún no tiene un diseño de certificado configurado. Contacte a soporte.');
+        }
+
+        return view('academico.curso.certificado', compact('curso', 'user', 'resumen', 'plantilla', 'notaFinal'));
+    }
 }
+
+
+

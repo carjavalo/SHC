@@ -245,8 +245,10 @@ class CursoController extends Controller
         $creadores = User::whereIn('role', ['Super Admin', 'Administrador', 'Admin', 'Operador'])
                            ->orderBy('name')
                            ->get();
+                           
+        $plantillas = \App\Models\PlantillaCertificado::orderBy('nombre')->get();
 
-        return view('admin.capacitaciones.cursos.create', compact('areas', 'creadores'));
+        return view('admin.capacitaciones.cursos.create', compact('areas', 'creadores', 'plantillas'));
     }
 
     /**
@@ -267,6 +269,7 @@ class CursoController extends Controller
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
             'estado' => 'nullable|in:borrador,activo,finalizado,archivado',
             'max_estudiantes' => 'nullable|integer|min:1',
+            'plantilla_certificado_id' => 'nullable|exists:plantilla_certificados,id',
             'objetivos' => 'nullable|string|max:65535',
             'requisitos' => 'nullable|string|max:65535',
             'duracion_horas' => 'nullable|integer|min:1',
@@ -482,8 +485,10 @@ class CursoController extends Controller
         $creadores = User::whereIn('role', ['Super Admin', 'Administrador', 'Admin', 'Operador'])
                            ->orderBy('name')
                            ->get();
+                           
+        $plantillas = \App\Models\PlantillaCertificado::orderBy('nombre')->get();
 
-        return view('admin.capacitaciones.cursos.edit', compact('curso', 'areas', 'creadores'));
+        return view('admin.capacitaciones.cursos.edit', compact('curso', 'areas', 'creadores', 'plantillas'));
     }
 
     /**
@@ -500,6 +505,7 @@ class CursoController extends Controller
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
             'estado' => 'required|in:borrador,activo,finalizado,archivado',
             'max_estudiantes' => 'nullable|integer|min:1',
+            'plantilla_certificado_id' => 'nullable|exists:plantilla_certificados,id',
             'objetivos' => 'nullable|string',
             'requisitos' => 'nullable|string',
             'duracion_horas' => 'nullable|integer|min:1',
@@ -812,3 +818,4 @@ class CursoController extends Controller
         }
     }
 }
+

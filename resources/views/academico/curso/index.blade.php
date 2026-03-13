@@ -87,6 +87,13 @@
                             </div>
                         </div>
                         <p class="text-muted">Has completado {{ $progreso }}% del curso</p>
+                          @if(isset($resumen) && $resumen['aprobado'])
+                          <div class="mt-3 text-center">
+                              <a href="{{ route('academico.curso.certificado', $curso->id) }}" target="_blank" class="btn btn-success btn-block shadow-sm">
+                                  <i class="fas fa-certificate"></i> Descargar Certificado
+                              </a>
+                          </div>
+                          @endif
                         
                         <div class="row text-center">
                             <div class="col-6">
@@ -263,3 +270,4 @@
         }
     </script>
 @stop
+

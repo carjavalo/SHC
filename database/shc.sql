@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-03-2026 a las 23:30:25
+-- Tiempo de generación: 13-03-2026 a las 20:54:38
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -153,7 +153,8 @@ INSERT INTO `cursos` (`id`, `titulo`, `descripcion`, `id_area`, `instructor_id`,
 (13, 'Reanimación Cardiopulmonar(RCP)', NULL, 10, 44, '2026-01-05 00:00:00', NULL, 'activo', 'AKOQD7', NULL, 'cursos/portadas/fnNjsPQQ8xtazUNrAmbuQkRi3PMi4hXkDuMjDayy.png', NULL, NULL, 20, 3.00, 5.00, '2026-01-06 03:18:42', '2026-03-11 23:11:54'),
 (14, 'Hemato Oncología', NULL, 11, 45, NULL, NULL, 'activo', 'K3HJMJ', NULL, NULL, NULL, NULL, 115, 3.00, 5.00, '2026-01-06 18:51:49', '2026-01-06 18:56:21'),
 (17, 'pagos', 'practica', 10, 44, '2026-01-01 00:00:00', '2026-04-30 23:59:00', 'activo', 'RJ3ZRN', NULL, 'cursos/portadas/ij514HBRhjh6EObLwXLIkECDhQJaJtAO6mSiUOf6.jpg', 'Aprender', 'Que sea bachiller', NULL, 3.00, 5.00, '2026-01-17 01:47:17', '2026-03-12 19:55:56'),
-(18, 'Inducción Institucional (General)', NULL, 9, 44, '2026-01-01 19:00:00', '2026-01-31 19:00:00', 'activo', 'WVCVG3', NULL, 'cursos/portadas/Mm1x04uATVbbeMbUt4TOtLk2gtskDWJUReD7rpBd.png', NULL, NULL, NULL, 4.00, 5.00, '2026-01-22 21:24:01', '2026-01-22 21:44:27');
+(18, 'Inducción Institucional (General)', NULL, 9, 44, '2026-01-01 19:00:00', '2026-01-31 19:00:00', 'activo', 'WVCVG3', NULL, 'cursos/portadas/Mm1x04uATVbbeMbUt4TOtLk2gtskDWJUReD7rpBd.png', NULL, NULL, NULL, 4.00, 5.00, '2026-01-22 21:24:01', '2026-01-22 21:44:27'),
+(20, 'Cprueba1', 'solo prueba', 10, 44, '2026-03-01 11:06:00', '2026-03-31 11:06:00', 'activo', 'HJSFNC', NULL, 'cursos/portadas/lmiUOQNNupijzc0fRdVeVw6UijhBngYXAVeIIKZF.png', 'aprender prueba', 'saber de todo', NULL, 3.00, 5.00, '2026-03-13 21:20:16', '2026-03-13 21:20:51');
 
 -- --------------------------------------------------------
 
@@ -198,7 +199,11 @@ INSERT INTO `curso_actividades` (`id`, `curso_id`, `material_id`, `titulo`, `des
 (34, 17, 67, 'liquidacion 1', 'contestar y subir', 'tarea', '1)\n2)\n3)', NULL, NULL, NULL, '2026-01-01 00:00:00', '2026-04-30 23:59:00', 5, 0, 1, 1, 50.00, 4.00, 0, '2026-01-17 01:47:17', '2026-02-03 20:58:14'),
 (35, 17, 67, 'Liquidacion2', 'responda en Breve', 'tarea', '1)\n2)\n3)', NULL, NULL, '[1768595865224]', '2026-01-01 00:00:00', '2026-01-31 23:59:00', 5, 0, 1, 1, 50.00, 5.00, 0, '2026-01-17 01:47:17', '2026-01-17 01:47:17'),
 (36, 17, 68, 'Pos liquidar 1', 'conteste', 'tarea', '1)\n2)\n3)', NULL, NULL, NULL, '2026-01-01 00:00:00', '2026-01-31 23:59:00', 5, 0, 1, 1, 0.50, 5.00, 0, '2026-01-17 01:47:17', '2026-01-17 01:47:17'),
-(37, 17, 68, 'Final Post Liquidacion jum', 'conteste con cuidado ok', 'quiz', 'tiene 20 minutos para responder', '{\"duration\":\"20\",\"questions\":[{\"id\":\"1\",\"text\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"points\":\"1.5\",\"options\":{\"A\":\"vvvvvvvvvvvv\",\"B\":\"vvvvvvvvvvvvvvvv\",\"C\":\"vvvvvvvvvvvvvvv\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"},{\"id\":\"2\",\"text\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"points\":\"1.5\",\"options\":{\"A\":\"bbbbbbb\",\"B\":\"bbbbbbbbbbbb\",\"C\":\"bbbbbbbbbbbbb\"},\"correctAnswers\":[\"B\"],\"isMultipleChoice\":\"false\"},{\"id\":\"3\",\"text\":\"rrrrrrrrrrrrrrrrr\",\"points\":\"0.5\",\"options\":{\"A\":\"ggggggggggggg\",\"B\":\"ffffffffffffffff\",\"C\":\"gggggggggggg\",\"D\":\"hhhhhhhhhhhhhhhhhhh\"},\"correctAnswers\":[\"D\"],\"isMultipleChoice\":\"false\"},{\"id\":\"4\",\"text\":\"zzzzzzzzzzzzzzzzzzzzzzz\",\"points\":\"1.5\",\"options\":{\"A\":\"rrrrrrrrrrrrrr\",\"B\":\"rrtttttttttttttttttt\",\"C\":\"trrrrrrrrrrrrrr\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"}]}', NULL, '[\"36\"]', '2026-02-03 15:50:00', '2026-02-28 16:15:00', 5, 0, 1, 1, 99.50, 5.00, 1, '2026-01-17 01:47:17', '2026-02-04 21:50:32');
+(37, 17, 68, 'Final Post Liquidacion jum', 'conteste con cuidado ok', 'quiz', 'tiene 20 minutos para responder', '{\"duration\":\"20\",\"questions\":[{\"id\":\"1\",\"text\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"points\":\"1.5\",\"options\":{\"A\":\"vvvvvvvvvvvv\",\"B\":\"vvvvvvvvvvvvvvvv\",\"C\":\"vvvvvvvvvvvvvvv\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"},{\"id\":\"2\",\"text\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"points\":\"1.5\",\"options\":{\"A\":\"bbbbbbb\",\"B\":\"bbbbbbbbbbbb\",\"C\":\"bbbbbbbbbbbbb\"},\"correctAnswers\":[\"B\"],\"isMultipleChoice\":\"false\"},{\"id\":\"3\",\"text\":\"rrrrrrrrrrrrrrrrr\",\"points\":\"0.5\",\"options\":{\"A\":\"ggggggggggggg\",\"B\":\"ffffffffffffffff\",\"C\":\"gggggggggggg\",\"D\":\"hhhhhhhhhhhhhhhhhhh\"},\"correctAnswers\":[\"D\"],\"isMultipleChoice\":\"false\"},{\"id\":\"4\",\"text\":\"zzzzzzzzzzzzzzzzzzzzzzz\",\"points\":\"1.5\",\"options\":{\"A\":\"rrrrrrrrrrrrrr\",\"B\":\"rrtttttttttttttttttt\",\"C\":\"trrrrrrrrrrrrrr\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"}]}', NULL, '[\"36\"]', '2026-02-03 15:50:00', '2026-02-28 16:15:00', 5, 0, 1, 1, 99.50, 5.00, 1, '2026-01-17 01:47:17', '2026-02-04 21:50:32'),
+(42, 20, 87, 'ATprueba1', 'Prueba solamente', 'tarea', 'Leer', NULL, NULL, NULL, '2026-03-01 11:10:00', '2026-03-31 11:10:00', 100, 0, 1, 1, 20.00, 3.50, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17'),
+(43, 20, 87, 'ATprueba2', 'solo es una prueba', 'tarea', 'leerer y subir al correo', NULL, NULL, '[1773418267344]', '2026-03-01 11:11:00', '2026-03-31 11:11:00', 100, 0, 1, 1, 80.00, 3.50, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17'),
+(44, 20, 88, 'AQprueba', 'solamente es prueba', 'quiz', 'Contestet Rapidamente', '{\"duration\":20,\"totalPoints\":100,\"questions\":[{\"id\":1,\"type\":\"multiple\",\"text\":\"que tono de piel tiene\",\"points\":10,\"options\":{\"A\":\"Negro\",\"B\":\"Mestizo\",\"C\":\"Blanco\",\"D\":\"Mulato\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":2,\"type\":\"multiple\",\"text\":\"Tu eres\",\"points\":20,\"options\":{\"A\":\"Adulto\",\"B\":\"Ni\\u00f1o\",\"C\":\"Adolescente\",\"D\":\"Mayor\"},\"correctAnswers\":[\"A\",\"D\"],\"isMultipleChoice\":true},{\"id\":3,\"type\":\"multiple\",\"text\":\"Te gustan\",\"points\":40,\"options\":{\"A\":\"Acuerpadas\",\"B\":\"Altas\",\"C\":\"Medio Gorditas\",\"D\":\"Delagadas\"},\"correctAnswers\":[\"A\",\"B\",\"C\"],\"isMultipleChoice\":true},{\"id\":4,\"type\":\"multiple\",\"text\":\"Yo  soy\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Juan\",\"C\":\"Pedro\",\"D\":\"Alberto\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":5,\"type\":\"multiple\",\"text\":\"Yo me llamo\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Andres\",\"C\":\"Jairton\",\"D\":\"Pedro\"},\"correctAnswers\":[\"A\",\"C\"],\"isMultipleChoice\":true}]}', NULL, '[1773418267344,1773418333542]', '2026-03-01 11:12:00', '2026-03-31 11:12:00', 100, 0, 1, 1, 80.00, 3.00, 1, '2026-03-13 21:20:17', '2026-03-13 21:28:47'),
+(45, 20, 88, 'ATprueba3', 'Solo prueba', 'tarea', 'Leer y subir al correo', NULL, NULL, '[1773418267344,1773418709034]', '2026-03-01 11:19:00', '2026-03-31 11:19:00', 100, 0, 1, 1, 20.00, 3.00, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17');
 
 -- --------------------------------------------------------
 
@@ -223,6 +228,20 @@ CREATE TABLE `curso_actividad_entrega` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `curso_actividad_entrega`
+--
+
+INSERT INTO `curso_actividad_entrega` (`id`, `curso_id`, `actividad_id`, `user_id`, `contenido`, `puntos_obtenidos`, `observaciones_estudiante`, `archivo_path`, `calificacion`, `comentarios_instructor`, `estado`, `entregado_at`, `revisado_at`, `created_at`, `updated_at`) VALUES
+(13, 20, 42, 36, 'ya lo hice', 0.00, 'todobien', 'entregas/NCZBiciqxXMtlTcO0HAIzFRByMgwoGawv6nfdzIc.jpg', 3.90, 'te fue bien', 'revisado', '2026-03-13 16:35:34', '2026-03-13 21:35:34', NULL, '2026-03-13 21:35:34'),
+(14, 20, 43, 36, 'ya lo hice', 0.00, 'como fue', 'entregas/XabAqV0PkCKPDAhYmrQXCOKdqEzAKvleSSz2GCsV.jpg', 4.00, 'sos el mejor', 'revisado', '2026-03-13 16:36:20', '2026-03-13 21:36:20', NULL, '2026-03-13 21:36:20'),
+(15, 20, 44, 36, '{\"respuestas\":{\"1\":\"A\",\"2\":[\"A\",\"D\"],\"3\":[\"A\",\"B\",\"C\"],\"4\":\"A\",\"5\":[\"A\",\"C\"]},\"resultados\":[{\"pregunta_id\":1,\"pregunta\":\"que tono de piel tiene\",\"respuesta_estudiante\":\"A) Negro\",\"respuesta_correcta\":\"A) Negro\",\"es_correcta\":true,\"puntos\":0.5,\"porcentaje_pregunta\":10,\"es_multiple\":false},{\"pregunta_id\":2,\"pregunta\":\"Tu eres\",\"respuesta_estudiante\":\"A) Adulto, D) Mayor\",\"respuesta_correcta\":\"A) Adulto, D) Mayor\",\"es_correcta\":true,\"puntos\":1,\"porcentaje_pregunta\":20,\"es_multiple\":true},{\"pregunta_id\":3,\"pregunta\":\"Te gustan\",\"respuesta_estudiante\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"respuesta_correcta\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"es_correcta\":true,\"puntos\":2,\"porcentaje_pregunta\":40,\"es_multiple\":true},{\"pregunta_id\":4,\"pregunta\":\"Yo  soy\",\"respuesta_estudiante\":\"A) Carlos\",\"respuesta_correcta\":\"A) Carlos\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":false},{\"pregunta_id\":5,\"pregunta\":\"Yo me llamo\",\"respuesta_estudiante\":\"A) Carlos, C) Jairton\",\"respuesta_correcta\":\"A) Carlos, C) Jairton\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":true}],\"tiempo_transcurrido\":\"30\"}', 5.00, NULL, NULL, 5.00, NULL, 'aprobado', '2026-03-13 21:29:28', NULL, NULL, '2026-03-13 21:29:28'),
+(16, 20, 45, 36, 'ya', 0.00, 'brebe', 'entregas/1tE6yVFZsE0iBvcWGYbo4oQf7ldR1HF4cfC6NEAT.jpg', 5.00, 'perro panzon', 'revisado', '2026-03-13 16:39:18', '2026-03-13 21:39:18', NULL, '2026-03-13 21:39:18'),
+(17, 20, 42, 46, 'ya', 0.00, 'ok', 'entregas/uD9s4sPVNmLEQbO14IMw7gTJetJOLoMrJpR9aGLi.jpg', 1.50, 'No joda', 'revisado', '2026-03-13 16:38:26', '2026-03-13 21:38:26', NULL, '2026-03-13 21:38:26'),
+(18, 20, 43, 46, 'ok', 0.00, 'bien', 'entregas/3xkVPCHIs9Ln9uVeWAHwkjko404w6x5HaSLDFxOa.jpg', 3.00, 'que lastima', 'revisado', '2026-03-13 16:38:43', '2026-03-13 21:38:43', NULL, '2026-03-13 21:38:43'),
+(21, 20, 44, 46, '{\"respuestas\":{\"1\":\"A\",\"2\":[\"A\",\"D\"],\"3\":[\"A\"],\"4\":\"A\",\"5\":[\"B\",\"D\"]},\"resultados\":[{\"pregunta_id\":1,\"pregunta\":\"que tono de piel tiene\",\"respuesta_estudiante\":\"A) Negro\",\"respuesta_correcta\":\"A) Negro\",\"es_correcta\":true,\"puntos\":0.5,\"porcentaje_pregunta\":10,\"es_multiple\":false},{\"pregunta_id\":2,\"pregunta\":\"Tu eres\",\"respuesta_estudiante\":\"A) Adulto, D) Mayor\",\"respuesta_correcta\":\"A) Adulto, D) Mayor\",\"es_correcta\":true,\"puntos\":1,\"porcentaje_pregunta\":20,\"es_multiple\":true},{\"pregunta_id\":3,\"pregunta\":\"Te gustan\",\"respuesta_estudiante\":\"A) Acuerpadas\",\"respuesta_correcta\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"es_correcta\":false,\"puntos\":0.67,\"porcentaje_pregunta\":40,\"es_multiple\":true},{\"pregunta_id\":4,\"pregunta\":\"Yo  soy\",\"respuesta_estudiante\":\"A) Carlos\",\"respuesta_correcta\":\"A) Carlos\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":false},{\"pregunta_id\":5,\"pregunta\":\"Yo me llamo\",\"respuesta_estudiante\":\"B) Andres, D) Pedro\",\"respuesta_correcta\":\"A) Carlos, C) Jairton\",\"es_correcta\":false,\"puntos\":0,\"porcentaje_pregunta\":15,\"es_multiple\":true}],\"tiempo_transcurrido\":\"39\"}', 2.92, NULL, NULL, 2.92, NULL, 'revisado', '2026-03-13 21:37:40', NULL, NULL, '2026-03-13 21:37:40'),
+(22, 20, 45, 46, 'ok', 0.00, 'su madre', 'entregas/WZABz0NVslekODLf7LAGJzCm8BxSy6nww06PR2Ne.jpg', 1.00, 'vaya joder', 'revisado', '2026-03-13 16:40:33', '2026-03-13 21:40:33', NULL, '2026-03-13 21:40:33');
 
 -- --------------------------------------------------------
 
@@ -285,7 +304,9 @@ INSERT INTO `curso_asignaciones` (`id`, `curso_id`, `estudiante_id`, `asignado_p
 (29, 18, 75, 1, NULL, 'activo', '2026-02-05 23:48:14', NULL, NULL, '2026-02-05 23:48:17', '2026-02-05 23:48:17'),
 (30, 18, 76, 1, NULL, 'inactivo', '2026-02-05 23:48:14', NULL, NULL, '2026-02-05 23:48:19', '2026-03-12 22:43:58'),
 (31, 18, 46, 1, 45, 'activo', '2026-03-12 19:54:34', NULL, NULL, '2026-03-12 19:36:23', '2026-03-12 19:54:34'),
-(32, 13, 76, 1, 45, 'activo', '2026-03-12 22:44:08', NULL, NULL, '2026-03-12 22:44:08', '2026-03-12 22:44:08');
+(32, 13, 76, 1, 45, 'activo', '2026-03-12 22:44:08', NULL, NULL, '2026-03-12 22:44:08', '2026-03-12 22:44:08'),
+(34, 20, 36, 1, 77, 'activo', '2026-03-13 21:21:52', NULL, NULL, '2026-03-13 21:21:52', '2026-03-13 21:21:52'),
+(35, 20, 46, 1, 77, 'activo', '2026-03-13 21:23:08', NULL, NULL, '2026-03-13 21:23:08', '2026-03-13 21:23:08');
 
 -- --------------------------------------------------------
 
@@ -319,7 +340,9 @@ INSERT INTO `curso_estudiantes` (`id`, `curso_id`, `estudiante_id`, `fecha_inscr
 (40, 18, 76, '2026-02-05 23:48:14', 'inactivo', 0, NULL, '2026-02-05 23:48:19', '2026-02-05 23:48:19'),
 (43, 18, 46, '2026-03-12 20:58:12', 'activo', 0, '2026-03-12 20:58:12', '2026-03-12 20:58:12', '2026-03-12 20:58:12'),
 (44, 17, 46, '2026-03-12 20:58:17', 'activo', 0, '2026-03-12 20:58:17', '2026-03-12 20:58:17', '2026-03-12 20:58:17'),
-(45, 18, 36, '2026-03-12 21:01:34', 'inactivo', 0, '2026-03-12 21:01:34', '2026-03-12 21:01:34', '2026-03-12 21:01:34');
+(45, 18, 36, '2026-03-12 21:01:34', 'inactivo', 0, '2026-03-12 21:01:34', '2026-03-12 21:01:34', '2026-03-12 21:01:34'),
+(48, 20, 46, '2026-03-13 21:23:51', 'activo', 67, '2026-03-13 21:37:40', '2026-03-13 21:23:51', '2026-03-13 21:23:51'),
+(49, 20, 36, '2026-03-13 21:25:29', 'activo', 67, '2026-03-13 21:29:28', '2026-03-13 21:25:29', '2026-03-13 21:25:29');
 
 -- --------------------------------------------------------
 
@@ -347,7 +370,8 @@ CREATE TABLE `curso_foros` (
 
 INSERT INTO `curso_foros` (`id`, `curso_id`, `usuario_id`, `titulo`, `contenido`, `parent_id`, `es_anuncio`, `es_fijado`, `likes`, `created_at`, `updated_at`) VALUES
 (14, 17, 44, 'discutir', 'temas libres', NULL, 0, 1, 0, '2026-01-17 01:47:17', '2026-01-17 01:47:17'),
-(15, 18, 44, '¡Bienvenidos al hospital!', 'Nos complace iniciar con ustedes este proceso de inducción, en el cual conocerán los lineamientos, normas y procedimientos que orientan nuestra labor asistencial y académica. Este espacio busca facilitar su integración, fortalecer su desempeño y promover una atención en salud responsable, ética y de calidad. Les deseamos una experiencia formativa exitosa.\n\n\n', NULL, 1, 1, 0, '2026-01-22 21:24:01', '2026-01-22 21:24:01');
+(15, 18, 44, '¡Bienvenidos al hospital!', 'Nos complace iniciar con ustedes este proceso de inducción, en el cual conocerán los lineamientos, normas y procedimientos que orientan nuestra labor asistencial y académica. Este espacio busca facilitar su integración, fortalecer su desempeño y promover una atención en salud responsable, ética y de calidad. Les deseamos una experiencia formativa exitosa.\n\n\n', NULL, 1, 1, 0, '2026-01-22 21:24:01', '2026-01-22 21:24:01'),
+(17, 20, 44, 'c', 'c', NULL, 0, 1, 0, '2026-03-13 21:20:16', '2026-03-13 21:20:16');
 
 -- --------------------------------------------------------
 
@@ -409,7 +433,9 @@ INSERT INTO `curso_materiales` (`id`, `curso_id`, `titulo`, `descripcion`, `tipo
 (81, 18, '13. ATENCIÓN QUIRÚRGICA', '', 'video', NULL, NULL, NULL, NULL, 'https://view.genially.com/66df6e2bc9379e1c924c706d/interactive-content-atencion-quirurgica?authuser=0', 13, NULL, NULL, 1, 0.00, 3.00, 80, '2026-01-22 21:24:01', '2026-01-22 21:24:01'),
 (82, 18, '14. PROGRAMAS SOCIALES', '', 'video', NULL, NULL, NULL, NULL, 'https://view.genially.com/658580a378f80a0015b854ab/interactive-content-programas-sociales?authuser=0', 14, NULL, NULL, 1, 0.00, 3.00, 81, '2026-01-22 21:24:01', '2026-01-22 21:24:01'),
 (83, 18, '15. TRABAJO MIMHOS', '', 'video', NULL, NULL, NULL, NULL, 'https://view.genially.com/6585bd42899e6700159fe0be/interactive-content-trabajo-mimhos?authuser=0', 15, NULL, NULL, 1, 0.00, 3.00, 82, '2026-01-22 21:24:01', '2026-01-22 21:24:01'),
-(84, 18, '16. LACTANCIA MATERNA', '', 'video', NULL, NULL, NULL, NULL, 'https://view.genially.com/6585bc35fa7c870015622fd4/interactive-content-lactancia-materna?authuser=0', 16, NULL, NULL, 1, 0.00, 3.00, 83, '2026-01-22 21:24:01', '2026-01-22 21:24:01');
+(84, 18, '16. LACTANCIA MATERNA', '', 'video', NULL, NULL, NULL, NULL, 'https://view.genially.com/6585bc35fa7c870015622fd4/interactive-content-lactancia-materna?authuser=0', 16, NULL, NULL, 1, 0.00, 3.00, 83, '2026-01-22 21:24:01', '2026-01-22 21:24:01'),
+(87, 20, 'Mprueba1', 'solo es una prueba', 'documento', 'cursos/20/materiales/9OfEGipVwyBCJ1ULWkSXXAkyUbAd1FN6EzSrLnI0.pdf', 'Lili LLanos Orden.pdf', 'pdf', 52732, NULL, 1, NULL, NULL, 1, 30.00, 4.00, NULL, '2026-03-13 21:20:16', '2026-03-13 21:20:16'),
+(88, 20, 'Mprueba2', 'solo es una prueba', 'clase_en_linea', NULL, NULL, NULL, NULL, 'https://meet.google.com/cvt-ockg-utm', 2, '2026-03-01 11:09:00', '2026-03-31 11:09:00', 1, 70.00, 4.00, 87, '2026-03-13 21:20:16', '2026-03-13 21:20:16');
 
 -- --------------------------------------------------------
 
@@ -426,6 +452,16 @@ CREATE TABLE `curso_material_visto` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `curso_material_visto`
+--
+
+INSERT INTO `curso_material_visto` (`id`, `curso_id`, `material_id`, `user_id`, `visto_at`, `created_at`, `updated_at`) VALUES
+(47, 20, 87, 36, '2026-03-13 21:26:42', NULL, '2026-03-13 21:26:42'),
+(48, 20, 88, 36, '2026-03-13 21:30:27', NULL, '2026-03-13 21:30:27'),
+(49, 20, 87, 46, '2026-03-13 21:31:45', NULL, '2026-03-13 21:31:45'),
+(50, 20, 88, 46, '2026-03-13 21:40:00', NULL, '2026-03-13 21:40:00');
 
 -- --------------------------------------------------------
 
@@ -703,8 +739,13 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('3PngWJA4416xUzy9tEl0fhYGPWkgpyhTLbo0PJ3p', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiMWRGSXhXbGJPanFsY3pWUk5KMllRZklHM3FMVmhSdkRSZWFJVllQWCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjU0OiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL2FjYWRlbWljby9jb250cm9sLXBlZGFnb2dpY28iO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1773354346),
-('7Yl9VZrDbHqkT1cVKcTEvjI6Cyr2kPzM9KnTp6Xb', 36, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVUNiemZPWkxGWkNBa0xET1FhNzdoSW1RRVN1dEJ6bHF3cXNJbWwxTiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NTQ6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvYWNhZGVtaWNvL2N1cnNvcy1kaXNwb25pYmxlcyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjM2O30=', 1773337402);
+('bIKXInvXkmUX3evTwZx9g7SUSn0Je1RNzxtHUIA7', NULL, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoidkdLN1Rzbkh5SkdrQ01PSXRJVVgyVUp4WkdUYmQ4TGR1bXdVTW1nUyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEiO319', 1773431266),
+('Cy6SCleRDUQxiUGfOJokNXcmROj3HOUAOdTKZciz', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMzJQaDlKZ29GTFFURGYzMlk5UGttdTRwOEJxbm0walB4bng1ZThIYSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NTk6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvY29uZmlndXJhY2lvbi9lZGl0b3ItY2VydGlmaWNhZG9zIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1773431280),
+('diZYOK2uLKyQ7ZnLxyVRea9OSpPyiQDikoVIGjUH', 77, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiV0tFY2xtT1ZkS01GV005SHF0NnRUUkRYVkQ3cnRoMkxIUkVwRlNhTCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MTEwOiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL3RyYWNraW5nL29wZXJhdGlvbnM/ZGF0ZV9mcm9tPSZkYXRlX3RvPSZlbnRpdHlfdHlwZT0mb3BlcmF0aW9uX3R5cGU9JnNlYXJjaF91c2VyPXVubyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc3O30=', 1773422224),
+('EARArBTkKbCcRjqkzEZrIXJdlCooMXkZRdoIgol8', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiN3FNRm5CUDdNTUxUTFdGV0d6bFZwNDhaVEZ4ZTRRWk10THY0a2p6NCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NjA6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvYWNhZGVtaWNvL2N1cnNvLzIwP3RhYj1hY3RpdmlkYWRlcyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjQ2O30=', 1773420372),
+('gBx9vR5199X0gCGGalKp4a0UTxMI89PaKHwxHAqY', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTmdvcDhzVGZZZmg1amV2UkhMempWUThGUWdTRWtaOUxLSHVkbEo3NyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773413649),
+('Ui70j2GlVHwzmEYe1VCFCGjRw7KCwqqAcecNUiI3', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTEtST3J4ZHBFUlpsdWtkaGJBYmtYTlhBTHFXNGMxSVpnWjZMRTBYUyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773417067),
+('zsVtYm2tSo3uXZKjIAsbOKdQ0SHwGrEDOwbUgYF6', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiWFROZWY2b2JWbkY5QmFWdlU3SWJaOWc3c2VYSTRJM3JXNDFxRjExQSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773417239);
 
 -- --------------------------------------------------------
 
@@ -738,16 +779,17 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `apellido1`, `apellido2`, `email`, `phone`, `role`, `tipo_documento`, `numero_documento`, `servicio_area_id`, `vinculacion_contrato_id`, `sede_id`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'Carlos Jairton', 'Valderrama', 'Orobio', 'carjavalosistem@gmail.com', '302 5269287', 'Super Admin', 'DNI', '121424443', NULL, NULL, NULL, '2025-06-17 02:36:45', '$2y$12$EnOfSKid6Q0GxBR0ncZjde2okJWsrZIr999R7/gzJAEcAZJ2IIvPq', NULL, '2025-06-16 18:26:54', '2026-01-21 20:42:23'),
-(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Estudiante', 'Pasaporte', '6427785448', NULL, NULL, NULL, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'kkUHsDK3WYCRqj2Lk6JQGhfEHAR4MC5TXweEvzFUR8iuehCv7xoa5vfbbFww', '2025-06-17 02:17:36', '2026-02-03 21:43:57'),
+(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Estudiante', 'Pasaporte', '6427785448', NULL, NULL, NULL, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'y4ZWIxaM4kxAQhrzIJxDGDlTN11LoyxSquMCCRIQaeLBPAHnysLkcwLd54fS', '2025-06-17 02:17:36', '2026-03-13 21:29:28'),
 (37, 'Dos Estudiante', 'dos', 'dos', 'dos@estudiante.com', '+51987654323', 'Estudiante', 'Cédula', '1233321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$y1RMMw0/bqy4KgVa.L4DRetmOPVCm0ceI38zTioB0tbjlCRjjicYa', NULL, '2025-06-17 02:48:13', '2026-01-23 01:36:49'),
 (38, 'Usuario', 'Prueba', 'Verificado', 'test@example.com', '+51987654324', 'Estudiante', 'DNI', '87654321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$8RjSJS9V/WqEVYGKw8HQAuTI7G73FXCIcfbbCpK4sXUopD1dwyLCi', NULL, '2025-06-17 03:03:26', '2026-01-23 01:37:27'),
 (44, 'Jhon Andres', 'Carrillo', 'Bolaños', 'touma11913@gmail.com', '311 6306106', 'Operador', 'Cédula', '1143995780', NULL, NULL, NULL, '2025-12-12 18:00:34', '$2y$12$a8e/Y0JRjQieHsX2QgkUDertB9rhX/hSRx1m7XVpW8Xu6NGA.DdXy', 'QLPyS1gPoibKzWluPR9pge5TrlaGCqlENxxcOayq9iriFUIGGC265udoTN8Z', '2025-12-12 18:00:32', '2026-01-21 20:42:23'),
 (45, 'DocenteCurso', 'Prueba', 'Prueba', 'uno@docente.com', '+51987654326', 'Docente', 'Cédula', '987654321123', NULL, NULL, NULL, '2026-01-05 23:19:48', '$2y$12$MXkIdaF70ayAirlxuhBJie.8UqI.fo5gm0tXPW8b.KSOkY.m9iaWi', NULL, '2026-01-05 23:19:46', '2026-01-21 20:42:23'),
-(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Estudiante', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'Rlr701ReyqSAqOniW6LgFgQJpIqDfyjKPE6HjaquinJSTr1BqyWabvnnB85P', '2026-01-06 17:36:28', '2026-02-05 01:56:04'),
+(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Estudiante', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'LGjD9ITkgA2RjmsCh5FmjWLKBYdd8BTpl6ggds1J0c4ro6XQkOp9cfGyhhcW', '2026-01-06 17:36:28', '2026-03-13 21:37:40'),
 (63, 'Julanin', 'pacual', 'Prueba', 'carjavalo1@hotmail.com', '3002588545', 'Estudiante', 'Cédula', '36985214147', NULL, 1, 1, '2026-01-24 02:12:10', '$2y$12$GZd5Ndjp/jiIPSia67J.le7qhOU/QvF3BtXRJxjmSTur0MHwIHKBi', NULL, '2026-01-24 02:11:04', '2026-02-05 01:56:04'),
 (74, 'Cinco', 'estudiante', 'Cinco', 'cinco@estudiante.com', '30003252232', 'Estudiante', 'Cédula', '123123123', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$UzocY2Q84yz39A0b6nSK1OfliXrtev1nQ95zXIcwjCATkvVncfMYq', NULL, '2026-02-05 23:48:14', '2026-02-05 23:48:14'),
 (75, 'seis', 'estudiante', 'seis', 'seis@estudiante.com', '3152555363', 'Estudiante', 'Cédula', '555555555', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$YLMxY6I0DPt2ZF0KG8iMl.qi1AeEcpJhj3UwJ7Di0Lcxl1CmMKHOK', NULL, '2026-02-05 23:48:17', '2026-02-05 23:48:17'),
-(76, 'cuatro', 'estudiante', 'cuatro', 'cuatro@estudiante.com', '3123223536', 'Estudiante', 'Cédula', '321321321', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$JesjImtQK9y50B2Li7PRvOWOv6H5eHaJn4f.1aiargX7qWsZvwbse', NULL, '2026-02-05 23:48:19', '2026-02-05 23:48:19');
+(76, 'cuatro', 'estudiante', 'cuatro', 'cuatro@estudiante.com', '3123223536', 'Estudiante', 'Cédula', '321321321', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$JesjImtQK9y50B2Li7PRvOWOv6H5eHaJn4f.1aiargX7qWsZvwbse', NULL, '2026-02-05 23:48:19', '2026-02-05 23:48:19'),
+(77, 'docente', 'conocimiento', 'sabiduria', 'dos@docente.com', NULL, 'Docente', 'Cédula', '963852741', 9, 5, 1, '2026-03-13 13:19:27', '$2y$12$nVY67dZeHhZENsHa0b5L1OGfuxlusssU1w8jI3VoQxyjaVjiHmyGS', NULL, '2026-03-13 18:18:43', '2026-03-13 18:18:43');
 
 -- --------------------------------------------------------
 
@@ -987,7 +1029,16 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (395, 45, 'uno@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-12 20:56:50', '2026-03-12 20:56:50', '2026-03-12 20:56:50'),
 (396, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-12 20:57:49', '2026-03-12 20:57:49', '2026-03-12 20:57:49'),
 (397, 45, 'uno@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-12 20:58:39', '2026-03-12 20:58:39', '2026-03-12 20:58:39'),
-(398, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-12 20:59:22', '2026-03-12 20:59:22', '2026-03-12 20:59:22');
+(398, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-12 20:59:22', '2026-03-12 20:59:22', '2026-03-12 20:59:22'),
+(399, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 17:06:24', '2026-03-13 17:06:24', '2026-03-13 17:06:24'),
+(400, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 18:22:00', '2026-03-13 18:22:00', '2026-03-13 18:22:00'),
+(401, 77, 'dos@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:22:57', '2026-03-13 18:22:57', '2026-03-13 18:22:57'),
+(402, 77, 'dos@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 21:21:20', '2026-03-13 21:21:20', '2026-03-13 21:21:20'),
+(403, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 21:23:41', '2026-03-13 21:23:41', '2026-03-13 21:23:41'),
+(404, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 21:24:25', '2026-03-13 21:24:25', '2026-03-13 21:24:25'),
+(405, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 21:30:50', '2026-03-13 21:30:50', '2026-03-13 21:30:50'),
+(406, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:13:39', '2026-03-13 18:13:39', '2026-03-13 18:13:39'),
+(407, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:59:28', '2026-03-13 18:59:28', '2026-03-13 18:59:28');
 
 -- --------------------------------------------------------
 
@@ -1362,7 +1413,50 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (344, 1, 'create', 'Asignacion', 13, 'Asignación de curso \'Reanimación Cardiopulmonar(RCP)\' al estudiante: Uno Estudiante uno', '{\"estudiante_id\":36,\"estudiante_nombre\":\"Uno Estudiante uno\",\"curso_id\":13,\"curso_titulo\":\"Reanimaci\\u00f3n Cardiopulmonar(RCP)\",\"fecha_asignacion\":\"2026-03-12 16:42:30\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 21:42:30', '2026-03-12 21:42:30'),
 (345, 1, 'create', 'Asignacion', 17, 'Asignación de curso \'pagos\' al estudiante: Uno Estudiante uno', '{\"estudiante_id\":36,\"estudiante_nombre\":\"Uno Estudiante uno\",\"curso_id\":17,\"curso_titulo\":\"pagos\",\"fecha_asignacion\":\"2026-03-12 17:03:45\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 22:03:45', '2026-03-12 22:03:45'),
 (346, 1, 'create', 'Asignacion', 13, 'Asignación de curso \'Reanimación Cardiopulmonar(RCP)\' al estudiante: Uno Estudiante uno', '{\"estudiante_id\":36,\"estudiante_nombre\":\"Uno Estudiante uno\",\"curso_id\":13,\"curso_titulo\":\"Reanimaci\\u00f3n Cardiopulmonar(RCP)\",\"fecha_asignacion\":\"2026-03-12 17:03:45\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 22:03:45', '2026-03-12 22:03:45'),
-(347, 1, 'create', 'Asignacion', 13, 'Asignación de curso \'Reanimación Cardiopulmonar(RCP)\' al estudiante: cuatro estudiante', '{\"estudiante_id\":76,\"estudiante_nombre\":\"cuatro estudiante\",\"curso_id\":13,\"curso_titulo\":\"Reanimaci\\u00f3n Cardiopulmonar(RCP)\",\"fecha_asignacion\":\"2026-03-12 17:44:08\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 22:44:08', '2026-03-12 22:44:08');
+(347, 1, 'create', 'Asignacion', 13, 'Asignación de curso \'Reanimación Cardiopulmonar(RCP)\' al estudiante: cuatro estudiante', '{\"estudiante_id\":76,\"estudiante_nombre\":\"cuatro estudiante\",\"curso_id\":13,\"curso_titulo\":\"Reanimaci\\u00f3n Cardiopulmonar(RCP)\",\"fecha_asignacion\":\"2026-03-12 17:44:08\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-12 22:44:08', '2026-03-12 22:44:08'),
+(348, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 12:06:24\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 17:06:24', '2026-03-13 17:06:24'),
+(349, 1, 'create', 'Asignacion', 19, 'Asignación de curso \'Cprueba1\' al estudiante: Uno Estudiante uno', '{\"estudiante_id\":36,\"estudiante_nombre\":\"Uno Estudiante uno\",\"curso_id\":19,\"curso_titulo\":\"Cprueba1\",\"fecha_asignacion\":\"2026-03-13 13:21:23\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:21:23', '2026-03-13 18:21:23'),
+(350, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-13 13:22:00\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:22:00', '2026-03-13 18:22:00'),
+(351, 36, 'enroll', 'Curso', 19, 'Inscripción al curso: Cprueba1', '{\"curso_titulo\":\"Cprueba1\",\"fecha_inscripcion\":\"2026-03-13 13:22:10\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:22:10', '2026-03-13 18:22:10'),
+(352, 77, 'login', 'Session', NULL, 'Inicio de sesión: dos@docente.com', '{\"email\":\"dos@docente.com\",\"login_time\":\"2026-03-13 13:22:57\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:22:57', '2026-03-13 18:22:57'),
+(353, 36, 'submit', 'Actividad', 39, 'Entrega de actividad: Aprueba', '{\"actividad_titulo\":\"Aprueba\",\"curso_id\":19,\"fecha_entrega\":\"2026-03-13 13:24:53\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:24:53', '2026-03-13 18:24:53'),
+(354, 36, 'view', 'Material', 85, 'Visualización de material: Mprueba', '{\"material_titulo\":\"Mprueba\",\"curso_id\":19,\"fecha_visualizacion\":\"2026-03-13 13:25:07\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:25:07', '2026-03-13 18:25:07'),
+(355, 36, 'view', 'Material', 86, 'Visualización de material: Mprueba2', '{\"material_titulo\":\"Mprueba2\",\"curso_id\":19,\"fecha_visualizacion\":\"2026-03-13 13:27:54\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:27:54', '2026-03-13 18:27:54'),
+(356, 36, 'submit', 'Quiz', 40, 'Resolución de quiz: aprueba2 - Calificación: 0', '{\"quiz_titulo\":\"aprueba2\",\"calificacion\":0,\"curso_id\":19,\"fecha_resolucion\":\"2026-03-13 13:53:30\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 18:53:30', '2026-03-13 18:53:30'),
+(357, 36, 'submit', 'Quiz', 40, 'Resolución de quiz: aprueba2 - Calificación: 0', '{\"quiz_titulo\":\"aprueba2\",\"calificacion\":0,\"curso_id\":19,\"fecha_resolucion\":\"2026-03-13 15:10:56\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 20:10:56', '2026-03-13 20:10:56'),
+(358, 36, 'submit', 'Quiz', 40, 'Resolución de quiz: aprueba2 - Calificación: 3', '{\"quiz_titulo\":\"aprueba2\",\"calificacion\":3,\"curso_id\":19,\"fecha_resolucion\":\"2026-03-13 15:21:19\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 20:21:19', '2026-03-13 20:21:19'),
+(359, 36, 'submit', 'Quiz', 40, 'Resolución de quiz: aprueba2 - Calificación: 3', '{\"quiz_titulo\":\"aprueba2\",\"calificacion\":3,\"curso_id\":19,\"fecha_resolucion\":\"2026-03-13 15:28:52\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 20:28:52', '2026-03-13 20:28:52'),
+(360, 36, 'submit', 'Quiz', 40, 'Resolución de quiz: aprueba2 - Calificación: 3', '{\"quiz_titulo\":\"aprueba2\",\"calificacion\":3,\"curso_id\":19,\"fecha_resolucion\":\"2026-03-13 15:38:49\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 20:38:49', '2026-03-13 20:38:49'),
+(361, 77, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 16:05:46\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 21:05:46', '2026-03-13 21:05:46'),
+(362, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 16:05:55\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:05:55', '2026-03-13 21:05:55'),
+(363, 77, 'login', 'Session', NULL, 'Inicio de sesión: dos@docente.com', '{\"email\":\"dos@docente.com\",\"login_time\":\"2026-03-13 16:21:20\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 21:21:20', '2026-03-13 21:21:20'),
+(364, 1, 'create', 'Asignacion', 20, 'Asignación de curso \'Cprueba1\' al estudiante: Uno Estudiante uno', '{\"estudiante_id\":36,\"estudiante_nombre\":\"Uno Estudiante uno\",\"curso_id\":20,\"curso_titulo\":\"Cprueba1\",\"fecha_asignacion\":\"2026-03-13 16:21:52\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 21:21:52', '2026-03-13 21:21:52'),
+(365, 1, 'create', 'Asignacion', 20, 'Asignación de curso \'Cprueba1\' al estudiante: Tres Estudiante Estudiante', '{\"estudiante_id\":46,\"estudiante_nombre\":\"Tres Estudiante Estudiante\",\"curso_id\":20,\"curso_titulo\":\"Cprueba1\",\"fecha_asignacion\":\"2026-03-13 16:23:08\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 21:23:08', '2026-03-13 21:23:08'),
+(366, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-13 16:23:41\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:23:41', '2026-03-13 21:23:41'),
+(367, 46, 'enroll', 'Curso', 20, 'Inscripción al curso: Cprueba1', '{\"curso_titulo\":\"Cprueba1\",\"fecha_inscripcion\":\"2026-03-13 16:23:51\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:23:51', '2026-03-13 21:23:51'),
+(368, 46, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 16:24:17\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:24:17', '2026-03-13 21:24:17'),
+(369, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-13 16:24:25\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:24:25', '2026-03-13 21:24:25'),
+(370, 36, 'enroll', 'Curso', 20, 'Inscripción al curso: Cprueba1', '{\"curso_titulo\":\"Cprueba1\",\"fecha_inscripcion\":\"2026-03-13 16:25:29\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:25:29', '2026-03-13 21:25:29'),
+(371, 36, 'submit', 'Actividad', 42, 'Entrega de actividad: ATprueba1', '{\"actividad_titulo\":\"ATprueba1\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:26:35\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:26:35', '2026-03-13 21:26:35'),
+(372, 36, 'view', 'Material', 87, 'Visualización de material: Mprueba1', '{\"material_titulo\":\"Mprueba1\",\"curso_id\":20,\"fecha_visualizacion\":\"2026-03-13 16:26:42\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:26:42', '2026-03-13 21:26:42'),
+(373, 36, 'submit', 'Actividad', 43, 'Entrega de actividad: ATprueba2', '{\"actividad_titulo\":\"ATprueba2\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:28:04\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:28:04', '2026-03-13 21:28:04'),
+(374, 36, 'submit', 'Quiz', 44, 'Resolución de quiz: AQprueba - Calificación: 5', '{\"quiz_titulo\":\"AQprueba\",\"calificacion\":5,\"curso_id\":20,\"fecha_resolucion\":\"2026-03-13 16:29:28\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:29:28', '2026-03-13 21:29:28'),
+(375, 36, 'submit', 'Actividad', 45, 'Entrega de actividad: ATprueba3', '{\"actividad_titulo\":\"ATprueba3\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:30:17\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:30:17', '2026-03-13 21:30:17'),
+(376, 36, 'view', 'Material', 88, 'Visualización de material: Mprueba2', '{\"material_titulo\":\"Mprueba2\",\"curso_id\":20,\"fecha_visualizacion\":\"2026-03-13 16:30:27\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:30:27', '2026-03-13 21:30:27'),
+(377, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 16:30:46\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:30:46', '2026-03-13 21:30:46'),
+(378, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-13 16:30:50\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:30:50', '2026-03-13 21:30:50'),
+(379, 46, 'submit', 'Actividad', 42, 'Entrega de actividad: ATprueba1', '{\"actividad_titulo\":\"ATprueba1\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:31:16\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:31:16', '2026-03-13 21:31:16'),
+(380, 46, 'submit', 'Actividad', 43, 'Entrega de actividad: ATprueba2', '{\"actividad_titulo\":\"ATprueba2\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:31:37\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:31:37', '2026-03-13 21:31:37'),
+(381, 46, 'view', 'Material', 87, 'Visualización de material: Mprueba1', '{\"material_titulo\":\"Mprueba1\",\"curso_id\":20,\"fecha_visualizacion\":\"2026-03-13 16:31:45\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:31:45', '2026-03-13 21:31:45'),
+(382, 46, 'submit', 'Quiz', 44, 'Resolución de quiz: AQprueba - Calificación: 0', '{\"quiz_titulo\":\"AQprueba\",\"calificacion\":0,\"curso_id\":20,\"fecha_resolucion\":\"2026-03-13 16:32:55\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:32:55', '2026-03-13 21:32:55'),
+(383, 46, 'submit', 'Quiz', 44, 'Resolución de quiz: AQprueba - Calificación: 0.5', '{\"quiz_titulo\":\"AQprueba\",\"calificacion\":0.5,\"curso_id\":20,\"fecha_resolucion\":\"2026-03-13 16:34:19\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:34:19', '2026-03-13 21:34:19'),
+(384, 46, 'submit', 'Quiz', 44, 'Resolución de quiz: AQprueba - Calificación: 2.92', '{\"quiz_titulo\":\"AQprueba\",\"calificacion\":2.92,\"curso_id\":20,\"fecha_resolucion\":\"2026-03-13 16:37:40\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:37:40', '2026-03-13 21:37:40'),
+(385, 46, 'submit', 'Actividad', 45, 'Entrega de actividad: ATprueba3', '{\"actividad_titulo\":\"ATprueba3\",\"curso_id\":20,\"fecha_entrega\":\"2026-03-13 16:39:47\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:39:47', '2026-03-13 21:39:47'),
+(386, 46, 'view', 'Material', 88, 'Visualización de material: Mprueba2', '{\"material_titulo\":\"Mprueba2\",\"curso_id\":20,\"fecha_visualizacion\":\"2026-03-13 16:40:00\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-13 21:40:00', '2026-03-13 21:40:00'),
+(387, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 13:13:24\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:13:24', '2026-03-13 18:13:24'),
+(388, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 13:13:39\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:13:39', '2026-03-13 18:13:39'),
+(389, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 13:58:36\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:58:36', '2026-03-13 18:58:36'),
+(390, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 13:59:28\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:59:28', '2026-03-13 18:59:28');
 
 -- --------------------------------------------------------
 
@@ -1656,19 +1750,19 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `cursos`
 --
 ALTER TABLE `cursos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_actividades`
 --
 ALTER TABLE `curso_actividades`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_actividad_entrega`
 --
 ALTER TABLE `curso_actividad_entrega`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_actividad_entregas`
@@ -1680,31 +1774,31 @@ ALTER TABLE `curso_actividad_entregas`
 -- AUTO_INCREMENT de la tabla `curso_asignaciones`
 --
 ALTER TABLE `curso_asignaciones`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_estudiantes`
 --
 ALTER TABLE `curso_estudiantes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_foros`
 --
 ALTER TABLE `curso_foros`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_materiales`
 --
 ALTER TABLE `curso_materiales`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT de la tabla `curso_material_visto`
 --
 ALTER TABLE `curso_material_visto`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT de la tabla `failed_jobs`
@@ -1752,19 +1846,19 @@ ALTER TABLE `servicios_areas`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=399;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=408;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=348;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=391;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`

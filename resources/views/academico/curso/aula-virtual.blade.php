@@ -111,6 +111,13 @@
                         </div>
                     </div>
                     <small class="text-muted">Tu progreso en el curso</small>
+                    @if($resumen['aprobado'])
+                    <div class="mt-3 text-center">
+                        <a href="{{ route('academico.curso.certificado', $curso->id) }}" target="_blank" class="btn btn-success btn-sm btn-block">
+                            <i class="fas fa-certificate"></i> Descargar Certificado
+                        </a>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -1023,3 +1030,4 @@ function mostrarResultados(response) {
     }
 </style>
 @stop
+

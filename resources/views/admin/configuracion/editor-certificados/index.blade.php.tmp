@@ -251,7 +251,7 @@
                     {{-- Logo HUV --}}
                     <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
                          id="logoHUV"
-                         style="top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+                        style="z-index:20;top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
                         <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
                         <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo HUV</span>
                     </div>
@@ -259,7 +259,7 @@
                     {{-- Logo Institución --}}
                     <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
                          id="logoInstitucion"
-                         style="top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+                        style="z-index:20;top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
                         <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
                         <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo Institución</span>
                     </div>
@@ -511,17 +511,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const el = document.getElementById('logoHUV');
-            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            let el = document.getElementById('logoHUV');
+            if(!el) {
+                el = document.createElement('div');
+                el.id = 'logoHUV';
+                el.className = 'draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded';
+                el.style.cssText = 'z-index:20;top:6%;left:8%;width:' + (document.getElementById('logo1Ancho')?.value || 160) + 'px;height:96px;cursor:move;user-select:none;';
+                document.getElementById('certificate').appendChild(el);
+            }
+            el.style.border = 'none';
+            el.style.background = 'transparent';
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none;">';
             el.classList.add('draggable-element');
             makeDraggable(el);
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
         };
         reader.readAsDataURL(file);
     });
@@ -531,17 +533,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const el = document.getElementById('logoInstitucion');
-            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            let el = document.getElementById('logoInstitucion');
+            if(!el) {
+                el = document.createElement('div');
+                el.id = 'logoInstitucion';
+                el.className = 'draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded';
+                el.style.cssText = 'z-index:20;top:6%;right:8%;width:' + (document.getElementById('logo2Ancho')?.value || 160) + 'px;height:96px;cursor:move;user-select:none;';
+                document.getElementById('certificate').appendChild(el);
+            }
+            el.style.border = 'none';
+            el.style.background = 'transparent';
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none;">';
             el.classList.add('draggable-element');
             makeDraggable(el);
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
         };
         reader.readAsDataURL(file);
     });
@@ -554,8 +558,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('logoInstitucion').style.width = this.value + 'px';
     });
 
+    // ===== Men� contextual para eliminar elementos (Configuraci�n global) =====
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'custom-context-menu';
+    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
+    document.body.appendChild(contextMenu);
+
+    let elementoSeleccionado = null;
+
     // ===== Drag & drop para elementos del certificado =====
     function makeDraggable(el) {
+        el.oncontextmenu = function(e) {
+            e.preventDefault();
+            elementoSeleccionado = el;
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+        };
+
         el.onmousedown = function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
             let shiftX = e.clientX - el.getBoundingClientRect().left;
@@ -616,64 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const certEl = document.getElementById('certificate');
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Vista Previa Certificado</title>');
-        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;aspect-ratio:1.414/1;background-size:cover;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
-        win.document.write('</head><body>');
-        win.document.write('<div class="cert">' + certEl.innerHTML + '</div>');
-        win.document.write('</body></html>');
-        win.document.close();
-    });
-
-    // ===== Generar certificado (print) =====
-    document.getElementById('btnGenerarCertificado').addEventListener('click', function() {
-        const certEl = document.getElementById('certificate');
-        const win = window.open('', '_blank');
-        win.document.write('<html><head><title>Certificado</title>');
-        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:cover;background-position:center;position:relative;}</style>');
-        win.document.write('</head><body>');
-        win.document.write('<div class="cert" style="background-image:' + certEl.style.backgroundImage + '">' + certEl.innerHTML + '</div>');
-        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},500);</scr' + 'ipt>');
-        win.document.write('</body></html>');
-        win.document.close();
-    });
-
-    // Inicializar
-    actualizarCertificado();
-
-    // ===== Menú contextual para eliminar elementos =====
-    // Crear menú contextual
-    const contextMenu = document.createElement('div');
-    contextMenu.className = 'custom-context-menu';
-    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
-    document.body.appendChild(contextMenu);
-
-    let elementoSeleccionado = null;
-
-    // Mostrar menú contextual al hacer clic derecho en cualquier draggable
-    function applyContextMenuToAll() {
-        document.querySelectorAll('.draggable-element').forEach(function(el) {
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
-        });
-    }
-    applyContextMenuToAll();
-    // Permitir que los nuevos elementos también tengan menú contextual
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    observer.disconnect();
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    // Reaplicar menú contextual cuando haya cambios
-    observer.disconnect();
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    observer.takeRecords();
-    applyContextMenuToAll();
-
-    // Ocultar menú contextual al hacer clic fuera
+    // Ocultar men� contextual al hacer clic fuera
     document.addEventListener('click', function(e) {
         if (!contextMenu.contains(e.target)) {
             contextMenu.style.display = 'none';
@@ -691,4 +654,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @stop
-

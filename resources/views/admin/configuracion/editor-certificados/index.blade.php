@@ -1,4 +1,4 @@
-﻿@extends('adminlte::page')
+@extends('adminlte::page')
 
 @section('title', 'Editor de Certificados')
 
@@ -7,12 +7,12 @@
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1><i class="fas fa-certificate"></i> Editor de Certificados</h1>
-                <p class="text-muted">DiseÃ±e y genere certificados personalizados para los participantes de los cursos.</p>
+                <p class="text-muted">Diseñe y genere certificados personalizados para los participantes de los cursos.</p>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="#">ConfiguraciÃ³n</a></li>
+                    <li class="breadcrumb-item"><a href="#">Configuración</a></li>
                     <li class="breadcrumb-item active">Editor de Certificados</li>
                 </ol>
             </div>
@@ -34,6 +34,17 @@
             </div>
         </div>
         <div class="d-flex align-items-center">
+            @if(isset($plantillas) && count($plantillas) > 0)
+            <select id="selectPlantilla" class="form-control form-control-sm mr-2" style="width: 150px;">
+                <option value="">-- Cargar --</option>
+                @foreach($plantillas as $plantilla)
+                    <option value="{{ $plantilla->id }}">{{ $plantilla->nombre }}</option>
+                @endforeach
+            </select>
+            @endif
+            <button class="btn btn-outline-success btn-sm mr-2" id="btnGuardarPlantilla" data-toggle="modal" data-target="#modalGuardarPlantilla">
+                <i class="fas fa-save mr-1"></i> Guardar Plantilla
+            </button>
             <button class="btn btn-outline-secondary btn-sm mr-2" id="btnVistaPrevia">
                 <i class="fas fa-eye mr-1"></i> Vista Previa
             </button>
@@ -44,13 +55,13 @@
     </div>
 
     <div class="row" style="min-height: calc(100vh - 250px);">
-        {{-- Panel lateral izquierdo de configuraciÃ³n --}}
+        {{-- Panel lateral izquierdo de configuración --}}
         <div class="col-md-4 col-lg-3">
             <div class="card card-outline card-primary" style="max-height: calc(100vh - 250px); overflow-y: auto;">
                 <div class="card-body p-3" style="font-family: 'Inter', sans-serif;">
                     <div class="space-y-4">
 
-                        {{-- SelecciÃ³n de usuario --}}
+                        {{-- Selección de usuario --}}
                         <div class="mb-4">
                             <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">
                                 <i class="fas fa-user mr-1"></i> Seleccionar Participante
@@ -69,7 +80,7 @@
                             </select>
                         </div>
 
-                        {{-- SelecciÃ³n de curso --}}
+                        {{-- Selección de curso --}}
                         <div class="mb-4">
                             <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">
                                 <i class="fas fa-book-open mr-1"></i> Seleccionar Curso
@@ -138,10 +149,10 @@
                             </div>
                         </div>
 
-                        {{-- IdentificaciÃ³n --}}
+                        {{-- Identificación --}}
                         <div class="mb-4">
                             <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">
-                                <i class="fas fa-id-card mr-1"></i> IdentificaciÃ³n
+                                <i class="fas fa-id-card mr-1"></i> Identificación
                             </h6>
                             <div class="row mt-2">
                                 <div class="col-6 mb-2">
@@ -150,11 +161,11 @@
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">1er Apellido</label>
-                                    <input type="text" class="form-control form-control-sm" id="inputApellido1" placeholder="PÃ©rez" readonly>
+                                    <input type="text" class="form-control form-control-sm" id="inputApellido1" placeholder="Pérez" readonly>
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">2do Apellido</label>
-                                    <input type="text" class="form-control form-control-sm" id="inputApellido2" placeholder="GarcÃ­a" readonly>
+                                    <input type="text" class="form-control form-control-sm" id="inputApellido2" placeholder="García" readonly>
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">Documento</label>
@@ -170,10 +181,10 @@
                             </h6>
                             <div class="mt-2">
                                 <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">Nombre del Curso</label>
-                                <input type="text" class="form-control form-control-sm mb-2" id="inputCursoNombre" placeholder="Seminario de Urgencias MÃ©dicas" readonly>
+                                <input type="text" class="form-control form-control-sm mb-2" id="inputCursoNombre" placeholder="Seminario de Urgencias Médicas" readonly>
 
                                 <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">Detalle Adicional</label>
-                                <textarea class="form-control form-control-sm mb-2" id="inputDetalle" rows="2" placeholder="En calidad de asistente con menciÃ³n..."></textarea>
+                                <textarea class="form-control form-control-sm mb-2" id="inputDetalle" rows="2" placeholder="En calidad de asistente con mención..."></textarea>
 
                                 <label class="text-muted text-uppercase" style="font-size:9px;font-weight:700;">Intensidad Horaria</label>
                                 <input type="number" class="form-control form-control-sm mb-2" id="inputHoras" placeholder="40" readonly>
@@ -209,7 +220,7 @@
                         <div class="mb-3 pt-3 border-top">
                             <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">Estilo Visual</h6>
                             <div class="d-flex justify-content-between align-items-center mt-2">
-                                <span class="text-muted" style="font-size:12px;">TamaÃ±o TipografÃ­a</span>
+                                <span class="text-muted" style="font-size:12px;">Tamaño Tipografía</span>
                                 <span class="font-weight-bold" style="font-size:12px;color:#1e3a8a;" id="fontSizeLabel">24px</span>
                             </div>
                             <input type="range" class="custom-range mt-1" min="12" max="64" value="24" id="fontSizeRange">
@@ -241,7 +252,7 @@
                     </button>
                 </div>
                 <span class="badge badge-light text-uppercase font-weight-bold shadow-sm" style="letter-spacing:2px;font-size:10px;">
-                    Modo EdiciÃ³n Capas
+                    Modo Edición Capas
                 </span>
             </div>
 
@@ -251,17 +262,17 @@
                     {{-- Logo HUV --}}
                     <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
                          id="logoHUV"
-                         style="top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+                        style="z-index:20;top:6%;left:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
                         <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
                         <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo HUV</span>
                     </div>
 
-                    {{-- Logo InstituciÃ³n --}}
+                    {{-- Logo Institución --}}
                     <div class="draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded"
                          id="logoInstitucion"
-                         style="top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
+                        style="z-index:20;top:6%;right:8%;width:160px;height:96px;border:2px dashed #94a3b8;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);cursor:move;user-select:none;">
                         <i class="fas fa-plus-circle text-muted mb-1" style="font-size:20px;"></i>
-                        <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo InstituciÃ³n</span>
+                        <span class="text-muted text-uppercase font-weight-bold" style="font-size:9px;">Logotipo Institución</span>
                     </div>
 
                     {{-- Contenido central del certificado --}}
@@ -269,7 +280,7 @@
 
                         <div class="draggable-element mb-2 px-3 py-2">
                             <h2 class="text-uppercase font-weight-bold" style="color:#1e3a8a;font-size:16px;letter-spacing:4px;">El Hospital Universitario del Valle</h2>
-                            <p class="text-muted font-italic" style="font-size:13px;">"Evaristo GarcÃ­a" E.S.E.</p>
+                            <p class="text-muted font-italic" style="font-size:13px;">"Evaristo García" E.S.E.</p>
                         </div>
 
                         <div class="draggable-element my-3">
@@ -284,9 +295,9 @@
 
                         <div class="draggable-element mb-5" style="max-width:640px;">
                             <p class="text-secondary" style="line-height:1.7;font-size:14px;padding:0 40px;">
-                                Por haber participado y aprobado satisfactoriamente las actividades acadÃ©micas del curso
+                                Por haber participado y aprobado satisfactoriamente las actividades académicas del curso
                                 <span class="font-weight-bold font-italic" style="color:#1e3a8a;" id="certCursoNombre">NOMBRE DEL CURSO</span>, con una intensidad horaria de
-                                <span class="font-weight-bold" id="certHoras">40</span> horas cronolÃ³gicas, desarrollado bajo la modalidad presencial en las instalaciones del hospital.
+                                <span class="font-weight-bold" id="certHoras">40</span> horas cronológicas, desarrollado bajo la modalidad presencial en las instalaciones del hospital.
                             </p>
                         </div>
 
@@ -305,12 +316,12 @@
                         </div>
                     </div>
 
-                    {{-- Pie de pÃ¡gina --}}
-                        {{-- Pie de pÃ¡gina (eliminado por solicitud) --}}
+                    {{-- Pie de página --}}
+                        {{-- Pie de página (eliminado por solicitud) --}}
 
                     {{-- Marca lateral --}}
                     <div class="position-absolute" style="right:24px;top:50%;transform:rotate(-90deg);transform-origin:right center;">
-                        <span class="text-uppercase font-weight-bold" style="font-size:8px;color:#cbd5e1;letter-spacing:4px;">CertificaciÃ³n AcadÃ©mica V3.0 - 2024</span>
+                        <span class="text-uppercase font-weight-bold" style="font-size:8px;color:#cbd5e1;letter-spacing:4px;">Certificación Académica V3.0 - 2024</span>
                     </div>
                 </div>
             </div>
@@ -319,7 +330,7 @@
             <div class="d-flex align-items-center bg-white rounded-pill shadow-sm px-4 py-2 mt-3 mx-auto" style="max-width:600px;">
                 <i class="fas fa-info-circle mr-2" style="color:#1e3a8a;"></i>
                 <p class="text-muted mb-0" style="font-size:11px;">
-                    Todos los elementos (logos y textos) se pueden arrastrar para ajustar su posiciÃ³n sobre el fondo.
+                    Todos los elementos (logos y textos) se pueden arrastrar para ajustar su posición sobre el fondo.
                 </p>
             </div>
         </div>
@@ -341,10 +352,10 @@
     .certificate-canvas {
         aspect-ratio: unset;
         width: var(--cert-width, 960px);
-        height: var(--cert-height, 680px);
+        min-height: var(--cert-height, 680px);
         max-width: 100%;
-        max-height: 100vh;
-        background-size: cover;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
         background-position: center;
         position: relative;
     }
@@ -378,7 +389,7 @@
     .custom-range::-webkit-slider-thumb {
         background: #1e3a8a;
     }
-    /* MenÃº contextual personalizado */
+    /* Menú contextual personalizado */
     .custom-context-menu {
         position: absolute;
         z-index: 9999;
@@ -401,13 +412,43 @@
         background: #e2e8f0;
     }
 </style>
+
+<!-- Modal para Guardar Plantilla -->
+<div class="modal fade" id="modalGuardarPlantilla" tabindex="-1" role="dialog" aria-labelledby="modalGuardarLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{{ route('configuracion.editor-certificados.store') }}" method="POST" id="formGuardarPlantilla">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalGuardarLabel">Guardar Plantilla de Certificado</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="nombre_plantilla">Nombre de la plantilla</label>
+            <input type="text" class="form-control" id="nombre_plantilla" name="nombre" required placeholder="Ej: Certificado de Aprobación 2026">
+          </div>
+          <input type="hidden" name="html_content" id="html_content_input">
+          <input type="hidden" name="fondo_base64" id="fondo_base64_input">
+          <input type="hidden" name="elementos_json" id="elementos_json_input">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitPlantilla">Guardar Plantilla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ===== Meses en espaÃ±ol para formateo =====
+    // ===== Meses en español para formateo =====
     const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
     function formatearFecha(dateStr) {
@@ -419,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return d + ' de ' + meses[m] + ' de ' + y;
     }
 
-    // ===== SelecciÃ³n de usuario â†’ llena campos de identidad =====
+    // ===== Selección de usuario → llena campos de identidad =====
     const selectUsuario = document.getElementById('selectUsuario');
     selectUsuario.addEventListener('change', function() {
         const opt = this.options[this.selectedIndex];
@@ -438,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarCertificado();
     });
 
-    // ===== SelecciÃ³n de curso â†’ llena campos de contenido =====
+    // ===== Selección de curso → llena campos de contenido =====
     const selectCurso = document.getElementById('selectCurso');
     selectCurso.addEventListener('change', function() {
         const opt = this.options[this.selectedIndex];
@@ -486,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (el) el.addEventListener('input', actualizarCertificado);
     });
 
-    // ===== TamaÃ±o de tipografÃ­a =====
+    // ===== Tamaño de tipografía =====
     const fontRange = document.getElementById('fontSizeRange');
     const fontLabel = document.getElementById('fontSizeLabel');
     fontRange.addEventListener('input', function() {
@@ -511,17 +552,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const el = document.getElementById('logoHUV');
-            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            let el = document.getElementById('logoHUV');
+            if(!el) {
+                el = document.createElement('div');
+                el.id = 'logoHUV';
+                el.className = 'draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded';
+                el.style.cssText = 'z-index:20;top:6%;left:8%;width:' + (document.getElementById('logo1Ancho')?.value || 160) + 'px;height:96px;cursor:move;user-select:none;';
+                document.getElementById('certificate').appendChild(el);
+            }
+            el.style.border = 'none';
+            el.style.background = 'transparent';
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none;">';
             el.classList.add('draggable-element');
             makeDraggable(el);
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
         };
         reader.readAsDataURL(file);
     });
@@ -531,33 +574,58 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const el = document.getElementById('logoInstitucion');
-            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+            let el = document.getElementById('logoInstitucion');
+            if(!el) {
+                el = document.createElement('div');
+                el.id = 'logoInstitucion';
+                el.className = 'draggable-element position-absolute d-flex flex-column align-items-center justify-content-center text-center rounded';
+                el.style.cssText = 'z-index:20;top:6%;right:8%;width:' + (document.getElementById('logo2Ancho')?.value || 160) + 'px;height:96px;cursor:move;user-select:none;';
+                document.getElementById('certificate').appendChild(el);
+            }
+            el.style.border = 'none';
+            el.style.background = 'transparent';
+            el.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none;">';
             el.classList.add('draggable-element');
             makeDraggable(el);
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
         };
         reader.readAsDataURL(file);
     });
 
     // ===== Ancho de logotipos =====
     document.getElementById('logo1Ancho').addEventListener('input', function() {
-        document.getElementById('logoHUV').style.width = this.value + 'px';
+        const logo = document.getElementById('logoHUV');
+        if(logo) logo.style.width = this.value + 'px';
     });
     document.getElementById('logo2Ancho').addEventListener('input', function() {
-        document.getElementById('logoInstitucion').style.width = this.value + 'px';
+        const logo = document.getElementById('logoInstitucion');
+        if(logo) logo.style.width = this.value + 'px';
     });
+
+    // ===== Men� contextual para eliminar elementos (Configuraci�n global) =====
+    const contextMenu = document.createElement('div');
+    contextMenu.className = 'custom-context-menu';
+    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
+    document.body.appendChild(contextMenu);
+
+    let elementoSeleccionado = null;
 
     // ===== Drag & drop para elementos del certificado =====
     function makeDraggable(el) {
+        el.oncontextmenu = function(e) {
+            e.preventDefault();
+            elementoSeleccionado = el;
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+        };
+
         el.onmousedown = function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            
+            // Guardar el z-index original para no perder capas al soltar
+            let originalZIndex = el.style.zIndex || window.getComputedStyle(el).zIndex;
+            if (originalZIndex === 'auto' || originalZIndex === '') originalZIndex = 20;
+
             let shiftX = e.clientX - el.getBoundingClientRect().left;
             let shiftY = e.clientY - el.getBoundingClientRect().top;
             el.style.position = 'absolute';
@@ -579,7 +647,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.onmouseup = function() {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.onmouseup = null;
-                el.style.zIndex = '';
+                // Restaurar el z-index en vez de dejarlo vacío para evitar el bloqueo del div principal
+                el.style.zIndex = originalZIndex;
             };
             e.preventDefault();
         };
@@ -591,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     applyDraggableToAll();
-    // Permitir que los nuevos elementos tambiÃ©n sean movibles
+    // Permitir que los nuevos elementos también sean movibles
     const observer = new MutationObserver(applyDraggableToAll);
     observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
 
@@ -610,14 +679,62 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('certificate').style.transform = 'scale(' + (zoomLevel / 100) + ')';
         document.getElementById('certificate').style.transformOrigin = 'top center';
     }
+      // ===== Guardar Plantilla (Modal) =====
+      document.getElementById('btnGuardarPlantilla').addEventListener('click', function() {
+          const certEl = document.getElementById('certificate');
+          const htmlContent = certEl.innerHTML;
+          let base64Bg = certEl.style.backgroundImage.slice(4, -1).replace(/"/g, "");
+          
+          let elementos = [];
+          document.querySelectorAll('.draggable-element').forEach(el => {
+              elementos.push({
+                  id: el.id,
+                  type: el.classList.contains('text-element') ? 'text' : 'image',
+                  top: el.style.top,
+                  left: el.style.left,
+                  width: el.style.width || 'auto',
+                  height: el.style.height || 'auto',
+                  content: el.classList.contains('text-element') ? el.innerHTML : el.querySelector('img')?.src
+              });
+          });
 
-    // ===== Vista previa (abrir en nueva pestaÃ±a) =====
+          document.getElementById('html_content_input').value = htmlContent;
+          document.getElementById('fondo_base64_input').value = base64Bg;
+          document.getElementById('elementos_json_input').value = JSON.stringify(elementos);
+      });
+
+      // ===== Cargar Plantilla Seleccionada =====
+      const selectPlantilla = document.getElementById('selectPlantilla');
+      if (selectPlantilla) {
+          selectPlantilla.addEventListener('change', function() {
+              if (this.value) {
+                  fetch(`/configuracion/editor-certificados/${this.value}/json`)
+                      .then(r => r.json())
+                      .then(data => {
+                          const certEl = document.getElementById('certificate');
+                          certEl.innerHTML = data.html_content;
+                          
+                          document.querySelectorAll('.draggable-element').forEach(el => {
+                              makeDraggable(el);
+                          });
+
+                          if (data.elementos_json && data.elementos_json.fondo_base64) {
+                              certEl.style.backgroundImage = 'url(' + data.elementos_json.fondo_base64 + ')';
+                          }
+                      });
+              } else {
+                  document.getElementById('certificate').innerHTML = '';
+                  document.getElementById('certificate').style.backgroundImage = 'none';
+              }
+          });
+      }
+    // ===== Vista previa (abrir en nueva pestaña) =====
     document.getElementById('btnVistaPrevia').addEventListener('click', function() {
         const certEl = document.getElementById('certificate');
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Vista Previa Certificado</title>');
         win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;aspect-ratio:1.414/1;background-size:cover;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
+        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;min-height:680px;background-size:100% 100%;background-repeat:no-repeat;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
         win.document.write('</head><body>');
         win.document.write('<div class="cert">' + certEl.innerHTML + '</div>');
         win.document.write('</body></html>');
@@ -630,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Certificado</title>');
         win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:cover;background-position:center;position:relative;}</style>');
+        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:100% 100%;background-repeat:no-repeat;background-position:center;position:relative;}</style>');
         win.document.write('</head><body>');
         win.document.write('<div class="cert" style="background-image:' + certEl.style.backgroundImage + '">' + certEl.innerHTML + '</div>');
         win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},500);</scr' + 'ipt>');
@@ -641,39 +758,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar
     actualizarCertificado();
 
-    // ===== MenÃº contextual para eliminar elementos =====
-    // Crear menÃº contextual
-    const contextMenu = document.createElement('div');
-    contextMenu.className = 'custom-context-menu';
-    contextMenu.innerHTML = '<div class="menu-item" id="menuEliminar">Eliminar elemento</div>';
-    document.body.appendChild(contextMenu);
 
-    let elementoSeleccionado = null;
-
-    // Mostrar menÃº contextual al hacer clic derecho en cualquier draggable
-    function applyContextMenuToAll() {
-        document.querySelectorAll('.draggable-element').forEach(function(el) {
-            el.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                elementoSeleccionado = el;
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = e.pageX + 'px';
-                contextMenu.style.top = e.pageY + 'px';
-            });
-        });
-    }
-    applyContextMenuToAll();
-    // Permitir que los nuevos elementos tambiÃ©n tengan menÃº contextual
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    observer.disconnect();
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    // Reaplicar menÃº contextual cuando haya cambios
-    observer.disconnect();
-    observer.observe(document.getElementById('certificate'), { childList: true, subtree: true });
-    observer.takeRecords();
-    applyContextMenuToAll();
-
-    // Ocultar menÃº contextual al hacer clic fuera
+    // Ocultar men� contextual al hacer clic fuera
     document.addEventListener('click', function(e) {
         if (!contextMenu.contains(e.target)) {
             contextMenu.style.display = 'none';
@@ -691,3 +777,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @stop
+

@@ -30,6 +30,7 @@ class Curso extends Model
         'fecha_inicio',
         'fecha_fin',
         'estado',
+        'plantilla_certificado_id',
         'codigo_acceso',
         'max_estudiantes',
         'imagen_portada',
@@ -363,4 +364,8 @@ class Curso extends Model
         return $resumen;
     }
 
+    public function plantillaCertificado()
+    {
+        return $this->belongsTo(PlantillaCertificado::class, 'plantilla_certificado_id');
+    }
 }

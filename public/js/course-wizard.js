@@ -3283,6 +3283,7 @@ function submitCourseData() {
     formData.append('objetivos', $('#objetivos').val());
     formData.append('requisitos', $('#requisitos').val());
     formData.append('estado', $('#estado').val());
+    formData.append('plantilla_certificado_id', $('#plantilla_certificado_id').val());
 
     // Imagen de portada
     if (imagenPortada) {
@@ -3509,3 +3510,4 @@ function submitCourseData() {
     xhr.timeout = 600000; // 10 minutos de timeout
     xhr.send(formData);
 }
+
