@@ -26,7 +26,8 @@ class CertificadoPlantillaController extends Controller
     public function index(): View
     {
         $this->verificarAcceso();
-        $usuarios = User::orderBy('name')->get();
+        $docentes = User::where('role', 'Docente')->orderBy('name')->get();
+        $usuarios = $docentes; // Mantener la variable para no romper la vista si se usa en otro lado
         $cursos = Curso::orderBy('titulo')->get();
         $plantillas = PlantillaCertificado::latest()->get();
 
@@ -82,4 +83,29 @@ class CertificadoPlantillaController extends Controller
         $this->verificarAcceso();
         return response()->json($plantilla);
     }
+
+    public function getCursosPorDocente(User $docente)
+    {
+        $this->verificarAcceso();
+        
+        // Obtener cursos donde es instructor o está asignado como docente
+        $cursosIds = \App\Models\CursoAsignacion::where('docente_id', $docente->id)->pluck('curso_id')->toArray();
+        
+        $cursos = Curso::where('instructor_id', $docente->id)
+            ->orWhereIn('id', $cursosIds)
+            ->select('id', 'titulo', 'duracion_horas', 'fecha_inicio', 'fecha_fin')
+            ->orderBy('titulo')
+            ->get();
+
+        return response()->json($cursos);
+    }
 }
+
+
+
+
+
+
+
+
+

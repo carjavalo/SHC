@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-03-2026 a las 20:54:38
+-- Tiempo de generación: 13-03-2026 a las 23:26:25
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -133,6 +133,7 @@ CREATE TABLE `cursos` (
   `fecha_inicio` datetime DEFAULT NULL,
   `fecha_fin` datetime DEFAULT NULL,
   `estado` enum('borrador','activo','finalizado','archivado') NOT NULL DEFAULT 'borrador',
+  `plantilla_certificado_id` bigint(20) UNSIGNED DEFAULT NULL,
   `codigo_acceso` varchar(10) DEFAULT NULL,
   `max_estudiantes` int(11) DEFAULT NULL,
   `imagen_portada` varchar(255) DEFAULT NULL,
@@ -149,12 +150,12 @@ CREATE TABLE `cursos` (
 -- Volcado de datos para la tabla `cursos`
 --
 
-INSERT INTO `cursos` (`id`, `titulo`, `descripcion`, `id_area`, `instructor_id`, `fecha_inicio`, `fecha_fin`, `estado`, `codigo_acceso`, `max_estudiantes`, `imagen_portada`, `objetivos`, `requisitos`, `duracion_horas`, `nota_minima_aprobacion`, `nota_maxima`, `created_at`, `updated_at`) VALUES
-(13, 'Reanimación Cardiopulmonar(RCP)', NULL, 10, 44, '2026-01-05 00:00:00', NULL, 'activo', 'AKOQD7', NULL, 'cursos/portadas/fnNjsPQQ8xtazUNrAmbuQkRi3PMi4hXkDuMjDayy.png', NULL, NULL, 20, 3.00, 5.00, '2026-01-06 03:18:42', '2026-03-11 23:11:54'),
-(14, 'Hemato Oncología', NULL, 11, 45, NULL, NULL, 'activo', 'K3HJMJ', NULL, NULL, NULL, NULL, 115, 3.00, 5.00, '2026-01-06 18:51:49', '2026-01-06 18:56:21'),
-(17, 'pagos', 'practica', 10, 44, '2026-01-01 00:00:00', '2026-04-30 23:59:00', 'activo', 'RJ3ZRN', NULL, 'cursos/portadas/ij514HBRhjh6EObLwXLIkECDhQJaJtAO6mSiUOf6.jpg', 'Aprender', 'Que sea bachiller', NULL, 3.00, 5.00, '2026-01-17 01:47:17', '2026-03-12 19:55:56'),
-(18, 'Inducción Institucional (General)', NULL, 9, 44, '2026-01-01 19:00:00', '2026-01-31 19:00:00', 'activo', 'WVCVG3', NULL, 'cursos/portadas/Mm1x04uATVbbeMbUt4TOtLk2gtskDWJUReD7rpBd.png', NULL, NULL, NULL, 4.00, 5.00, '2026-01-22 21:24:01', '2026-01-22 21:44:27'),
-(20, 'Cprueba1', 'solo prueba', 10, 44, '2026-03-01 11:06:00', '2026-03-31 11:06:00', 'activo', 'HJSFNC', NULL, 'cursos/portadas/lmiUOQNNupijzc0fRdVeVw6UijhBngYXAVeIIKZF.png', 'aprender prueba', 'saber de todo', NULL, 3.00, 5.00, '2026-03-13 21:20:16', '2026-03-13 21:20:51');
+INSERT INTO `cursos` (`id`, `titulo`, `descripcion`, `id_area`, `instructor_id`, `fecha_inicio`, `fecha_fin`, `estado`, `plantilla_certificado_id`, `codigo_acceso`, `max_estudiantes`, `imagen_portada`, `objetivos`, `requisitos`, `duracion_horas`, `nota_minima_aprobacion`, `nota_maxima`, `created_at`, `updated_at`) VALUES
+(13, 'Reanimación Cardiopulmonar(RCP)', NULL, 10, 44, '2026-01-05 00:00:00', NULL, 'activo', NULL, 'AKOQD7', NULL, 'cursos/portadas/fnNjsPQQ8xtazUNrAmbuQkRi3PMi4hXkDuMjDayy.png', NULL, NULL, 20, 3.00, 5.00, '2026-01-06 03:18:42', '2026-03-11 23:11:54'),
+(14, 'Hemato Oncología', NULL, 11, 45, NULL, NULL, 'activo', NULL, 'K3HJMJ', NULL, NULL, NULL, NULL, 115, 3.00, 5.00, '2026-01-06 18:51:49', '2026-01-06 18:56:21'),
+(17, 'pagos', 'practica', 10, 44, '2026-01-01 00:00:00', '2026-04-30 23:59:00', 'activo', NULL, 'RJ3ZRN', NULL, 'cursos/portadas/ij514HBRhjh6EObLwXLIkECDhQJaJtAO6mSiUOf6.jpg', 'Aprender', 'Que sea bachiller', NULL, 3.00, 5.00, '2026-01-17 01:47:17', '2026-03-12 19:55:56'),
+(18, 'Inducción Institucional (General)', NULL, 9, 44, '2026-01-01 19:00:00', '2026-01-31 19:00:00', 'activo', NULL, 'WVCVG3', NULL, 'cursos/portadas/Mm1x04uATVbbeMbUt4TOtLk2gtskDWJUReD7rpBd.png', NULL, NULL, NULL, 4.00, 5.00, '2026-01-22 21:24:01', '2026-01-22 21:44:27'),
+(20, 'Cprueba1', 'solo prueba', 10, 44, '2026-03-01 11:06:00', '2026-03-31 11:06:00', 'activo', NULL, 'HJSFNC', NULL, 'cursos/portadas/lmiUOQNNupijzc0fRdVeVw6UijhBngYXAVeIIKZF.png', 'aprender prueba', 'saber de todo', NULL, 3.00, 5.00, '2026-03-13 21:20:16', '2026-03-13 21:20:51');
 
 -- --------------------------------------------------------
 
@@ -202,7 +203,7 @@ INSERT INTO `curso_actividades` (`id`, `curso_id`, `material_id`, `titulo`, `des
 (37, 17, 68, 'Final Post Liquidacion jum', 'conteste con cuidado ok', 'quiz', 'tiene 20 minutos para responder', '{\"duration\":\"20\",\"questions\":[{\"id\":\"1\",\"text\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"points\":\"1.5\",\"options\":{\"A\":\"vvvvvvvvvvvv\",\"B\":\"vvvvvvvvvvvvvvvv\",\"C\":\"vvvvvvvvvvvvvvv\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"},{\"id\":\"2\",\"text\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"points\":\"1.5\",\"options\":{\"A\":\"bbbbbbb\",\"B\":\"bbbbbbbbbbbb\",\"C\":\"bbbbbbbbbbbbb\"},\"correctAnswers\":[\"B\"],\"isMultipleChoice\":\"false\"},{\"id\":\"3\",\"text\":\"rrrrrrrrrrrrrrrrr\",\"points\":\"0.5\",\"options\":{\"A\":\"ggggggggggggg\",\"B\":\"ffffffffffffffff\",\"C\":\"gggggggggggg\",\"D\":\"hhhhhhhhhhhhhhhhhhh\"},\"correctAnswers\":[\"D\"],\"isMultipleChoice\":\"false\"},{\"id\":\"4\",\"text\":\"zzzzzzzzzzzzzzzzzzzzzzz\",\"points\":\"1.5\",\"options\":{\"A\":\"rrrrrrrrrrrrrr\",\"B\":\"rrtttttttttttttttttt\",\"C\":\"trrrrrrrrrrrrrr\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":\"false\"}]}', NULL, '[\"36\"]', '2026-02-03 15:50:00', '2026-02-28 16:15:00', 5, 0, 1, 1, 99.50, 5.00, 1, '2026-01-17 01:47:17', '2026-02-04 21:50:32'),
 (42, 20, 87, 'ATprueba1', 'Prueba solamente', 'tarea', 'Leer', NULL, NULL, NULL, '2026-03-01 11:10:00', '2026-03-31 11:10:00', 100, 0, 1, 1, 20.00, 3.50, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17'),
 (43, 20, 87, 'ATprueba2', 'solo es una prueba', 'tarea', 'leerer y subir al correo', NULL, NULL, '[1773418267344]', '2026-03-01 11:11:00', '2026-03-31 11:11:00', 100, 0, 1, 1, 80.00, 3.50, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17'),
-(44, 20, 88, 'AQprueba', 'solamente es prueba', 'quiz', 'Contestet Rapidamente', '{\"duration\":20,\"totalPoints\":100,\"questions\":[{\"id\":1,\"type\":\"multiple\",\"text\":\"que tono de piel tiene\",\"points\":10,\"options\":{\"A\":\"Negro\",\"B\":\"Mestizo\",\"C\":\"Blanco\",\"D\":\"Mulato\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":2,\"type\":\"multiple\",\"text\":\"Tu eres\",\"points\":20,\"options\":{\"A\":\"Adulto\",\"B\":\"Ni\\u00f1o\",\"C\":\"Adolescente\",\"D\":\"Mayor\"},\"correctAnswers\":[\"A\",\"D\"],\"isMultipleChoice\":true},{\"id\":3,\"type\":\"multiple\",\"text\":\"Te gustan\",\"points\":40,\"options\":{\"A\":\"Acuerpadas\",\"B\":\"Altas\",\"C\":\"Medio Gorditas\",\"D\":\"Delagadas\"},\"correctAnswers\":[\"A\",\"B\",\"C\"],\"isMultipleChoice\":true},{\"id\":4,\"type\":\"multiple\",\"text\":\"Yo  soy\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Juan\",\"C\":\"Pedro\",\"D\":\"Alberto\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":5,\"type\":\"multiple\",\"text\":\"Yo me llamo\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Andres\",\"C\":\"Jairton\",\"D\":\"Pedro\"},\"correctAnswers\":[\"A\",\"C\"],\"isMultipleChoice\":true}]}', NULL, '[1773418267344,1773418333542]', '2026-03-01 11:12:00', '2026-03-31 11:12:00', 100, 0, 1, 1, 80.00, 3.00, 1, '2026-03-13 21:20:17', '2026-03-13 21:28:47'),
+(44, 20, 88, 'AQprueba', 'solamente es prueba', 'quiz', 'Contestet Rapidamente', '{\"duration\":20,\"totalPoints\":100,\"questions\":[{\"id\":1,\"type\":\"multiple\",\"text\":\"que tono de piel tiene\",\"points\":10,\"options\":{\"A\":\"Negro\",\"B\":\"Mestizo\",\"C\":\"Blanco\",\"D\":\"Mulato\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":2,\"type\":\"multiple\",\"text\":\"Tu eres\",\"points\":20,\"options\":{\"A\":\"Adulto\",\"B\":\"Ni\\u00f1o\",\"C\":\"Adolescente\",\"D\":\"Mayor\"},\"correctAnswers\":[\"A\",\"D\"],\"isMultipleChoice\":true},{\"id\":3,\"type\":\"multiple\",\"text\":\"Te gustan\",\"points\":40,\"options\":{\"A\":\"Acuerpadas\",\"B\":\"Altas\",\"C\":\"Medio Gorditas\",\"D\":\"Delagadas\"},\"correctAnswers\":[\"A\",\"B\",\"C\"],\"isMultipleChoice\":true},{\"id\":4,\"type\":\"multiple\",\"text\":\"Yo  soy\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Juan\",\"C\":\"Pedro\",\"D\":\"Alberto\"},\"correctAnswers\":[\"A\"],\"isMultipleChoice\":false,\"correctAnswer\":\"A\"},{\"id\":5,\"type\":\"multiple\",\"text\":\"Yo me llamo\",\"points\":15,\"options\":{\"A\":\"Carlos\",\"B\":\"Andres\",\"C\":\"Jairton\",\"D\":\"Pedro\"},\"correctAnswers\":[\"A\",\"C\"],\"isMultipleChoice\":true}]}', NULL, '[1773418267344,1773418333542]', '2026-03-01 11:12:00', '2026-03-31 11:12:00', 100, 0, 1, 1, 80.00, 3.00, 0, '2026-03-13 21:20:17', '2026-03-13 22:14:22'),
 (45, 20, 88, 'ATprueba3', 'Solo prueba', 'tarea', 'Leer y subir al correo', NULL, NULL, '[1773418267344,1773418709034]', '2026-03-01 11:19:00', '2026-03-31 11:19:00', 100, 0, 1, 1, 20.00, 3.00, 0, '2026-03-13 21:20:17', '2026-03-13 21:20:17');
 
 -- --------------------------------------------------------
@@ -618,7 +619,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (39, '2026_01_21_161603_add_tipo_and_grupo_to_mensajes_chat_table', 14),
 (40, '2026_02_03_164209_add_puntos_obtenidos_to_curso_actividad_entrega', 15),
 (41, '2026_03_09_000001_create_banners_table', 16),
-(42, '2026_03_11_215325_add_docente_id_to_curso_asignaciones', 17);
+(42, '2026_03_11_215325_add_docente_id_to_curso_asignaciones', 17),
+(43, '2026_03_13_160435_create_plantilla_certificados_table', 18),
+(44, '2026_03_13_160644_add_plantilla_id_to_cursos_table', 18);
 
 -- --------------------------------------------------------
 
@@ -630,6 +633,22 @@ CREATE TABLE `password_reset_tokens` (
   `email` varchar(255) NOT NULL,
   `token` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `plantilla_certificados`
+--
+
+CREATE TABLE `plantilla_certificados` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `fondo_path` varchar(255) DEFAULT NULL,
+  `elementos_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`elementos_json`)),
+  `html_content` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -739,13 +758,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('bIKXInvXkmUX3evTwZx9g7SUSn0Je1RNzxtHUIA7', NULL, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoidkdLN1Rzbkh5SkdrQ01PSXRJVVgyVUp4WkdUYmQ4TGR1bXdVTW1nUyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEiO319', 1773431266),
-('Cy6SCleRDUQxiUGfOJokNXcmROj3HOUAOdTKZciz', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMzJQaDlKZ29GTFFURGYzMlk5UGttdTRwOEJxbm0walB4bng1ZThIYSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NTk6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvY29uZmlndXJhY2lvbi9lZGl0b3ItY2VydGlmaWNhZG9zIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1773431280),
-('diZYOK2uLKyQ7ZnLxyVRea9OSpPyiQDikoVIGjUH', 77, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiV0tFY2xtT1ZkS01GV005SHF0NnRUUkRYVkQ3cnRoMkxIUkVwRlNhTCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MTEwOiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL3RyYWNraW5nL29wZXJhdGlvbnM/ZGF0ZV9mcm9tPSZkYXRlX3RvPSZlbnRpdHlfdHlwZT0mb3BlcmF0aW9uX3R5cGU9JnNlYXJjaF91c2VyPXVubyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc3O30=', 1773422224),
-('EARArBTkKbCcRjqkzEZrIXJdlCooMXkZRdoIgol8', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiN3FNRm5CUDdNTUxUTFdGV0d6bFZwNDhaVEZ4ZTRRWk10THY0a2p6NCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NjA6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvYWNhZGVtaWNvL2N1cnNvLzIwP3RhYj1hY3RpdmlkYWRlcyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjQ2O30=', 1773420372),
-('gBx9vR5199X0gCGGalKp4a0UTxMI89PaKHwxHAqY', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTmdvcDhzVGZZZmg1amV2UkhMempWUThGUWdTRWtaOUxLSHVkbEo3NyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773413649),
-('Ui70j2GlVHwzmEYe1VCFCGjRw7KCwqqAcecNUiI3', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTEtST3J4ZHBFUlpsdWtkaGJBYmtYTlhBTHFXNGMxSVpnWjZMRTBYUyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773417067),
-('zsVtYm2tSo3uXZKjIAsbOKdQ0SHwGrEDOwbUgYF6', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiWFROZWY2b2JWbkY5QmFWdlU3SWJaOWc3c2VYSTRJM3JXNDFxRjExQSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773417239);
+('Cy6SCleRDUQxiUGfOJokNXcmROj3HOUAOdTKZciz', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMzJQaDlKZ29GTFFURGYzMlk5UGttdTRwOEJxbm0walB4bng1ZThIYSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Nzc6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvY29uZmlndXJhY2lvbi9lZGl0b3ItY2VydGlmaWNhZG9zL2RvY2VudGUvNzcvY3Vyc29zIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1773440354),
+('LLtAoY1IwFUdu7zFZfgvvSe6uhzvuOsKGFoFPzh3', 77, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiVHJNeUp4eDBsNGRvcDd1alcyZlRSYmQ4VkhWZDU3clV6ZnBlQ2U3ZSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjU0OiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL2FjYWRlbWljby9jb250cm9sLXBlZGFnb2dpY28iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3Nzt9', 1773440062),
+('WpkemXVdiY1mwZSK5DJVurtoFuKesiamwcS2c4L3', NULL, '127.0.0.1', 'Symfony', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVWJUN2lQWWxObHZMRnJiRXdDdERxMXlEcFNLdzhaM2MxQ1dJelhTViI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czo3NzoiaHR0cDovLzE5Mi4xNjguMi4yMDA6ODAwMS9jb25maWd1cmFjaW9uL2VkaXRvci1jZXJ0aWZpY2Fkb3MvZG9jZW50ZS80NS9jdXJzb3MiO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czo3NzoiaHR0cDovLzE5Mi4xNjguMi4yMDA6ODAwMS9jb25maWd1cmFjaW9uL2VkaXRvci1jZXJ0aWZpY2Fkb3MvZG9jZW50ZS80NS9jdXJzb3MiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773439887);
 
 -- --------------------------------------------------------
 
@@ -1038,7 +1053,9 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (404, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 21:24:25', '2026-03-13 21:24:25', '2026-03-13 21:24:25'),
 (405, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-13 21:30:50', '2026-03-13 21:30:50', '2026-03-13 21:30:50'),
 (406, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:13:39', '2026-03-13 18:13:39', '2026-03-13 18:13:39'),
-(407, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:59:28', '2026-03-13 18:59:28', '2026-03-13 18:59:28');
+(407, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 18:59:28', '2026-03-13 18:59:28', '2026-03-13 18:59:28'),
+(408, 77, 'dos@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-13 21:32:37', '2026-03-13 21:32:37', '2026-03-13 21:32:37'),
+(409, 1, 'carjavalosistem@gmail.com', '127.0.0.1', 'Symfony', 'success', 'verified', NULL, '2026-03-13 22:13:18', '2026-03-13 22:13:18', '2026-03-13 22:13:18');
 
 -- --------------------------------------------------------
 
@@ -1456,7 +1473,8 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (387, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 13:13:24\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:13:24', '2026-03-13 18:13:24'),
 (388, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 13:13:39\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:13:39', '2026-03-13 18:13:39'),
 (389, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-13 13:58:36\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:58:36', '2026-03-13 18:58:36'),
-(390, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 13:59:28\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:59:28', '2026-03-13 18:59:28');
+(390, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-13 13:59:28\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 18:59:28', '2026-03-13 18:59:28'),
+(391, 77, 'login', 'Session', NULL, 'Inicio de sesión: dos@docente.com', '{\"email\":\"dos@docente.com\",\"login_time\":\"2026-03-13 16:32:37\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-13 21:32:37', '2026-03-13 21:32:37');
 
 -- --------------------------------------------------------
 
@@ -1663,6 +1681,12 @@ ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`email`);
 
 --
+-- Indices de la tabla `plantilla_certificados`
+--
+ALTER TABLE `plantilla_certificados`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `procedimientos`
 --
 ALTER TABLE `procedimientos`
@@ -1822,7 +1846,13 @@ ALTER TABLE `mensajes_chat`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+
+--
+-- AUTO_INCREMENT de la tabla `plantilla_certificados`
+--
+ALTER TABLE `plantilla_certificados`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `procedimientos`
@@ -1852,13 +1882,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=408;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=410;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=391;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=392;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`

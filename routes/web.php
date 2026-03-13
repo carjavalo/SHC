@@ -176,6 +176,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [\App\Http\Controllers\CertificadoPlantillaController::class, 'index'])->name('index');
             Route::post('/guardar', [\App\Http\Controllers\CertificadoPlantillaController::class, 'store'])->name('store');
             Route::delete('/{plantilla}', [\App\Http\Controllers\CertificadoPlantillaController::class, 'destroy'])->name('destroy');
+            Route::get('/docente/{docente}/cursos', [\App\Http\Controllers\CertificadoPlantillaController::class, 'getCursosPorDocente'])->name('docente.cursos');
             Route::get('/{plantilla}/json', [\App\Http\Controllers\CertificadoPlantillaController::class, 'showJson'])->name('showJson');
         });
 
@@ -193,3 +194,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

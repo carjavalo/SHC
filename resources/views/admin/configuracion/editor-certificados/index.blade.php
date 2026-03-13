@@ -64,10 +64,10 @@
                         {{-- Selección de usuario --}}
                         <div class="mb-4">
                             <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">
-                                <i class="fas fa-user mr-1"></i> Seleccionar Participante
+                                <i class="fas fa-chalkboard-teacher mr-1"></i> Seleccionar Docente
                             </h6>
-                            <select class="form-control form-control-sm mt-2" id="selectUsuario">
-                                <option value="">-- Seleccione un usuario --</option>
+                            <select class="form-control form-control-sm mt-2" id="selectDocente">
+                                <option value="">-- Seleccione un docente --</option>
                                 @foreach($usuarios as $usuario)
                                     <option value="{{ $usuario->id }}"
                                             data-name="{{ $usuario->name }}"
@@ -87,15 +87,7 @@
                             </h6>
                             <select class="form-control form-control-sm mt-2" id="selectCurso">
                                 <option value="">-- Seleccione un curso --</option>
-                                @foreach($cursos as $curso)
-                                    <option value="{{ $curso->id }}"
-                                            data-titulo="{{ $curso->titulo }}"
-                                            data-duracion="{{ $curso->duracion_horas }}"
-                                            data-fecha-inicio="{{ $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : '' }}"
-                                            data-fecha-fin="{{ $curso->fecha_fin ? $curso->fecha_fin->format('Y-m-d') : '' }}">
-                                        {{ $curso->titulo }}
-                                    </option>
-                                @endforeach
+                                
                             </select>
                         </div>
 
@@ -461,8 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===== Selección de usuario → llena campos de identidad =====
-    const selectUsuario = document.getElementById('selectUsuario');
-    selectUsuario.addEventListener('change', function() {
+    const selectDocente = document.getElementById('selectDocente');
+    selectDocente.addEventListener('change', function() {
         const opt = this.options[this.selectedIndex];
         if (!this.value) {
             document.getElementById('inputNombres').value = '';
@@ -476,8 +468,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
         document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
         document.getElementById('inputDocumento').value = opt.dataset.documento || '';
-        actualizarCertificado();
-    });
+          actualizarCertificado();
+          
+          // Cargar cursos al cambiar el docente
+          const cursoSelect = document.getElementById('selectCurso');
+          cursoSelect.innerHTML = '<option value="">Cargando...</option>';
+          fetch('/configuracion/editor-certificados/docente/' + opt.value + '/cursos')
+              .then(res => res.json())
+              .then(cursos => {
+                  cursoSelect.innerHTML = '<option value="">-- Seleccione un curso --</option>';
+                  cursos.forEach(c => {
+                      let dura = c.duracion_horas ? c.duracion_horas : ''; let fini = c.fecha_inicio ? c.fecha_inicio.substring(0,10) : ''; let ffin = c.fecha_fin ? c.fecha_fin.substring(0,10) : '';
+                      cursoSelect.innerHTML += '<option value="'+c.id+'" data-titulo="'+c.titulo+'" data-duracion="'+dura+'" data-fecha-inicio="'+fini+'" data-fecha-fin="'+ffin+'">'+c.titulo+'</option>';
+                  });
+              })
+              .catch(err => {
+                  console.error("Error al cargar los cursos", err);
+                  cursoSelect.innerHTML = '<option value="">-- Error --</option>';
+              });
+      });
 
     // ===== Selección de curso → llena campos de contenido =====
     const selectCurso = document.getElementById('selectCurso');
@@ -777,4 +786,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @stop
+
+
+
+
+
+
+
+
+
+
+
+
 
