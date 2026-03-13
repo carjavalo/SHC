@@ -692,10 +692,16 @@ function mostrarModalQuiz(actividadId, actividad) {
     
     let preguntasHTML = '';
     preguntas.forEach((pregunta, index) => {
+        const esMultiple = (pregunta.isMultipleChoice === true) || 
+                           (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+        const inputType = esMultiple ? 'checkbox' : 'radio';
+        const indicadorTipo = esMultiple ? '<span class="badge badge-info ml-2"><i class="fas fa-check-double"></i> Múltiple respuesta</span>' : '';
+        
         preguntasHTML += `
-            <div class="quiz-question">
-                <h5><span class="badge badge-primary">${index + 1}</span> ${pregunta.text}</h5>
-                <small class="text-muted"><i class="fas fa-star"></i> ${pregunta.points} puntos</small>
+            <div class="quiz-question" data-multiple="${esMultiple}">
+                <h5><span class="badge badge-primary">${index + 1}</span> ${pregunta.text} ${indicadorTipo}</h5>
+                <small class="text-muted"><i class="fas fa-percentage"></i> ${pregunta.points}% del quiz</small>
+                ${esMultiple ? '<br><small class="text-info"><i class="fas fa-info-circle"></i> Selecciona todas las respuestas correctas</small>' : ''}
                 <div class="mt-3">
         `;
         
@@ -706,7 +712,8 @@ function mostrarModalQuiz(actividadId, actividad) {
                 const textoOpcion = typeof opcion === 'object' ? opcion.text : opcion;
                 preguntasHTML += `
                     <label class="quiz-option">
-                        <input type="radio" name="pregunta_${pregunta.id}" value="${letra}">
+                        <input type="${inputType}" name="pregunta_${pregunta.id}" value="${letra}"
+                               ${esMultiple ? `data-pregunta-id="${pregunta.id}"` : ''}>
                         <strong>${letra})</strong> ${textoOpcion}
                     </label>
                 `;
@@ -715,7 +722,8 @@ function mostrarModalQuiz(actividadId, actividad) {
             Object.keys(pregunta.options).forEach(opcion => {
                 preguntasHTML += `
                     <label class="quiz-option">
-                        <input type="radio" name="pregunta_${pregunta.id}" value="${opcion}">
+                        <input type="${inputType}" name="pregunta_${pregunta.id}" value="${opcion}"
+                               ${esMultiple ? `data-pregunta-id="${pregunta.id}"` : ''}>
                         <strong>${opcion})</strong> ${pregunta.options[opcion]}
                     </label>
                 `;
@@ -752,28 +760,67 @@ function mostrarModalQuiz(actividadId, actividad) {
         didOpen: () => {
             iniciarTemporizador(duracion, actividadId, actividad);
             
-            // Manejar selección de opciones
-            $('.quiz-option').on('click', function() {
-                $(this).find('input[type="radio"]').prop('checked', true);
-                $(this).siblings().removeClass('selected');
-                $(this).addClass('selected');
+            // Manejar selección de opciones - radio buttons
+            $(document).off('click.quizRadio').on('click.quizRadio', '.quiz-option input[type="radio"]', function() {
+                const name = $(this).attr('name');
+                $(`input[name="${name}"]`).closest('.quiz-option').removeClass('selected');
+                $(this).closest('.quiz-option').addClass('selected');
+            });
+            
+            // Manejar selección de opciones - checkboxes
+            $(document).off('click.quizCheckbox').on('click.quizCheckbox', '.quiz-option input[type="checkbox"]', function() {
+                if ($(this).is(':checked')) {
+                    $(this).closest('.quiz-option').addClass('selected');
+                } else {
+                    $(this).closest('.quiz-option').removeClass('selected');
+                }
+            });
+            
+            // Click en el label activa selección visual
+            $(document).off('click.quizOption').on('click.quizOption', '.quiz-option', function(e) {
+                if ($(e.target).is('input')) return;
+                const input = $(this).find('input');
+                if (input.attr('type') === 'radio') {
+                    input.prop('checked', true).trigger('click');
+                } else {
+                    input.prop('checked', !input.prop('checked')).trigger('click');
+                }
             });
         },
         willClose: () => {
             if (quizTimer) {
                 clearInterval(quizTimer);
             }
+            $(document).off('click.quizRadio click.quizCheckbox click.quizOption');
         },
         preConfirm: () => {
             const respuestas = {};
             let todasRespondidas = true;
             
             preguntas.forEach(pregunta => {
-                const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
-                if (respuesta) {
-                    respuestas[pregunta.id] = respuesta;
+                const esMultiple = (pregunta.isMultipleChoice === true) || 
+                                   (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+                
+                if (esMultiple) {
+                    // Para preguntas de múltiple respuesta, obtener todos los checkboxes marcados
+                    const respuestasSeleccionadas = [];
+                    $(`input[name="pregunta_${pregunta.id}"]:checked`).each(function() {
+                        respuestasSeleccionadas.push($(this).val());
+                    });
+                    
+                    if (respuestasSeleccionadas.length > 0) {
+                        respuestas[pregunta.id] = respuestasSeleccionadas;
+                    } else {
+                        todasRespondidas = false;
+                    }
                 } else {
-                    todasRespondidas = false;
+                    // Para preguntas de respuesta única
+                    const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
+                    if (respuesta) {
+                        respuestas[pregunta.id] = respuesta;
+                    } else {
+                        todasRespondidas = false;
+                    }
                 }
             });
             
@@ -820,9 +867,17 @@ function iniciarTemporizador(duracionMinutos, actividadId, actividad) {
                 const respuestas = {};
                 const preguntas = actividad.contenido_json.questions || [];
                 preguntas.forEach(pregunta => {
-                    const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
-                    if (respuesta) {
-                        respuestas[pregunta.id] = respuesta;
+                    const esMultiple = (pregunta.isMultipleChoice === true) || 
+                                       (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+                    if (esMultiple) {
+                        const checked = [];
+                        $(`input[name="pregunta_${pregunta.id}"]:checked`).each(function() {
+                            checked.push($(this).val());
+                        });
+                        if (checked.length > 0) respuestas[pregunta.id] = checked;
+                    } else {
+                        const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
+                        if (respuesta) respuestas[pregunta.id] = respuesta;
                     }
                 });
                 enviarRespuestasQuiz(actividadId, respuestas);

@@ -50,21 +50,56 @@
         
         let preguntasHTML = '';
         preguntas.forEach((pregunta, index) => {
+            // Determinar si es pregunta de múltiple respuesta
+            const esMultiple = (pregunta.isMultipleChoice === true) || 
+                               (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+            const inputType = esMultiple ? 'checkbox' : 'radio';
+            const tipoBadge = esMultiple 
+                ? '<span class="badge badge-info ml-2"><i class="fas fa-check-double"></i> Múltiple respuesta</span>' 
+                : '';
+            
             preguntasHTML += `
-                <div class="quiz-question">
-                    <h5><span class="badge badge-primary">${index + 1}</span> ${pregunta.text}</h5>
-                    <small class="text-muted"><i class="fas fa-star"></i> ${pregunta.points} puntos</small>
+                <div class="quiz-question" data-multiple="${esMultiple}">
+                    <h5>
+                        <span class="badge badge-primary">${index + 1}</span> ${pregunta.text}
+                        ${tipoBadge}
+                    </h5>
+                    <small class="text-muted"><i class="fas fa-percentage"></i> ${pregunta.points}% del quiz</small>
+                    ${esMultiple ? '<br><small class="text-info"><i class="fas fa-info-circle"></i> Selecciona todas las respuestas correctas</small>' : ''}
                     <div class="mt-3">
             `;
             
-            Object.keys(pregunta.options).forEach(opcion => {
-                preguntasHTML += `
-                    <label class="quiz-option">
-                        <input type="radio" name="pregunta_${pregunta.id}" value="${opcion}">
-                        <strong>${opcion})</strong> ${pregunta.options[opcion]}
-                    </label>
-                `;
-            });
+            // Normalizar opciones: soportar tanto formato key-value {"A": "texto"}
+            // como formato array de objetos [{id, text, isCorrect}]
+            const opciones = pregunta.options;
+            if (Array.isArray(opciones)) {
+                // Formato antiguo: array de objetos
+                opciones.forEach((opt, optIndex) => {
+                    const letter = String.fromCharCode(65 + optIndex); // A, B, C...
+                    const textoOpcion = (typeof opt === 'object') ? (opt.text || '') : String(opt);
+                    preguntasHTML += `
+                        <label class="quiz-option">
+                            <input type="${inputType}" name="pregunta_${pregunta.id}" value="${letter}" 
+                                   ${esMultiple ? `data-pregunta-id="${pregunta.id}"` : ''}>
+                            <strong>${letter})</strong> ${textoOpcion}
+                        </label>
+                    `;
+                });
+            } else if (opciones && typeof opciones === 'object') {
+                // Formato nuevo: key-value map {"A": "texto", "B": "texto"}
+                Object.keys(opciones).forEach(opcion => {
+                    const textoOpcion = (typeof opciones[opcion] === 'object') 
+                        ? (opciones[opcion].text || JSON.stringify(opciones[opcion])) 
+                        : String(opciones[opcion]);
+                    preguntasHTML += `
+                        <label class="quiz-option">
+                            <input type="${inputType}" name="pregunta_${pregunta.id}" value="${opcion}" 
+                                   ${esMultiple ? `data-pregunta-id="${pregunta.id}"` : ''}>
+                            <strong>${opcion})</strong> ${textoOpcion}
+                        </label>
+                    `;
+                });
+            }
             
             preguntasHTML += `
                     </div>
@@ -79,7 +114,7 @@
                     <div class="quiz-timer" id="quiz-timer">
                         <i class="fas fa-clock"></i> <span id="tiempo-restante">${duracion}:00</span>
                     </div>
-                    <small class="text-muted">Total de puntos: ${quizData.totalPoints}</small>
+                    <small class="text-muted">Nota máxima: 5.0 | Nota mínima aprobación: ${actividad.nota_minima_aprobacion || 3.0}</small>
                 </div>
                 <div id="quiz-preguntas" style="max-height: 400px; overflow-y: auto; text-align: left;">
                     ${preguntasHTML}
@@ -96,28 +131,66 @@
             didOpen: () => {
                 iniciarTemporizador(duracion, actividadId, actividad);
                 
-                // Manejar selección de opciones
-                $('.quiz-option').on('click', function() {
-                    $(this).find('input[type="radio"]').prop('checked', true);
-                    $(this).siblings().removeClass('selected');
-                    $(this).addClass('selected');
+                // Manejar selección de opciones - radio buttons
+                $(document).off('click.quizRadio').on('click.quizRadio', '.quiz-option input[type="radio"]', function() {
+                    const name = $(this).attr('name');
+                    $(`input[name="${name}"]`).closest('.quiz-option').removeClass('selected');
+                    $(this).closest('.quiz-option').addClass('selected');
+                });
+                
+                // Manejar selección de opciones - checkboxes
+                $(document).off('click.quizCheckbox').on('click.quizCheckbox', '.quiz-option input[type="checkbox"]', function() {
+                    if ($(this).is(':checked')) {
+                        $(this).closest('.quiz-option').addClass('selected');
+                    } else {
+                        $(this).closest('.quiz-option').removeClass('selected');
+                    }
+                });
+                
+                // Click en el label activa selción visual
+                $(document).off('click.quizOption').on('click.quizOption', '.quiz-option', function(e) {
+                    if ($(e.target).is('input')) return; // No double-trigger
+                    const input = $(this).find('input');
+                    if (input.attr('type') === 'radio') {
+                        input.prop('checked', true).trigger('click');
+                    } else {
+                        input.prop('checked', !input.prop('checked')).trigger('click');
+                    }
                 });
             },
             willClose: () => {
                 if (quizTimer) {
                     clearInterval(quizTimer);
                 }
+                $(document).off('click.quizRadio click.quizCheckbox click.quizOption');
             },
             preConfirm: () => {
                 const respuestas = {};
                 let todasRespondidas = true;
                 
                 preguntas.forEach(pregunta => {
-                    const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
-                    if (respuesta) {
-                        respuestas[pregunta.id] = respuesta;
+                    const esMultiple = (pregunta.isMultipleChoice === true) || 
+                                       (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+                    
+                    if (esMultiple) {
+                        // Recoger checkboxes marcados como array
+                        const checked = [];
+                        $(`input[data-pregunta-id="${pregunta.id}"]:checked`).each(function() {
+                            checked.push($(this).val());
+                        });
+                        if (checked.length > 0) {
+                            respuestas[pregunta.id] = checked;
+                        } else {
+                            todasRespondidas = false;
+                        }
                     } else {
-                        todasRespondidas = false;
+                        // Recoger radio button
+                        const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
+                        if (respuesta) {
+                            respuestas[pregunta.id] = respuesta;
+                        } else {
+                            todasRespondidas = false;
+                        }
                     }
                 });
                 
@@ -164,9 +237,17 @@
                     const respuestas = {};
                     const preguntas = actividad.contenido_json.questions || [];
                     preguntas.forEach(pregunta => {
-                        const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
-                        if (respuesta) {
-                            respuestas[pregunta.id] = respuesta;
+                        const esMultiple = (pregunta.isMultipleChoice === true) || 
+                                           (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+                        if (esMultiple) {
+                            const checked = [];
+                            $(`input[data-pregunta-id="${pregunta.id}"]:checked`).each(function() {
+                                checked.push($(this).val());
+                            });
+                            if (checked.length > 0) respuestas[pregunta.id] = checked;
+                        } else {
+                            const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
+                            if (respuesta) respuestas[pregunta.id] = respuesta;
                         }
                     });
                     enviarRespuestasQuiz(actividadId, respuestas);
@@ -211,6 +292,9 @@
     // Mostrar resultados del quiz
     function mostrarResultados(response) {
         const resultados = response.resultados || [];
+        const notaObtenida = response.nota_obtenida || 0;
+        const notaMaxima = response.nota_maxima || 5.0;
+        const notaMinimaAprobacion = response.nota_minima_aprobacion || 3.0;
         const porcentaje = response.porcentaje || 0;
         const aprobado = response.aprobado || false;
         
@@ -218,16 +302,18 @@
         resultados.forEach((resultado, index) => {
             const claseResultado = resultado.es_correcta ? 'quiz-result-correct' : 'quiz-result-incorrect';
             const iconoResultado = resultado.es_correcta ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-times-circle text-danger"></i>';
+            const porcentajePregunta = resultado.porcentaje_pregunta || 0;
+            const multipleBadge = resultado.es_multiple ? ' <span class="badge badge-info badge-sm"><i class="fas fa-check-double"></i></span>' : '';
             
             resultadosHTML += `
                 <div class="quiz-question ${claseResultado}">
                     <div class="d-flex justify-content-between align-items-start">
-                        <h6><span class="badge badge-secondary">${index + 1}</span> ${resultado.pregunta}</h6>
+                        <h6><span class="badge badge-secondary">${index + 1}</span> ${resultado.pregunta}${multipleBadge}</h6>
                         ${iconoResultado}
                     </div>
                     <p class="mb-1"><strong>Tu respuesta:</strong> ${resultado.respuesta_estudiante || 'Sin respuesta'}</p>
                     ${!resultado.es_correcta ? `<p class="mb-1"><strong>Respuesta correcta:</strong> ${resultado.respuesta_correcta}</p>` : ''}
-                    <p class="mb-0"><strong>Puntos:</strong> ${resultado.puntos}</p>
+                    <p class="mb-0"><strong>Nota obtenida:</strong> ${resultado.puntos} / ${(porcentajePregunta / 100 * 5).toFixed(2)} <small class="text-muted">(${porcentajePregunta}% del quiz)</small></p>
                 </div>
             `;
         });
@@ -237,10 +323,11 @@
             title: aprobado ? '¡Felicitaciones!' : 'Quiz Completado',
             html: `
                 <div class="text-center mb-4">
-                    <h2 class="display-4">${porcentaje}%</h2>
-                    <p class="lead">${response.puntos_obtenidos} de ${response.puntos_maximos} puntos</p>
-                    <span class="badge badge-${aprobado ? 'success' : 'warning'} badge-pill px-3 py-2">
-                        ${aprobado ? 'APROBADO' : 'NO APROBADO'}
+                    <h2 class="display-4" style="color: ${aprobado ? '#28a745' : '#dc3545'}">${notaObtenida} / ${notaMaxima}</h2>
+                    <p class="lead">${porcentaje}% de respuestas correctas</p>
+                    <p class="text-muted">Nota mínima de aprobación: ${notaMinimaAprobacion}</p>
+                    <span class="badge badge-${aprobado ? 'success' : 'danger'} badge-pill px-3 py-2" style="font-size: 1.1em;">
+                        ${aprobado ? '<i class="fas fa-check-circle"></i> APROBADO' : '<i class="fas fa-times-circle"></i> NO APROBADO'}
                     </span>
                 </div>
                 <div style="max-height: 400px; overflow-y: auto; text-align: left;">
@@ -284,7 +371,8 @@
         border-color: #007bff;
     }
     
-    .quiz-option input[type="radio"] {
+    .quiz-option input[type="radio"],
+    .quiz-option input[type="checkbox"] {
         margin-right: 10px;
     }
     

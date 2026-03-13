@@ -365,6 +365,20 @@
                 return;
             }
             
+            // Asegurar que contenido_json sea un objeto
+                        let contenidoJson = actividad.contenido_json || {};
+            if (typeof contenidoJson === 'string') {
+                try {
+                    contenidoJson = JSON.parse(contenidoJson);
+                    if (typeof contenidoJson === 'string') {
+                        contenidoJson = JSON.parse(contenidoJson);
+                    }
+                } catch(e) {
+                    console.error('No se pudo parsear contenido_json', e);
+                    contenidoJson = {};
+                }
+            }
+
             const tipo = actividad.tipo;
             const requierePreguntas = tipo === 'quiz' || tipo === 'evaluacion';
             const typeLabels = { tarea: 'Tarea', quiz: 'Quiz', evaluacion: 'Evaluación', proyecto: 'Proyecto' };
@@ -383,9 +397,9 @@
             let fechaApertura = actividad.fecha_apertura ? actividad.fecha_apertura.substring(0, 16) : '';
             let fechaCierre = actividad.fecha_cierre ? actividad.fecha_cierre.substring(0, 16) : '';
             
-            const tituloEscapado = (actividad.titulo || '').replace(/"/g, '&quot;');
-            const descripcionEscapada = (actividad.descripcion || '').replace(/"/g, '&quot;');
-            const instruccionesEscapadas = (actividad.instrucciones || '').replace(/"/g, '&quot;');
+            const tituloEscapado = String(actividad.titulo || '').replace(/"/g, '&quot;');
+            const descripcionEscapada = String(actividad.descripcion || '').replace(/"/g, '&quot;');
+            const instruccionesEscapadas = String(actividad.instrucciones || '').replace(/"/g, '&quot;');
             
             // Campos para Quiz
             const quizFields = requierePreguntas ? `
@@ -393,7 +407,7 @@
                 <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas</h5>
                 <div class="form-group">
                     <label for="edit-actividad-duration">Duración (minutos)</label>
-                    <input type="number" class="form-control" id="edit-actividad-duration" min="5" max="180" value="${actividad.contenido_json?.duration || 30}">
+                    <input type="number" class="form-control" id="edit-actividad-duration" min="5" max="180" value="${contenidoJson.duration || 30}">
                 </div>
                 <div id="edit-actividad-questions-container"></div>
                 <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="window.addEditQuestion()">
@@ -450,12 +464,38 @@
                 confirmButtonColor: '#28a745',
                 width: '800px',
                 didOpen: () => {
+                    console.log('Modal opened. contenidoJson:', contenidoJson);
                     window.editQuestions = [];
                     window.editQuestionCounter = 0;
                     window.editOptionCounters = {};
-                    
-                    if (requierePreguntas && actividad.contenido_json && actividad.contenido_json.questions) {
-                        actividad.contenido_json.questions.forEach(q => window.loadEditQuestion(q));
+
+                    if (requierePreguntas && contenidoJson && contenidoJson.questions) {
+                        let questionsArray = contenidoJson.questions;
+                        
+                        // Asegurar que sea un arreglo iterativo
+                        if (!Array.isArray(questionsArray)) {
+                           console.log('questions is not array, trying to parse o convert...');
+                           if (typeof questionsArray === 'string') {
+                               try { questionsArray = JSON.parse(questionsArray); } catch(e) {}
+                           } else if (typeof questionsArray === 'object' && questionsArray !== null) {
+                               questionsArray = Object.values(questionsArray);
+                           }
+                        }
+                        
+                        if (!Array.isArray(questionsArray)) {
+                            questionsArray = [];
+                        }
+
+                        console.log('Loading questions:', questionsArray);
+                        questionsArray.forEach(q => {
+                            try {
+                                window.loadEditQuestion(q);
+                            } catch(e) {
+                                console.error('Error loading question', q, e);
+                            }
+                        });
+                    } else {
+                        console.log('No questions to load or requierePreguntas is false');
                     }
                 },
                 preConfirm: () => {
@@ -718,7 +758,7 @@
                         <strong>Pregunta ${window.editQuestions.length + 1}</strong>
                         <button type="button" class="btn btn-sm btn-danger" onclick="window.removeEditQuestion(${qId})"><i class="fas fa-trash"></i></button>
                     </div>
-                    <input type="text" class="form-control mb-2" id="edit-question-text-${qId}" value="${(question.text || '').replace(/"/g, '&quot;')}" placeholder="Texto de la pregunta">
+                    <input type="text" class="form-control mb-2" id="edit-question-text-${qId}" value="${String(question.text || '').replace(/"/g, '&quot;')}" placeholder="Texto de la pregunta">
                     <input type="number" class="form-control mb-2" id="edit-question-points-${qId}" min="0" max="5" step="0.1" value="${question.points || 1}" placeholder="Puntos">
                     <div id="edit-options-container-${qId}"></div>
                     <button type="button" class="btn btn-sm btn-outline-success" onclick="window.addEditQuestionOption(${qId})"><i class="fas fa-plus"></i> Opción</button>
@@ -770,7 +810,7 @@
                     <div class="input-group-text"><input type="checkbox" ${isCorrect ? 'checked' : ''}></div>
                     <span class="input-group-text"><strong>${letter}</strong></span>
                 </div>
-                <input type="text" class="form-control" value="${(text || '').replace(/"/g, '&quot;')}">
+                <input type="text" class="form-control" value="${String(text || '').replace(/"/g, '&quot;')}">
             </div>`;
             container.insertAdjacentHTML('beforeend', optHtml);
         };
@@ -1026,3 +1066,4 @@
         };
     </script>
 @stop
+

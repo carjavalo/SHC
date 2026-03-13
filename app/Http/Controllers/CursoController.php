@@ -352,6 +352,64 @@ class CursoController extends Controller
 
             // Procesar actividades
             if ($request->has('activities_data') && !empty($request->input('activities_data'))) {
+                // Validar que la suma de porcentajes de actividades por material no exceda 100%
+                $activitiesDataCheck = json_decode($request->input('activities_data'), true);
+                if (is_array($activitiesDataCheck) && is_array($materialsDataCheck ?? null)) {
+                    // Agrupar actividades por materialId y sumar porcentajes
+                    $porcentajesPorMaterial = [];
+                    foreach ($activitiesDataCheck as $actData) {
+                        $matId = $actData['materialId'] ?? null;
+                        if ($matId) {
+                            if (!isset($porcentajesPorMaterial[$matId])) {
+                                $porcentajesPorMaterial[$matId] = 0;
+                            }
+                            $porcentajesPorMaterial[$matId] += floatval($actData['porcentajeMaterial'] ?? 0);
+                        }
+                    }
+                    
+                    // Verificar que ningún material exceda 100%
+                    foreach ($porcentajesPorMaterial as $matId => $totalPorcentajeAct) {
+                        if ($totalPorcentajeAct > 100.0) {
+                            // Buscar el nombre del material
+                            $nombreMaterial = 'Material ID ' . $matId;
+                            foreach ($materialsDataCheck as $mat) {
+                                if (($mat['id'] ?? null) == $matId) {
+                                    $nombreMaterial = $mat['title'] ?? $nombreMaterial;
+                                    break;
+                                }
+                            }
+                            throw new \Exception("La suma de porcentajes de las actividades del material '{$nombreMaterial}' es {$totalPorcentajeAct}%, lo cual excede el 100% permitido.");
+                        }
+                    }
+                    
+                    // Validar que cada actividad tenga porcentaje > 0
+                    foreach ($activitiesDataCheck as $index => $actData) {
+                        $porcentaje = floatval($actData['porcentajeMaterial'] ?? 0);
+                        if ($porcentaje <= 0) {
+                            $tituloAct = $actData['title'] ?? 'Actividad ' . ($index + 1);
+                            throw new \Exception("La actividad '{$tituloAct}' tiene porcentaje 0%. Cada actividad debe tener un porcentaje asignado mayor a 0%.");
+                        }
+                    }
+                    
+                    // Validar que cada material tenga al menos una actividad
+                    foreach ($materialsDataCheck as $mat) {
+                        $matId = $mat['id'] ?? null;
+                        if ($matId) {
+                            $tieneActividad = false;
+                            foreach ($activitiesDataCheck as $actData) {
+                                if (($actData['materialId'] ?? null) == $matId) {
+                                    $tieneActividad = true;
+                                    break;
+                                }
+                            }
+                            if (!$tieneActividad) {
+                                $nombreMaterial = $mat['title'] ?? 'Material ID ' . $matId;
+                                throw new \Exception("El material '{$nombreMaterial}' no tiene actividades asignadas. Cada material debe tener al menos una actividad.");
+                            }
+                        }
+                    }
+                }
+                
                 try {
                     $this->processActivities($curso, $request);
                     \Log::info('Actividades procesadas para curso: ' . $curso->id);
@@ -683,25 +741,45 @@ class CursoController extends Controller
                 $questions = [];
                 if (isset($quizData['questions']) && is_array($quizData['questions'])) {
                     foreach ($quizData['questions'] as $question) {
-                        // Solo incluir campos necesarios para reducir tamaño
+                        // Procesar opciones según el formato recibido
+                        $cleanOptions = [];
+                        if (isset($question['options']) && is_array($question['options'])) {
+                            $firstKey = array_key_first($question['options']);
+                            if (is_string($firstKey) && preg_match('/^[A-Z]$/', $firstKey)) {
+                                // Formato nuevo del frontend: {"A": "texto", "B": "texto"}
+                                foreach ($question['options'] as $letter => $text) {
+                                    $cleanOptions[$letter] = is_string($text) ? mb_substr($text, 0, 1000) : (string)$text;
+                                }
+                            } else {
+                                // Formato antiguo: array de objetos [{id, text, isCorrect}]
+                                foreach ($question['options'] as $index => $option) {
+                                    if (is_array($option)) {
+                                        $letter = chr(65 + $index); // A, B, C...
+                                        $cleanOptions[$letter] = mb_substr($option['text'] ?? '', 0, 1000);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Determinar respuestas correctas
+                        $correctAnswers = $question['correctAnswers'] ?? [];
+                        if (empty($correctAnswers) && isset($question['correctAnswer']) && $question['correctAnswer'] !== null) {
+                            $correctAnswers = [$question['correctAnswer']];
+                        }
+
                         $cleanQuestion = [
                             'id' => $question['id'] ?? uniqid(),
                             'type' => $question['type'] ?? 'multiple',
-                            'text' => mb_substr($question['text'] ?? '', 0, 5000), // Limitar texto
+                            'text' => mb_substr($question['text'] ?? '', 0, 5000),
                             'points' => floatval($question['points'] ?? 1),
-                            'options' => [],
-                            'correctAnswer' => $question['correctAnswer'] ?? null,
+                            'options' => $cleanOptions,
+                            'correctAnswers' => $correctAnswers,
+                            'isMultipleChoice' => ($question['isMultipleChoice'] ?? false) || count($correctAnswers) > 1,
                         ];
                         
-                        // Procesar opciones
-                        if (isset($question['options']) && is_array($question['options'])) {
-                            foreach ($question['options'] as $option) {
-                                $cleanQuestion['options'][] = [
-                                    'id' => $option['id'] ?? uniqid(),
-                                    'text' => mb_substr($option['text'] ?? '', 0, 1000),
-                                    'isCorrect' => $option['isCorrect'] ?? false,
-                                ];
-                            }
+                        // Mantener correctAnswer para compatibilidad con quizzes de respuesta única
+                        if (count($correctAnswers) === 1) {
+                            $cleanQuestion['correctAnswer'] = $correctAnswers[0];
                         }
                         
                         $questions[] = $cleanQuestion;

@@ -356,6 +356,9 @@ class CursoActividad extends Model
 
     /**
      * Calcular la nota de un quiz/evaluación basado en las respuestas
+     * Usa el sistema de porcentajes: cada pregunta tiene un porcentaje (en 'points')
+     * Nota = Σ((porcentaje_pregunta / 100) × 5 × factor_correctitud)
+     * Para múltiples respuestas correctas, el porcentaje se distribuye entre ellas
      */
     public function calcularNotaQuiz(array $respuestas): float
     {
@@ -363,7 +366,7 @@ class CursoActividad extends Model
             return 0;
         }
 
-        $puntosObtenidos = 0;
+        $notaObtenida = 0;
         $preguntas = $this->contenido_json['questions'];
 
         foreach ($preguntas as $pregunta) {
@@ -373,37 +376,33 @@ class CursoActividad extends Model
             }
 
             $respuestaUsuario = $respuestas[$preguntaId];
-            $puntosPregunta = floatval($pregunta['points'] ?? 0);
+            $porcentajePregunta = floatval($pregunta['points'] ?? 0); // 'points' almacena el porcentaje
 
-            // Verificar si la respuesta es correcta
-            if (isset($pregunta['correctAnswer'])) {
-                // Respuesta única
-                if ($respuestaUsuario === $pregunta['correctAnswer']) {
-                    $puntosObtenidos += $puntosPregunta;
-                }
-            } elseif (isset($pregunta['correctAnswers']) && is_array($pregunta['correctAnswers'])) {
-                // Múltiples respuestas correctas
-                $respuestasUsuario = is_array($respuestaUsuario) ? $respuestaUsuario : [$respuestaUsuario];
-                $correctas = array_intersect($respuestasUsuario, $pregunta['correctAnswers']);
-                $incorrectas = array_diff($respuestasUsuario, $pregunta['correctAnswers']);
+            // Soportar tanto formato antiguo (correctAnswer) como nuevo (correctAnswers)
+            $respuestasCorrectas = $pregunta['correctAnswers'] ?? (isset($pregunta['correctAnswer']) ? [$pregunta['correctAnswer']] : []);
+            $esMultiple = ($pregunta['isMultipleChoice'] ?? false) || count($respuestasCorrectas) > 1;
+
+            if ($esMultiple) {
+                // MÚLTIPLES RESPUESTAS CORRECTAS
+                $numCorrectasTotal = count($respuestasCorrectas);
+                $porcentajePorRespuesta = ($numCorrectasTotal > 0) ? $porcentajePregunta / $numCorrectasTotal : 0;
                 
-                // Calcular puntos parciales
-                if (count($incorrectas) == 0 && count($correctas) == count($pregunta['correctAnswers'])) {
-                    $puntosObtenidos += $puntosPregunta;
-                }
-            } elseif (isset($pregunta['options']) && is_array($pregunta['options'])) {
-                // Buscar la opción correcta en las opciones
-                foreach ($pregunta['options'] as $opcion) {
-                    if (isset($opcion['isCorrect']) && $opcion['isCorrect'] && 
-                        (isset($opcion['id']) && $opcion['id'] === $respuestaUsuario)) {
-                        $puntosObtenidos += $puntosPregunta;
-                        break;
+                $respuestasUsuarioArray = is_array($respuestaUsuario) ? $respuestaUsuario : [$respuestaUsuario];
+                
+                foreach ($respuestasUsuarioArray as $resp) {
+                    if (in_array($resp, $respuestasCorrectas)) {
+                        $notaObtenida += ($porcentajePorRespuesta / 100) * 5;
                     }
+                }
+            } else {
+                // RESPUESTA ÚNICA
+                $respuestaCorrecta = $respuestasCorrectas[0] ?? '';
+                if ($respuestaUsuario === $respuestaCorrecta) {
+                    $notaObtenida += ($porcentajePregunta / 100) * 5;
                 }
             }
         }
 
-        // La nota ya está en escala 0-5.0 (suma de puntos de preguntas)
-        return min(round($puntosObtenidos, 2), self::NOTA_MAXIMA);
+        return min(round($notaObtenida, 2), self::NOTA_MAXIMA);
     }
 }

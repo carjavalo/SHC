@@ -588,52 +588,105 @@ class AcademicoController extends Controller
             $quizData = $actividad->contenido_json;
             $preguntas = $quizData['questions'] ?? [];
             
-            // Calcular calificación
-            $puntosObtenidos = 0;
-            $puntosMaximos = $quizData['totalPoints'] ?? 0;
+            // ========================================================
+            // SISTEMA DE AUTO-CALIFICACIÓN BASADO EN PORCENTAJES
+            // ========================================================
+            // Cada pregunta tiene un porcentaje (%) que suma máx 100%
+            // Nota máxima = 5.0
+            // Respuesta correcta: (porcentaje/100) × 5
+            // Respuesta incorrecta: (porcentaje/100) × 0 = 0
+            // Si hay múltiples respuestas correctas:
+            //   El porcentaje se distribuye entre la cantidad de respuestas correctas
+            //   Cada respuesta correcta marcada: (porcentaje/N_correctas/100) × 5
+            //   Cada respuesta incorrecta marcada o no marcada correcta: 0
+            // ========================================================
+            
+            $notaObtenida = 0;
             $resultados = [];
+
+            // Helper: obtener texto de una opción soportando ambos formatos
+            // Formato nuevo: {"A": "texto", "B": "texto"} → $options["A"] = "texto"
+            // Formato viejo: [{"id":"x","text":"texto","isCorrect":false},...] → buscar por índice
+            $getOptionText = function($options, $key) {
+                if (!is_array($options)) return '';
+                if (isset($options[$key])) {
+                    $val = $options[$key];
+                    return is_string($val) ? $val : ($val['text'] ?? '');
+                }
+                // Formato array numérico: key "A" → índice 0, "B" → 1, etc.
+                $index = ord(strtoupper($key)) - 65;
+                if (isset($options[$index])) {
+                    $val = $options[$index];
+                    return is_array($val) ? ($val['text'] ?? '') : (string)$val;
+                }
+                return '';
+            };
 
             foreach ($preguntas as $pregunta) {
                 $preguntaId = $pregunta['id'];
                 $respuestaEstudiante = $respuestas[$preguntaId] ?? null;
+                $porcentajePregunta = floatval($pregunta['points'] ?? 0); // 'points' almacena el porcentaje
                 
                 // Soportar tanto el formato antiguo (correctAnswer) como el nuevo (correctAnswers)
                 $respuestasCorrectas = $pregunta['correctAnswers'] ?? [$pregunta['correctAnswer'] ?? ''];
                 $esMultiple = ($pregunta['isMultipleChoice'] ?? false) || count($respuestasCorrectas) > 1;
                 
-                $esCorrecta = false;
+                $puntosEstaPregunta = 0;
                 $respuestaEstudianteTexto = '';
                 $respuestaCorrectaTexto = '';
+                $esCorrecta = false;
                 
                 if ($esMultiple) {
-                    // Para preguntas de múltiple respuesta
-                    $respuestasEstudianteArray = is_array($respuestaEstudiante) ? $respuestaEstudiante : [];
+                    // MÚLTIPLES RESPUESTAS CORRECTAS
+                    // El porcentaje se distribuye entre las N respuestas correctas
+                    $numCorrectasTotal = count($respuestasCorrectas);
+                    $porcentajePorRespuesta = ($numCorrectasTotal > 0) ? $porcentajePregunta / $numCorrectasTotal : 0;
+                    
+                    // Si el frontend envió un solo string en vez de array, envolverlo
+                    if (is_array($respuestaEstudiante)) {
+                        $respuestasEstudianteArray = $respuestaEstudiante;
+                    } elseif (!empty($respuestaEstudiante)) {
+                        $respuestasEstudianteArray = [$respuestaEstudiante];
+                    } else {
+                        $respuestasEstudianteArray = [];
+                    }
+                    
+                    // Por cada respuesta correcta que el estudiante marcó: sumar (porcentajePorRespuesta/100) × 5
+                    $aciertos = 0;
+                    foreach ($respuestasEstudianteArray as $resp) {
+                        if (in_array($resp, $respuestasCorrectas)) {
+                            $puntosEstaPregunta += ($porcentajePorRespuesta / 100) * 5;
+                            $aciertos++;
+                        }
+                    }
+                    
+                    // Determinar si respondió todo correctamente
                     sort($respuestasEstudianteArray);
                     sort($respuestasCorrectas);
-                    
-                    // Verificar si las respuestas coinciden exactamente
                     $esCorrecta = ($respuestasEstudianteArray === $respuestasCorrectas);
                     
                     // Formatear texto de respuestas
-                    $respuestaEstudianteTexto = implode(', ', array_map(function($r) use ($pregunta) {
-                        return $r . ') ' . ($pregunta['options'][$r] ?? '');
+                    $respuestaEstudianteTexto = implode(', ', array_map(function($r) use ($pregunta, $getOptionText) {
+                        return $r . ') ' . $getOptionText($pregunta['options'], $r);
                     }, $respuestasEstudianteArray));
                     
-                    $respuestaCorrectaTexto = implode(', ', array_map(function($r) use ($pregunta) {
-                        return $r . ') ' . ($pregunta['options'][$r] ?? '');
+                    $respuestaCorrectaTexto = implode(', ', array_map(function($r) use ($pregunta, $getOptionText) {
+                        return $r . ') ' . $getOptionText($pregunta['options'], $r);
                     }, $respuestasCorrectas));
                 } else {
-                    // Para preguntas de respuesta única
+                    // RESPUESTA ÚNICA
                     $respuestaCorrecta = $respuestasCorrectas[0] ?? '';
                     $esCorrecta = ($respuestaEstudiante === $respuestaCorrecta);
                     
-                    $respuestaEstudianteTexto = $respuestaEstudiante ? $respuestaEstudiante . ') ' . ($pregunta['options'][$respuestaEstudiante] ?? '') : 'Sin respuesta';
-                    $respuestaCorrectaTexto = $respuestaCorrecta . ') ' . ($pregunta['options'][$respuestaCorrecta] ?? '');
+                    if ($esCorrecta) {
+                        $puntosEstaPregunta = ($porcentajePregunta / 100) * 5;
+                    }
+                    
+                    $respuestaEstudianteTexto = $respuestaEstudiante ? $respuestaEstudiante . ') ' . $getOptionText($pregunta['options'], $respuestaEstudiante) : 'Sin respuesta';
+                    $respuestaCorrectaTexto = $respuestaCorrecta . ') ' . $getOptionText($pregunta['options'], $respuestaCorrecta);
                 }
                 
-                if ($esCorrecta) {
-                    $puntosObtenidos += $pregunta['points'];
-                }
+                $notaObtenida += $puntosEstaPregunta;
 
                 $resultados[] = [
                     'pregunta_id' => $preguntaId,
@@ -641,14 +694,18 @@ class AcademicoController extends Controller
                     'respuesta_estudiante' => $respuestaEstudianteTexto,
                     'respuesta_correcta' => $respuestaCorrectaTexto,
                     'es_correcta' => $esCorrecta,
-                    'puntos' => $esCorrecta ? $pregunta['points'] : 0,
+                    'puntos' => round($puntosEstaPregunta, 2),
+                    'porcentaje_pregunta' => $porcentajePregunta,
                     'es_multiple' => $esMultiple
                 ];
             }
 
-            $porcentaje = $puntosMaximos > 0 ? ($puntosObtenidos / $puntosMaximos) * 100 : 0;
+            // La nota final está en escala 0-5.0
+            $notaFinal = min(round($notaObtenida, 2), 5.0);
+            $notaMinimaAprobacion = floatval($actividad->nota_minima_aprobacion ?? 3.0);
+            $aprobado = $notaFinal >= $notaMinimaAprobacion;
 
-            // Guardar resultado en la base de datos
+            // Guardar resultado en la base de datos (calificación en escala 0-5.0)
             DB::table('curso_actividad_entrega')->updateOrInsert(
                 [
                     'curso_id' => $curso->id,
@@ -661,8 +718,9 @@ class AcademicoController extends Controller
                         'resultados' => $resultados,
                         'tiempo_transcurrido' => $request->tiempo_transcurrido
                     ]),
-                    'puntos_obtenidos' => $puntosObtenidos,
-                    'calificacion' => $porcentaje,
+                    'puntos_obtenidos' => $notaFinal,
+                    'calificacion' => $notaFinal,
+                    'estado' => $aprobado ? 'aprobado' : 'revisado',
                     'entregado_at' => now(),
                     'updated_at' => now()
                 ]
@@ -672,16 +730,17 @@ class AcademicoController extends Controller
             $curso->actualizarProgresoEstudiante($user->id);
 
             // Registrar operación de resolución de quiz
-            OperationLogger::logQuizSubmission($actividad->id, $actividad->titulo, round($porcentaje, 2), $curso->id);
+            OperationLogger::logQuizSubmission($actividad->id, $actividad->titulo, $notaFinal, $curso->id);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Quiz completado exitosamente',
+                'message' => $aprobado ? '¡Quiz aprobado!' : 'Quiz completado',
                 'resultados' => $resultados,
-                'puntos_obtenidos' => $puntosObtenidos,
-                'puntos_maximos' => $puntosMaximos,
-                'porcentaje' => round($porcentaje, 2),
-                'aprobado' => $porcentaje >= 60
+                'nota_obtenida' => $notaFinal,
+                'nota_maxima' => 5.0,
+                'nota_minima_aprobacion' => $notaMinimaAprobacion,
+                'porcentaje' => round(($notaFinal / 5.0) * 100, 2),
+                'aprobado' => $aprobado
             ]);
 
         } catch (\Exception $e) {

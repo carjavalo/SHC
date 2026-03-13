@@ -156,18 +156,76 @@ class ControlPedagogicoController extends Controller
     }
 
     /**
+     * Activar/desactivar una actividad (quiz o evaluación)
+     */
+    public function toggleActividad(Request $request)
+    {
+        $user = Auth::user();
+        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+
+        $actividadId = $request->get('actividad_id');
+        $habilitado = $request->boolean('habilitado');
+
+        $actividad = \App\Models\CursoActividad::find($actividadId);
+        if (!$actividad) {
+            return response()->json(['error' => 'Actividad no encontrada'], 404);
+        }
+
+        // Si es docente, verificar que tenga asignación en el curso
+        if ($user->role === 'Docente') {
+            $tieneAsignacion = \App\Models\CursoAsignacion::where('curso_id', $actividad->curso_id)
+                ->where('docente_id', $user->id)
+                ->where('estado', 'activo')
+                ->exists();
+            if (!$tieneAsignacion) {
+                return response()->json(['error' => 'No tienes asignación en este curso'], 403);
+            }
+        }
+
+        // Solo permitir toggle en quiz y evaluacion
+        if (!in_array($actividad->tipo, ['quiz', 'evaluacion'])) {
+            return response()->json(['error' => 'Solo se pueden activar/desactivar Quiz o Evaluaciones'], 400);
+        }
+
+        $actividad->habilitado = $habilitado;
+        $actividad->save();
+
+        $tipoLabel = $actividad->tipo === 'quiz' ? 'Quiz' : 'Evaluación';
+        $estadoLabel = $habilitado ? 'habilitado' : 'deshabilitado';
+
+        return response()->json([
+            'success' => true,
+            'habilitado' => $habilitado,
+            'mensaje' => "{$tipoLabel} '{$actividad->titulo}' {$estadoLabel} correctamente."
+        ]);
+    }
+
+    /**
      * Habilitar reintento de una actividad (eliminar entrega)
      */
     public function resetActividad(Request $request)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador'])) {
+        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 403);
         }
 
         $cursoId = $request->get('curso_id');
         $estudianteId = $request->get('estudiante_id');
         $actividadId = $request->get('actividad_id');
+
+        // Si es docente, verificar asignación en el curso
+        if ($user->role === 'Docente') {
+            $tieneAsignacion = \App\Models\CursoAsignacion::where('curso_id', $cursoId)
+                ->where('docente_id', $user->id)
+                ->where('estado', 'activo')
+                ->exists();
+            if (!$tieneAsignacion) {
+                return response()->json(['error' => 'No tienes asignación en este curso'], 403);
+            }
+        }
 
         $entrega = DB::table('curso_actividad_entrega')
             ->where('curso_id', $cursoId)
@@ -186,6 +244,56 @@ class ControlPedagogicoController extends Controller
         return response()->json([
             'success' => true,
             'mensaje' => 'La actividad ha sido reseteada, el estudiante puede volver a enviarla.'
+        ]);
+    }
+
+    /**
+     * Habilitar reintento grupal de una actividad (quiz/evaluación) para estudiantes reprobados
+     */
+    public function resetActividadGrupo(Request $request)
+    {
+        $user = Auth::user();
+        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+
+        $cursoId = $request->get('curso_id');
+        $actividadId = $request->get('actividad_id');
+        $estudianteIds = $request->get('estudiante_ids', []);
+
+        if (empty($estudianteIds)) {
+            return response()->json(['error' => 'No se especificaron estudiantes'], 400);
+        }
+
+        // Verificar que la actividad sea quiz o evaluación
+        $actividad = \App\Models\CursoActividad::find($actividadId);
+        if (!$actividad || !in_array($actividad->tipo, ['quiz', 'evaluacion'])) {
+            return response()->json(['error' => 'Solo se pueden reintentar Quiz o Evaluaciones'], 400);
+        }
+
+        // Si es docente, verificar asignación
+        if ($user->role === 'Docente') {
+            $tieneAsignacion = \App\Models\CursoAsignacion::where('curso_id', $cursoId)
+                ->where('docente_id', $user->id)
+                ->where('estado', 'activo')
+                ->exists();
+            if (!$tieneAsignacion) {
+                return response()->json(['error' => 'No tienes asignación en este curso'], 403);
+            }
+        }
+
+        $deleted = DB::table('curso_actividad_entrega')
+            ->where('curso_id', $cursoId)
+            ->where('actividad_id', $actividadId)
+            ->whereIn('user_id', $estudianteIds)
+            ->delete();
+
+        $tipoLabel = $actividad->tipo === 'quiz' ? 'Quiz' : 'Evaluación';
+
+        return response()->json([
+            'success' => true,
+            'mensaje' => "Se habilitó el reintento de {$tipoLabel} '{$actividad->titulo}' para {$deleted} estudiante(s).",
+            'eliminados' => $deleted
         ]);
     }
     
@@ -473,6 +581,7 @@ class ControlPedagogicoController extends Controller
                     'nombre' => $actividad->titulo,
                     'tipo' => $actividad->tipo,
                     'peso' => floatval($actividad->porcentaje_curso ?? 0),
+                    'habilitado' => (bool) $actividad->habilitado,
                 ];
             }
             

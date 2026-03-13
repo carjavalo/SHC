@@ -82,6 +82,13 @@
                                         <i class="fas fa-{{ $componente['tipo'] == 'tarea' ? 'clipboard-check' : ($componente['tipo'] == 'quiz' ? 'question-circle' : 'file-alt') }}"></i>
                                         {{ Str::limit($componente['nombre'], 20) }} 
                                         <strong class="text-primary">({{ number_format($componente['peso'], 2) }}%)</strong>
+                                        @if(in_array($componente['tipo'], ['quiz', 'evaluacion']))
+                                            @if($componente['habilitado'])
+                                                <span class="badge badge-success badge-sm ml-1" title="Habilitado"><i class="fas fa-check-circle"></i></span>
+                                            @else
+                                                <span class="badge badge-secondary badge-sm ml-1" title="Deshabilitado"><i class="fas fa-ban"></i></span>
+                                            @endif
+                                        @endif
                                     </span>
                                 @endforeach
                             </div>
@@ -91,6 +98,193 @@
             </div>
         </div>
     </div>
+
+    {{-- Panel de Activación de Quiz/Evaluaciones (solo para roles autorizados) --}}
+    @if(in_array(auth()->user()->role, ['Super Admin', 'Administrador', 'Operador', 'Docente']))
+        @php
+            $quizActividades = [];
+            foreach ($estructuraEvaluacion as $item) {
+                if (!empty($item['componentes'])) {
+                    foreach ($item['componentes'] as $comp) {
+                        if (in_array($comp['tipo'], ['quiz', 'evaluacion'])) {
+                            $quizActividades[] = array_merge($comp, ['material' => $item['nombre']]);
+                        }
+                    }
+                }
+            }
+        @endphp
+        @if(count($quizActividades) > 0)
+            <div class="card shadow-sm mb-4 toggle-panel-card">
+                <div class="card-header toggle-panel-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-toggle-on"></i> Activar / Desactivar Quiz y Evaluaciones
+                        </h5>
+                        <span class="badge badge-light toggle-counter" id="toggleCounter">
+                            <span id="activasCount">{{ collect($quizActividades)->where('habilitado', true)->count() }}</span> 
+                            / {{ count($quizActividades) }} activas
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-info-circle"></i> 
+                        Activa o desactiva los Quiz y Evaluaciones para que los estudiantes puedan realizarlos.
+                        Los cambios se aplican inmediatamente.
+                    </p>
+                    <div class="toggle-activities-grid">
+                        @foreach($quizActividades as $qa)
+                            <div class="toggle-activity-card {{ $qa['habilitado'] ? 'toggle-active' : 'toggle-inactive' }}" 
+                                 id="toggle-card-{{ $qa['id'] }}">
+                                <div class="toggle-activity-top">
+                                    <div class="toggle-activity-icon {{ $qa['tipo'] === 'quiz' ? 'icon-quiz' : 'icon-eval' }}">
+                                        <i class="fas fa-{{ $qa['tipo'] === 'quiz' ? 'question-circle' : 'file-alt' }}"></i>
+                                    </div>
+                                    <div class="toggle-activity-info">
+                                        <span class="toggle-activity-type badge {{ $qa['tipo'] === 'quiz' ? 'badge-info' : 'badge-warning' }}">
+                                            {{ $qa['tipo'] === 'quiz' ? 'Quiz' : 'Evaluación' }}
+                                        </span>
+                                        <h6 class="toggle-activity-name mb-0">{{ $qa['nombre'] }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-folder-open"></i> {{ $qa['material'] }}
+                                            &bull; <strong>{{ number_format($qa['peso'], 1) }}%</strong>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="toggle-activity-bottom">
+                                    <span class="toggle-status-label" id="toggle-label-{{ $qa['id'] }}">
+                                        @if($qa['habilitado'])
+                                            <i class="fas fa-check-circle text-success"></i> Habilitado
+                                        @else
+                                            <i class="fas fa-ban text-secondary"></i> Deshabilitado
+                                        @endif
+                                    </span>
+                                    <label class="toggle-switch" title="{{ $qa['habilitado'] ? 'Desactivar' : 'Activar' }}">
+                                        <input type="checkbox" 
+                                               class="toggle-actividad-check" 
+                                               data-actividad-id="{{ $qa['id'] }}" 
+                                               data-nombre="{{ $qa['nombre'] }}"
+                                               data-tipo="{{ $qa['tipo'] }}"
+                                               {{ $qa['habilitado'] ? 'checked' : '' }}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endif
+
+    {{-- Panel de Reintentos para Evaluaciones Reprobadas (solo roles autorizados) --}}
+    @if(in_array(auth()->user()->role, ['Super Admin', 'Administrador', 'Operador', 'Docente']))
+        @php
+            $reprobadosQuiz = [];
+            foreach ($estructuraEvaluacion as $item) {
+                if (!empty($item['componentes'])) {
+                    foreach ($item['componentes'] as $comp) {
+                        if (in_array($comp['tipo'], ['quiz', 'evaluacion'])) {
+                            $estudiantesReprobados = [];
+                            foreach ($estudiantes as $est) {
+                                $califs = $est['calificaciones']['material_' . $item['id']] ?? [];
+                                $key = $comp['tipo'] . '_' . $comp['id'];
+                                $nota = $califs[$key] ?? 0;
+                                $porcentajeNota = ($nota / 5.0) * 100;
+                                if ($nota > 0 && $porcentajeNota < 60) {
+                                    $estudiantesReprobados[] = [
+                                        'id' => $est['id'],
+                                        'nombre' => $est['nombre'],
+                                        'email' => $est['email'],
+                                        'nota' => $nota,
+                                        'avatar' => $est['avatar'] ?? null,
+                                    ];
+                                }
+                            }
+                            if (count($estudiantesReprobados) > 0) {
+                                $reprobadosQuiz[] = [
+                                    'actividad_id' => $comp['id'],
+                                    'nombre' => $comp['nombre'],
+                                    'tipo' => $comp['tipo'],
+                                    'material' => $item['nombre'],
+                                    'estudiantes' => $estudiantesReprobados,
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+            $totalReprobados = collect($reprobadosQuiz)->sum(function($rq) { return count($rq['estudiantes']); });
+        @endphp
+
+        @if($totalReprobados > 0)
+            <div class="card shadow-sm mb-4 retry-panel-card">
+                <div class="card-header retry-panel-header" 
+                     data-toggle="collapse" data-target="#retryPanelBody" 
+                     aria-expanded="false" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-redo-alt"></i> Reintentos — Evaluaciones Reprobadas
+                            <i class="fas fa-chevron-down ml-2 retry-collapse-icon" style="font-size: 0.8rem; transition: transform 0.3s;"></i>
+                        </h5>
+                        <span class="badge badge-light retry-total-badge">
+                            <i class="fas fa-user-times"></i> {{ $totalReprobados }} reprobado{{ $totalReprobados > 1 ? 's' : '' }}
+                        </span>
+                    </div>
+                </div>
+                <div id="retryPanelBody" class="collapse">
+                    <div class="card-body py-3">
+                        <p class="text-muted mb-3" style="font-size: 0.85rem;">
+                            <i class="fas fa-info-circle"></i>
+                            Habilita reintentos individuales o grupales para estudiantes que reprobaron Quiz o Evaluaciones.
+                            Al habilitar, se elimina su entrega actual y podrán realizarla de nuevo.
+                        </p>
+                        @foreach($reprobadosQuiz as $rqIndex => $rq)
+                            <div class="retry-activity-group {{ $rqIndex < count($reprobadosQuiz) - 1 ? 'mb-3' : '' }}">
+                                <div class="retry-activity-header">
+                                    <div class="retry-activity-title">
+                                        <span class="retry-type-badge {{ $rq['tipo'] === 'quiz' ? 'badge-info' : 'badge-warning' }}">
+                                            <i class="fas fa-{{ $rq['tipo'] === 'quiz' ? 'question-circle' : 'file-alt' }}"></i>
+                                            {{ $rq['tipo'] === 'quiz' ? 'Quiz' : 'Evaluación' }}
+                                        </span>
+                                        <strong>{{ $rq['nombre'] }}</strong>
+                                        <small class="text-muted">({{ $rq['material'] }})</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-warning retry-all-btn" 
+                                            onclick="habilitarReintentosGrupo({{ $cursoActual->id }}, {{ $rq['actividad_id'] }}, this)"
+                                            title="Habilitar reintento para todos los reprobados">
+                                        <i class="fas fa-redo"></i> Todos
+                                    </button>
+                                </div>
+                                <div class="retry-students-chips">
+                                    @foreach($rq['estudiantes'] as $est)
+                                        <div class="retry-chip" id="retry-chip-{{ $rq['actividad_id'] }}-{{ $est['id'] }}">
+                                            <div class="retry-chip-avatar">
+                                                @if($est['avatar'])
+                                                    <img src="{{ asset('storage/' . $est['avatar']) }}" alt="">
+                                                @else
+                                                    {{ strtoupper(substr($est['nombre'], 0, 1)) }}
+                                                @endif
+                                            </div>
+                                            <div class="retry-chip-info">
+                                                <span class="retry-chip-name">{{ Str::limit($est['nombre'], 22) }}</span>
+                                                <span class="retry-chip-grade">{{ number_format($est['nota'], 1) }}/5.0</span>
+                                            </div>
+                                            <button class="retry-chip-btn" 
+                                                    onclick="event.stopPropagation(); habilitarReintentoQuiz({{ $cursoActual->id }}, {{ $est['id'] }}, {{ $rq['actividad_id'] }}, this)"
+                                                    title="Habilitar reintento para {{ $est['nombre'] }}">
+                                                <i class="fas fa-redo-alt"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endif
 
     <!-- Gradebook Table -->
     <div class="card shadow-sm">
@@ -203,8 +397,9 @@
                                                     $nota = $califs[$key] ?? 0;
                                                     // Convertir a porcentaje para determinar color
                                                     $porcentaje = ($nota / 5.0) * 100;
+                                                    $esQuizReprobado = in_array($componente['tipo'], ['quiz', 'evaluacion']) && $nota > 0 && $porcentaje < 60;
                                                 @endphp
-                                                <td class="grade-col text-center grade-cell-interactive" 
+                                                <td class="grade-col text-center grade-cell-interactive {{ $esQuizReprobado ? 'grade-cell-retry' : '' }}" 
                                                     data-estudiante-id="{{ $estudiante['id'] }}"
                                                     data-actividad-id="{{ $componente['id'] }}"
                                                     data-actividad-tipo="{{ $componente['tipo'] }}"
@@ -217,6 +412,9 @@
                                                         <span class="grade-badge grade-{{ $porcentaje >= 60 ? 'good' : ($porcentaje >= 50 ? 'warning' : 'poor') }}">
                                                             {{ number_format($nota, 1) }}/5.0
                                                         </span>
+                                                        @if($esQuizReprobado && in_array(auth()->user()->role, ['Super Admin', 'Administrador', 'Operador', 'Docente']))
+                                                            <i class="fas fa-redo-alt retry-inline-icon" title="Reprobado — Puede solicitar reintento"></i>
+                                                        @endif
                                                     @else
                                                         <span class="text-muted"><i class="fas fa-edit"></i> -</span>
                                                     @endif
@@ -773,6 +971,481 @@
         .evaluation-structure {
             grid-template-columns: 1fr;
         }
+
+        .toggle-activities-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* ==========================================
+       Toggle Panel - Activar/Desactivar Quiz
+       ========================================== */
+    .toggle-panel-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .toggle-panel-header {
+        background: linear-gradient(135deg, #2c4370, #1a5276) !important;
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .toggle-panel-header h5 {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+    }
+
+    .toggle-panel-header .toggle-counter {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.4rem 0.85rem;
+        border-radius: 20px;
+    }
+
+    .toggle-activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1rem;
+    }
+
+    .toggle-activity-card {
+        border-radius: 12px;
+        padding: 1.15rem;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .toggle-activity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        transition: all 0.35s ease;
+    }
+
+    .toggle-activity-card.toggle-active {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-color: #86efac;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
+    }
+
+    .toggle-activity-card.toggle-active::before {
+        background: linear-gradient(180deg, #22c55e, #16a34a);
+    }
+
+    .toggle-activity-card.toggle-inactive {
+        background: linear-gradient(135deg, #f8f9fa, #f1f3f5);
+        border-color: #dee2e6;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .toggle-activity-card.toggle-inactive::before {
+        background: #adb5bd;
+    }
+
+    .toggle-activity-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-activity-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .toggle-activity-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-activity-icon.icon-quiz {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+    }
+
+    .toggle-activity-icon.icon-eval {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .toggle-activity-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .toggle-activity-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1e293b;
+        margin-top: 0.25rem;
+        word-break: break-word;
+    }
+
+    .toggle-activity-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        padding-top: 0.75rem;
+        margin-left: 4px;
+    }
+
+    .toggle-status-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+        margin: 0;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #cbd5e1;
+        border-radius: 28px;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toggle-slider::before {
+        content: '';
+        position: absolute;
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(24px);
+    }
+
+    .toggle-switch input:focus + .toggle-slider {
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+
+    /* Animación de procesando */
+    .toggle-activity-card.toggle-processing {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .toggle-activity-card.toggle-processing::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes togglePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .toggle-activity-card.toggle-just-changed {
+        animation: togglePulse 0.4s ease;
+    }
+
+    /* ==========================================
+       Retry Panel - Reintentos Reprobados
+       ========================================== */
+    .retry-panel-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .retry-panel-header {
+        background: linear-gradient(135deg, #dc3545, #c82333) !important;
+        color: white;
+        padding: 0.9rem 1.25rem;
+        border: none;
+        transition: background 0.3s ease;
+    }
+
+    .retry-panel-header:hover {
+        background: linear-gradient(135deg, #c82333, #b21f2d) !important;
+    }
+
+    .retry-panel-header h5 {
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+    }
+
+    .retry-total-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.95) !important;
+        color: #dc3545 !important;
+    }
+
+    .retry-collapse-icon {
+        transition: transform 0.3s ease;
+    }
+
+    [aria-expanded="true"] .retry-collapse-icon {
+        transform: rotate(180deg);
+    }
+
+    .retry-activity-group {
+        background: #fafbfc;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.85rem;
+    }
+
+    .retry-activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.65rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .retry-activity-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+    }
+
+    .retry-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .retry-type-badge.badge-info {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .retry-type-badge.badge-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .retry-all-btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-weight: 600;
+        border-color: #f39c12;
+        color: #f39c12;
+        white-space: nowrap;
+    }
+
+    .retry-all-btn:hover {
+        background: #f39c12;
+        color: white;
+    }
+
+    .retry-students-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .retry-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: white;
+        border: 1px solid #f5c6cb;
+        border-radius: 24px;
+        padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+        transition: all 0.25s ease;
+        max-width: 260px;
+    }
+
+    .retry-chip:hover {
+        border-color: #dc3545;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .retry-chip-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.65rem;
+    }
+
+    .retry-chip-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .retry-chip-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.15;
+    }
+
+    .retry-chip-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #2c3e50;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .retry-chip-grade {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #dc3545;
+    }
+
+    .retry-chip-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+        font-size: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.25s ease;
+        padding: 0;
+    }
+
+    .retry-chip-btn:hover {
+        background: linear-gradient(135deg, #e67e22, #d35400);
+        transform: scale(1.15);
+        box-shadow: 0 2px 6px rgba(243, 156, 18, 0.4);
+    }
+
+    .retry-chip.retry-done {
+        opacity: 0.4;
+        pointer-events: none;
+        background: #f0f0f0;
+        border-color: #ddd;
+    }
+
+    .retry-chip.retry-done .retry-chip-btn {
+        background: #adb5bd;
+    }
+
+    .retry-chip.retry-processing {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    @keyframes retryPulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(0.95); opacity: 0.6; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .retry-chip.retry-processing {
+        animation: retryPulse 0.8s ease infinite;
+    }
+
+    /* Inline retry icon on grade cells */
+    .grade-cell-retry {
+        position: relative;
+    }
+
+    .retry-inline-icon {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 0.55rem;
+        color: #f39c12;
+        opacity: 0.7;
+        transition: all 0.2s ease;
+    }
+
+    .grade-cell-retry:hover .retry-inline-icon {
+        opacity: 1;
+        color: #e67e22;
+        transform: rotate(-45deg);
+    }
+
+    @media (max-width: 992px) {
+        .retry-students-chips {
+            gap: 0.35rem;
+        }
+        .retry-chip {
+            max-width: 100%;
+        }
+        .retry-activity-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 </style>
 @stop
@@ -780,7 +1453,8 @@
 @section('js')
 <script>
     const userRole = {!! json_encode(auth()->user()->role) !!};
-    const canResetActivity = ['Super Admin', 'Administrador', 'Operador'].includes(userRole);
+    const canResetActivity = ['Super Admin', 'Administrador', 'Operador', 'Docente'].includes(userRole);
+    const canToggleActivity = ['Super Admin', 'Administrador', 'Operador', 'Docente'].includes(userRole);
 
     $(document).ready(function() {
         // Cambiar curso
@@ -788,6 +1462,110 @@
             const cursoId = $(this).val();
             window.location.href = '{{ route("academico.control-pedagogico.index") }}?curso_id=' + cursoId;
         });
+
+        // Toggle de activar/desactivar quiz/evaluaciones
+        if (canToggleActivity) {
+            $(document).on('change', '.toggle-actividad-check', function() {
+                const checkbox = $(this);
+                const actividadId = checkbox.data('actividad-id');
+                const nombre = checkbox.data('nombre');
+                const tipo = checkbox.data('tipo');
+                const habilitado = checkbox.is(':checked');
+                const card = $(`#toggle-card-${actividadId}`);
+                const tipoLabel = tipo === 'quiz' ? 'Quiz' : 'Evaluación';
+                const accion = habilitado ? 'habilitar' : 'deshabilitar';
+
+                // Confirmar
+                Swal.fire({
+                    title: `¿${habilitado ? 'Habilitar' : 'Deshabilitar'} ${tipoLabel}?`,
+                    html: `
+                        <div class="text-left">
+                            <p><strong>${nombre}</strong></p>
+                            <p class="text-muted">
+                                ${habilitado 
+                                    ? '<i class="fas fa-check-circle text-success"></i> Los estudiantes <strong>podrán</strong> realizar esta actividad.' 
+                                    : '<i class="fas fa-ban text-danger"></i> Los estudiantes <strong>no podrán</strong> realizar esta actividad hasta que se habilite.'}
+                            </p>
+                        </div>
+                    `,
+                    icon: habilitado ? 'question' : 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: `<i class="fas fa-${habilitado ? 'check' : 'ban'}"></i> Sí, ${accion}`,
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: habilitado ? '#22c55e' : '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Marcar procesando
+                        card.addClass('toggle-processing');
+
+                        $.ajax({
+                            url: '{{ route("academico.control-pedagogico.toggle-actividad") }}',
+                            method: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                actividad_id: actividadId,
+                                habilitado: habilitado ? 1 : 0
+                            },
+                            success: function(response) {
+                                card.removeClass('toggle-processing');
+
+                                if (response.success) {
+                                    // Actualizar UI
+                                    const label = $(`#toggle-label-${actividadId}`);
+                                    if (habilitado) {
+                                        card.removeClass('toggle-inactive').addClass('toggle-active');
+                                        label.html('<i class="fas fa-check-circle text-success"></i> Habilitado');
+                                    } else {
+                                        card.removeClass('toggle-active').addClass('toggle-inactive');
+                                        label.html('<i class="fas fa-ban text-secondary"></i> Deshabilitado');
+                                    }
+
+                                    // Animación
+                                    card.addClass('toggle-just-changed');
+                                    setTimeout(() => card.removeClass('toggle-just-changed'), 500);
+
+                                    // Actualizar contador
+                                    const activasCount = $('.toggle-actividad-check:checked').length;
+                                    $('#activasCount').text(activasCount);
+
+                                    // Toast
+                                    const Toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: true,
+                                    });
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: response.mensaje
+                                    });
+                                } else {
+                                    // Revertir checkbox
+                                    checkbox.prop('checked', !habilitado);
+                                    Swal.fire('Error', response.error || 'No se pudo cambiar el estado', 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                card.removeClass('toggle-processing');
+                                // Revertir checkbox
+                                checkbox.prop('checked', !habilitado);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: xhr.responseJSON?.error || 'No se pudo cambiar el estado de la actividad',
+                                    confirmButtonColor: '#2c4370'
+                                });
+                            }
+                        });
+                    } else {
+                        // Revertir checkbox si cancela
+                        checkbox.prop('checked', !habilitado);
+                    }
+                });
+            });
+        }
 
         console.log('Control Pedagógico cargado correctamente');
     });
@@ -1150,5 +1928,174 @@
             }
         });
     }
+
+    // Función para habilitar reintento individual desde el panel de reintentos (chip)
+    function habilitarReintentoQuiz(cursoId, estudianteId, actividadId, btn) {
+        const chip = $(btn).closest('.retry-chip');
+        const estudianteNombre = chip.find('.retry-chip-name').text().trim();
+
+        Swal.fire({
+            title: '¿Habilitar reintento?',
+            html: `<p>Se eliminará la entrega actual de <strong>${estudianteNombre}</strong> y podrá realizar esta evaluación de nuevo.</p>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-redo-alt"></i> Sí, habilitar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#f39c12',
+            cancelButtonColor: '#6c757d',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                chip.addClass('retry-processing');
+
+                $.ajax({
+                    url: '{{ route("academico.control-pedagogico.reset-actividad") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        curso_id: cursoId,
+                        estudiante_id: estudianteId,
+                        actividad_id: actividadId
+                    },
+                    success: function(response) {
+                        chip.removeClass('retry-processing');
+                        if (response.success) {
+                            chip.addClass('retry-done');
+                            chip.find('.retry-chip-btn').html('<i class="fas fa-check"></i>');
+                            chip.find('.retry-chip-grade').text('Reintento habilitado').css('color', '#27ae60');
+
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                            });
+                            Toast.fire({
+                                icon: 'success',
+                                title: `Reintento habilitado para ${estudianteNombre}`
+                            });
+
+                            // Actualizar contador de reprobados
+                            actualizarContadorReprobados();
+                        } else {
+                            Swal.fire('Error', response.error || 'No se pudo habilitar el reintento', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        chip.removeClass('retry-processing');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.error || 'No se pudo habilitar el reintento',
+                            confirmButtonColor: '#2c4370'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para habilitar reintento grupal (todos los reprobados de un quiz)
+    function habilitarReintentosGrupo(cursoId, actividadId, btn) {
+        const group = $(btn).closest('.retry-activity-group');
+        const chips = group.find('.retry-chip:not(.retry-done)');
+        const count = chips.length;
+
+        if (count === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin pendientes',
+                text: 'Ya se habilitaron todos los reintentos para esta evaluación.',
+                confirmButtonColor: '#2c4370'
+            });
+            return;
+        }
+
+        const estudianteIds = [];
+        chips.each(function() {
+            const id = $(this).attr('id').split('-').pop();
+            estudianteIds.push(parseInt(id));
+        });
+
+        Swal.fire({
+            title: '¿Habilitar reintento grupal?',
+            html: `<p>Se habilitará el reintento para <strong>${count} estudiante(s)</strong> que reprobaron esta evaluación.</p>
+                   <p class="text-muted"><small>Se eliminarán sus entregas actuales y podrán realizarla de nuevo.</small></p>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: `<i class="fas fa-redo"></i> Sí, habilitar ${count} reintento(s)`,
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#f39c12',
+            cancelButtonColor: '#6c757d',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                chips.addClass('retry-processing');
+                $(btn).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+
+                $.ajax({
+                    url: '{{ route("academico.control-pedagogico.reset-actividad-grupo") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        curso_id: cursoId,
+                        actividad_id: actividadId,
+                        estudiante_ids: estudianteIds
+                    },
+                    success: function(response) {
+                        chips.removeClass('retry-processing');
+                        if (response.success) {
+                            chips.addClass('retry-done');
+                            chips.find('.retry-chip-btn').html('<i class="fas fa-check"></i>');
+                            chips.find('.retry-chip-grade').text('Reintento habilitado').css('color', '#27ae60');
+                            $(btn).html('<i class="fas fa-check-circle"></i> Completado').removeClass('btn-outline-warning').addClass('btn-success').prop('disabled', true);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Reintentos habilitados!',
+                                text: response.mensaje,
+                                confirmButtonColor: '#2c4370'
+                            });
+
+                            actualizarContadorReprobados();
+                        } else {
+                            $(btn).prop('disabled', false).html('<i class="fas fa-redo"></i> Todos');
+                            Swal.fire('Error', response.error || 'Error desconocido', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        chips.removeClass('retry-processing');
+                        $(btn).prop('disabled', false).html('<i class="fas fa-redo"></i> Todos');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.error || 'No se pudieron habilitar los reintentos',
+                            confirmButtonColor: '#2c4370'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Actualizar el contador de reprobados en el badge del panel
+    function actualizarContadorReprobados() {
+        const pendientes = $('.retry-chip:not(.retry-done)').length;
+        const badge = $('.retry-total-badge');
+        if (pendientes === 0) {
+            badge.html('<i class="fas fa-check-circle"></i> Todos habilitados');
+            badge.removeClass('text-danger').css('color', '#27ae60');
+        } else {
+            badge.html(`<i class="fas fa-user-times"></i> ${pendientes} reprobado${pendientes > 1 ? 's' : ''}`);
+        }
+    }
+
+    // Toggle collapse icon rotation
+    $(document).ready(function() {
+        $('#retryPanelBody').on('show.bs.collapse', function() {
+            $(this).closest('.retry-panel-card').find('.retry-collapse-icon').css('transform', 'rotate(180deg)');
+        }).on('hide.bs.collapse', function() {
+            $(this).closest('.retry-panel-card').find('.retry-collapse-icon').css('transform', 'rotate(0deg)');
+        });
+    });
 </script>
 @stop

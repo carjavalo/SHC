@@ -429,47 +429,7 @@ $(document).ready(function() {
             }
         });
     });
-    
-    // Manejar botón editar actividad
-    $(document).on('click', '.btn-editar-actividad', function(e) {
-        e.preventDefault();
-        var actividadId = $(this).data('actividad-id');
-        
-        console.log('=== EDITAR ACTIVIDAD ===');
-        console.log('Actividad ID:', actividadId);
-        
-        // Mostrar loading
-        Swal.fire({
-            title: 'Cargando...',
-            html: '<i class="fas fa-spinner fa-spin fa-2x"></i>',
-            showConfirmButton: false,
-            allowOutsideClick: false
-        });
-        
-        // Obtener datos de la actividad mediante AJAX
-        $.ajax({
-            url: '/capacitaciones/cursos/{{ $curso->id }}/classroom/actividades/' + actividadId + '/obtener',
-            type: 'GET',
-            success: function(response) {
-                console.log('Respuesta del servidor:', response);
-                Swal.close();
-                if (response.success && response.actividad) {
-                    console.log('Abriendo modal de edición...');
-                    console.log('Datos de actividad:', response.actividad);
-                    // Abrir modal de edición completo
-                    editarActividadCompleta(actividadId, response.actividad);
-                } else {
-                    console.error('Error: No se pudo cargar la actividad');
-                    Swal.fire('Error', 'No se pudo cargar la actividad', 'error');
-                }
-            },
-            error: function(xhr) {
-                console.error('Error AJAX:', xhr);
-                Swal.fire('Error', 'Error al cargar la actividad: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
-        });
-    });
-    
+
     // Manejar botón eliminar actividad
     $(document).on('click', '.btn-eliminar-actividad', function() {
         const actividadId = $(this).data('actividad-id');
@@ -711,9 +671,16 @@ function iniciarTemporizador(duracionMinutos, actividadId, actividad) {
                 const respuestas = {};
                 const preguntas = actividad.contenido_json.questions || [];
                 preguntas.forEach(pregunta => {
-                    const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
-                    if (respuesta) {
-                        respuestas[pregunta.id] = respuesta;
+                    const esMultiple = pregunta.isMultipleChoice || (pregunta.correctAnswers && pregunta.correctAnswers.length > 1);
+                    if (esMultiple) {
+                        const checked = [];
+                        $(`input[name="pregunta_${pregunta.id}"]:checked`).each(function() {
+                            checked.push($(this).val());
+                        });
+                        if (checked.length > 0) respuestas[pregunta.id] = checked;
+                    } else {
+                        const respuesta = $(`input[name="pregunta_${pregunta.id}"]:checked`).val();
+                        if (respuesta) respuestas[pregunta.id] = respuesta;
                     }
                 });
                 enviarRespuestasQuiz(actividadId, respuestas);

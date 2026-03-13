@@ -1512,7 +1512,7 @@ function showActivityModal(activityType) {
     // Generar lista de materiales disponibles para vincular actividad
     const materialesDisponibles = courseData.materials || [];
     // El porcentaje de cada actividad es relativo al material (0-100%), no al curso
-    let materialesOptions = '<option value="">-- Actividad independiente (sin material) --</option>';
+    let materialesOptions = '<option value="">-- Selecciona un material --</option>';
     materialesDisponibles.forEach(mat => {
         // Calcular porcentaje usado por otras actividades de este material (sobre 100% del material)
         const porcentajeUsadoEnMaterial = courseData.activities
@@ -1520,7 +1520,8 @@ function showActivityModal(activityType) {
             .reduce((sum, a) => sum + (parseFloat(a.porcentajeMaterial) || 0), 0);
         // El disponible es 100% menos lo usado (relativo al material, no al curso)
         const porcentajeDisponibleMaterial = Math.max(0, 100 - porcentajeUsadoEnMaterial);
-        materialesOptions += `<option value="${mat.id}" data-porcentaje-disponible="${porcentajeDisponibleMaterial.toFixed(1)}" data-porcentaje-material="${mat.porcentajeCurso || 0}">${mat.title} (${porcentajeDisponibleMaterial.toFixed(1)}% disponible)</option>`;
+        const estaLleno = porcentajeDisponibleMaterial <= 0;
+        materialesOptions += `<option value="${mat.id}" data-porcentaje-disponible="${porcentajeDisponibleMaterial.toFixed(1)}" data-porcentaje-material="${mat.porcentajeCurso || 0}" ${estaLleno ? 'style="color: #dc3545;"' : ''}>${mat.title} (${estaLleno ? '✗ 100% asignado' : porcentajeDisponibleMaterial.toFixed(1) + '% disponible'})</option>`;
     });
 
     // Sección de configuración de calificación para actividades
@@ -1543,10 +1544,12 @@ function showActivityModal(activityType) {
                         <div class="form-group mb-2">
                             <label for="activity-porcentaje">Porcentaje de la Actividad (%) *</label>
                             <input type="number" class="form-control" id="activity-porcentaje" 
-                                   min="0" max="100" step="0.1" value="0" placeholder="0">
+                                   min="0.1" max="100" step="0.1" value="" placeholder="Ej: 25" 
+                                   oninput="validarPorcentajeActividadEnTiempoReal()">
                             <small class="form-text text-muted" id="porcentaje-disponible-info">
                                 Selecciona un material para ver el porcentaje disponible
                             </small>
+                            <div id="porcentaje-warning" class="text-danger small" style="display: none;"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -1562,8 +1565,17 @@ function showActivityModal(activityType) {
                     <label class="small">Distribución del porcentaje del material:</label>
                     <div class="progress" style="height: 20px;">
                         <div class="progress-bar bg-success" role="progressbar" id="porcentaje-usado-bar" style="width: 0%"></div>
+                        <div class="progress-bar bg-info" role="progressbar" id="porcentaje-nueva-bar" style="width: 0%"></div>
                         <div class="progress-bar bg-secondary" role="progressbar" id="porcentaje-disponible-bar" style="width: 100%"></div>
                     </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <small class="text-success" id="leyenda-usado"><i class="fas fa-square"></i> Usado por otras actividades</small>
+                        <small class="text-info" id="leyenda-nueva"><i class="fas fa-square"></i> Esta actividad</small>
+                        <small class="text-secondary" id="leyenda-disponible"><i class="fas fa-square"></i> Disponible</small>
+                    </div>
+                </div>
+                <div id="porcentaje-total-info" class="alert alert-info py-1 mt-2" style="display: none;">
+                    <small><i class="fas fa-info-circle"></i> <span id="porcentaje-total-text"></span></small>
                 </div>
             </div>
         </div>
@@ -1574,12 +1586,13 @@ function showActivityModal(activityType) {
         <hr class="my-4">
         <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas de la ${tipoLabel}</h5>
         <div class="alert alert-info py-2">
-            <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> - La suma de puntos de todas las preguntas no puede exceder 5.0
+            <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> — Cada pregunta tiene un <strong>porcentaje (%)</strong>. La suma de los porcentajes de todas las preguntas no puede exceder <strong>100%</strong>.<br>
+            <small>La nota se calcula así: si una respuesta es correcta, su porcentaje se multiplica por 5. Si es incorrecta, por 0. Si hay varias respuestas correctas, el porcentaje se distribuye entre ellas.</small>
         </div>
         <div class="form-group">
-            <label>Puntos totales asignados:</label>
+            <label>Porcentaje total asignado:</label>
             <div class="progress" style="height: 25px;">
-                <div class="progress-bar bg-success" role="progressbar" id="quiz-points-progress" style="width: 0%">0 / 5.0</div>
+                <div class="progress-bar bg-success" role="progressbar" id="quiz-points-progress" style="width: 0%">0% / 100%</div>
             </div>
         </div>
         <div class="form-group">
@@ -1691,11 +1704,15 @@ function showActivityModal(activityType) {
                 const infoText = document.getElementById('porcentaje-disponible-info');
                 const progressContainer = document.getElementById('material-progress-container');
                 const usadoBar = document.getElementById('porcentaje-usado-bar');
+                const nuevaBar = document.getElementById('porcentaje-nueva-bar');
                 const disponibleBar = document.getElementById('porcentaje-disponible-bar');
+                const totalInfo = document.getElementById('porcentaje-total-info');
+                const totalText = document.getElementById('porcentaje-total-text');
                 
                 if (!materialSelect || !materialSelect.value) {
                     infoText.innerHTML = 'Selecciona un material para ver el porcentaje disponible';
                     progressContainer.style.display = 'none';
+                    if (totalInfo) totalInfo.style.display = 'none';
                     porcentajeInput.max = 100;
                     return;
                 }
@@ -1708,14 +1725,82 @@ function showActivityModal(activityType) {
                 const porcentajeUsadoEnMaterial = 100 - porcentajeDisponible;
                 
                 porcentajeInput.max = porcentajeDisponible;
-                infoText.innerHTML = 'Disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong> del material (el material representa ' + porcentajeMaterialEnCurso.toFixed(1) + '% del curso)';
+                porcentajeInput.min = 0.1;
+                
+                if (porcentajeDisponible <= 0) {
+                    infoText.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Este material ya tiene el 100% asignado a sus actividades. No puedes agregar más actividades a este material.</span>';
+                    porcentajeInput.disabled = true;
+                    porcentajeInput.value = '';
+                } else {
+                    porcentajeInput.disabled = false;
+                    infoText.innerHTML = 'Disponible: <strong class="text-success">' + porcentajeDisponible.toFixed(1) + '%</strong> del material (el material representa ' + porcentajeMaterialEnCurso.toFixed(1) + '% del curso)';
+                }
+                
+                // Calcular el valor actual del input para la barra
+                const valorActual = parseFloat(porcentajeInput.value) || 0;
+                const restanteReal = Math.max(0, porcentajeDisponible - valorActual);
                 
                 progressContainer.style.display = 'block';
                 // La barra de progreso muestra el uso sobre 100% del material
                 usadoBar.style.width = porcentajeUsadoEnMaterial + '%';
                 usadoBar.textContent = porcentajeUsadoEnMaterial > 10 ? porcentajeUsadoEnMaterial.toFixed(1) + '% usado' : '';
-                disponibleBar.style.width = porcentajeDisponible + '%';
-                disponibleBar.textContent = porcentajeDisponible > 10 ? porcentajeDisponible.toFixed(1) + '% disp' : '';
+                if (nuevaBar) {
+                    nuevaBar.style.width = Math.min(valorActual, porcentajeDisponible) + '%';
+                    nuevaBar.textContent = valorActual > 5 ? valorActual.toFixed(1) + '%' : '';
+                }
+                disponibleBar.style.width = restanteReal + '%';
+                disponibleBar.textContent = restanteReal > 10 ? restanteReal.toFixed(1) + '% disp' : '';
+                
+                // Mostrar información del total
+                if (totalInfo && totalText) {
+                    const totalConNueva = porcentajeUsadoEnMaterial + valorActual;
+                    totalInfo.style.display = 'block';
+                    if (totalConNueva > 100) {
+                        totalInfo.className = 'alert alert-danger py-1 mt-2';
+                        totalText.innerHTML = '<strong>¡Excede el 100%!</strong> La suma sería ' + totalConNueva.toFixed(1) + '% (máximo 100%)';
+                    } else if (totalConNueva === 100) {
+                        totalInfo.className = 'alert alert-success py-1 mt-2';
+                        totalText.innerHTML = '<strong>¡Perfecto!</strong> El material quedará con el 100% de sus actividades asignadas.';
+                    } else {
+                        totalInfo.className = 'alert alert-info py-1 mt-2';
+                        totalText.innerHTML = 'Suma actual: <strong>' + totalConNueva.toFixed(1) + '%</strong> de 100%. Quedaría <strong>' + (100 - totalConNueva).toFixed(1) + '%</strong> disponible para más actividades.';
+                    }
+                }
+            };
+            
+            // Función para validar el porcentaje en tiempo real mientras se escribe
+            window.validarPorcentajeActividadEnTiempoReal = function() {
+                const porcentajeInput = document.getElementById('activity-porcentaje');
+                const warningDiv = document.getElementById('porcentaje-warning');
+                const materialSelect = document.getElementById('activity-material');
+                
+                if (!materialSelect || !materialSelect.value) {
+                    if (warningDiv) { warningDiv.style.display = 'none'; }
+                    return;
+                }
+                
+                const valor = parseFloat(porcentajeInput.value) || 0;
+                const selectedOption = materialSelect.options[materialSelect.selectedIndex];
+                const maxDisponible = parseFloat(selectedOption.dataset.porcentajeDisponible) || 0;
+                
+                if (warningDiv) {
+                    if (valor > maxDisponible) {
+                        warningDiv.style.display = 'block';
+                        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> El porcentaje excede el disponible (' + maxDisponible.toFixed(1) + '%). La suma de actividades no puede superar el 100% del material.';
+                        porcentajeInput.classList.add('is-invalid');
+                        porcentajeInput.classList.remove('is-valid');
+                    } else if (valor > 0 && valor <= maxDisponible) {
+                        warningDiv.style.display = 'none';
+                        porcentajeInput.classList.remove('is-invalid');
+                        porcentajeInput.classList.add('is-valid');
+                    } else {
+                        warningDiv.style.display = 'none';
+                        porcentajeInput.classList.remove('is-invalid', 'is-valid');
+                    }
+                }
+                
+                // Actualizar barra de progreso en tiempo real
+                updatePorcentajeDisponibleActividad();
             };
             
             // Inicializar array temporal para preguntas del quiz
@@ -1840,9 +1925,9 @@ function showActivityModal(activityType) {
                 const container = document.getElementById('quiz-questions-container');
                 window.optionCounters[questionId] = 0;
                 
-                // Calcular puntos disponibles
-                const puntosUsados = calcularPuntosTotalesQuiz();
-                const puntosDisponibles = Math.max(0, 5 - puntosUsados).toFixed(1);
+                // Calcular porcentaje disponible
+                const porcentajeUsado = calcularPuntosTotalesQuiz();
+                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
                 
                 const questionHtml = `
                     <div class="card mb-3" id="question-${questionId}" style="border-left: 3px solid #007bff;">
@@ -1858,11 +1943,11 @@ function showActivityModal(activityType) {
                                 <input type="text" class="form-control" id="question-text-${questionId}" placeholder="Escribe la pregunta aquí">
                             </div>
                             <div class="form-group">
-                                <label>Ponderación (puntos) <small class="text-muted">Máx: 5.0</small></label>
+                                <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
                                 <input type="number" class="form-control question-points-input" id="question-points-${questionId}" 
-                                       min="0" max="5" step="0.1" value="1.0" placeholder="Puntos de esta pregunta"
-                                       onchange="actualizarPuntosDisponiblesQuiz()">
-                                <small class="form-text text-muted">Disponible: <span class="puntos-disponibles">${puntosDisponibles}</span> de 5.0 puntos</small>
+                                       min="0.1" max="100" step="0.1" value="" placeholder="Ej: 20"
+                                       oninput="actualizarPuntosDisponiblesQuiz()">
+                                <small class="form-text text-muted">Disponible: <span class="puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
@@ -1873,7 +1958,7 @@ function showActivityModal(activityType) {
                             <div id="options-container-${questionId}">
                                 <!-- Las opciones se agregarán aquí -->
                             </div>
-                            <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas (puede ser una o varias)</small>
+                            <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
                         </div>
                     </div>
                 `;
@@ -1885,11 +1970,11 @@ function showActivityModal(activityType) {
                 addQuestionOption(questionId);
                 addQuestionOption(questionId);
                 
-                // Actualizar puntos disponibles en todas las preguntas
+                // Actualizar porcentaje disponible en todas las preguntas
                 actualizarPuntosDisponiblesQuiz();
             };
             
-            // Función para calcular puntos totales del quiz
+            // Función para calcular porcentaje total asignado del quiz
             window.calcularPuntosTotalesQuiz = function() {
                 let total = 0;
                 document.querySelectorAll('.question-points-input').forEach(input => {
@@ -1898,22 +1983,22 @@ function showActivityModal(activityType) {
                 return total;
             };
             
-            // Función para actualizar puntos disponibles en todas las preguntas
+            // Función para actualizar porcentaje disponible en todas las preguntas
             window.actualizarPuntosDisponiblesQuiz = function() {
-                const puntosUsados = calcularPuntosTotalesQuiz();
-                const puntosDisponibles = Math.max(0, 5 - puntosUsados).toFixed(1);
+                const porcentajeUsado = calcularPuntosTotalesQuiz();
+                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
                 document.querySelectorAll('.puntos-disponibles').forEach(span => {
-                    span.textContent = puntosDisponibles;
-                    span.style.color = puntosUsados > 5 ? 'red' : 'inherit';
+                    span.textContent = porcentajeDisponible;
+                    span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
                 });
                 
                 // Actualizar barra de progreso si existe
                 const progressBar = document.getElementById('quiz-points-progress');
                 if (progressBar) {
-                    const porcentaje = Math.min(100, (puntosUsados / 5) * 100);
-                    progressBar.style.width = porcentaje + '%';
-                    progressBar.textContent = puntosUsados.toFixed(1) + ' / 5.0';
-                    progressBar.className = 'progress-bar ' + (puntosUsados > 5 ? 'bg-danger' : 'bg-success');
+                    const barWidth = Math.min(100, porcentajeUsado);
+                    progressBar.style.width = barWidth + '%';
+                    progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
+                    progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
                 }
             };
             
@@ -1980,8 +2065,8 @@ function showActivityModal(activityType) {
             const selectedOption = materialSelect.options[materialSelect.selectedIndex];
             const maxPorcentajeMat = parseFloat(selectedOption.dataset.porcentajeDisponible) || 0;
             
-            if (porcentajeMaterial < 0) {
-                Swal.showValidationMessage('El porcentaje no puede ser negativo');
+            if (porcentajeMaterial <= 0) {
+                Swal.showValidationMessage('El porcentaje debe ser mayor a 0%. Cada actividad debe tener un porcentaje asignado.');
                 return false;
             }
             
@@ -1991,7 +2076,7 @@ function showActivityModal(activityType) {
             }
             
             if (porcentajeMaterial > maxPorcentajeMat) {
-                Swal.showValidationMessage('El porcentaje excede el disponible del material (' + maxPorcentajeMat.toFixed(1) + '% de 100%)');
+                Swal.showValidationMessage('El porcentaje (' + porcentajeMaterial.toFixed(1) + '%) excede el disponible del material (' + maxPorcentajeMat.toFixed(1) + '%). La suma de todas las actividades de un material no puede superar el 100%.');
                 return false;
             }
             
@@ -2063,9 +2148,14 @@ function showActivityModal(activityType) {
                     
                     const puntosPregunta = parseFloat(questionPoints) || 0;
                     
-                    // Validar que los puntos de la pregunta estén entre 0 y 5
-                    if (puntosPregunta < 0 || puntosPregunta > 5) {
-                        Swal.showValidationMessage('Los puntos de cada pregunta deben estar entre 0 y 5');
+                    // Validar que el porcentaje de la pregunta esté entre 0.1 y 100
+                    if (puntosPregunta <= 0) {
+                        Swal.showValidationMessage('Cada pregunta debe tener un porcentaje mayor a 0%');
+                        return false;
+                    }
+                    
+                    if (puntosPregunta > 100) {
+                        Swal.showValidationMessage('El porcentaje de cada pregunta no puede exceder 100%');
                         return false;
                     }
                     
@@ -2081,9 +2171,9 @@ function showActivityModal(activityType) {
                     });
                 }
                 
-                // Validar que la suma total no exceda 5.0
-                if (totalQuestionPoints > 5) {
-                    Swal.showValidationMessage('La suma de puntos de todas las preguntas no puede exceder 5.0 (actual: ' + totalQuestionPoints.toFixed(1) + ')');
+                // Validar que la suma total no exceda 100%
+                if (totalQuestionPoints > 100) {
+                    Swal.showValidationMessage('La suma de porcentajes de todas las preguntas no puede exceder 100% (actual: ' + totalQuestionPoints.toFixed(1) + '%)');
                     return false;
                 }
                 
@@ -2394,12 +2484,13 @@ function editActivity(activityId) {
             <hr class="my-4">
             <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas del ${tipoLabel}</h5>
             <div class="alert alert-info py-2">
-                <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> - La suma de puntos de todas las preguntas no puede exceder 5.0
+                <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> — Cada pregunta tiene un <strong>porcentaje (%)</strong>. La suma no puede exceder <strong>100%</strong>.<br>
+                <small>Si una respuesta es correcta, su porcentaje se multiplica por 5. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
             </div>
             <div class="form-group">
-                <label>Puntos totales asignados:</label>
+                <label>Porcentaje total asignado:</label>
                 <div class="progress" style="height: 25px;">
-                    <div class="progress-bar bg-success" role="progressbar" id="quiz-points-progress-edit" style="width: 0%">0 / 5.0</div>
+                    <div class="progress-bar bg-success" role="progressbar" id="quiz-points-progress-edit" style="width: 0%">0% / 100%</div>
                 </div>
             </div>
             <div class="form-group">
@@ -2413,6 +2504,9 @@ function editActivity(activityId) {
             <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="addQuizQuestionEdit()" id="add-question-btn-edit">
                 <i class="fas fa-plus"></i> Agregar Pregunta
             </button>
+            <small class="form-text text-muted text-center d-block mt-2">
+                <i class="fas fa-info-circle"></i> Cada pregunta puede tener de 2 a 10 opciones. Marca las correctas con el checkbox.
+            </small>
         `;
     }
 
@@ -2500,7 +2594,13 @@ function editActivity(activityId) {
                 const porcentajeMaterialEnCurso = parseFloat(selectedOption.dataset.porcentajeMaterial) || 0;
                 
                 porcentajeInput.max = porcentajeDisponible;
-                infoText.innerHTML = 'Disponible: <strong>' + porcentajeDisponible.toFixed(1) + '%</strong> del material (el material representa ' + porcentajeMaterialEnCurso.toFixed(1) + '% del curso)';
+                porcentajeInput.min = 0.1;
+                
+                if (porcentajeDisponible <= 0) {
+                    infoText.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Este material ya tiene el 100% asignado. No queda porcentaje disponible.</span>';
+                } else {
+                    infoText.innerHTML = 'Disponible: <strong class="text-success">' + porcentajeDisponible.toFixed(1) + '%</strong> del material (el material representa ' + porcentajeMaterialEnCurso.toFixed(1) + '% del curso)';
+                }
             };
             
             // Si es quiz o evaluación, cargar las preguntas existentes para edición
@@ -2508,7 +2608,7 @@ function editActivity(activityId) {
                 window.quizQuestionsEdit = [];
                 window.questionCounterEdit = 0;
                 
-                // Función para calcular puntos totales del quiz en edición
+                // Función para calcular porcentaje total del quiz en edición
                 window.calcularPuntosTotalesQuizEdit = function() {
                     let total = 0;
                     document.querySelectorAll('.question-points-input-edit').forEach(input => {
@@ -2517,30 +2617,120 @@ function editActivity(activityId) {
                     return total;
                 };
                 
-                // Función para actualizar puntos disponibles en edición
+                // Función para actualizar porcentaje disponible en edición
                 window.actualizarPuntosDisponiblesQuizEdit = function() {
-                    const puntosUsados = calcularPuntosTotalesQuizEdit();
-                    const puntosDisponibles = Math.max(0, 5 - puntosUsados).toFixed(1);
+                    const porcentajeUsado = calcularPuntosTotalesQuizEdit();
+                    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
                     document.querySelectorAll('.puntos-disponibles-edit').forEach(span => {
-                        span.textContent = puntosDisponibles;
-                        span.style.color = puntosUsados > 5 ? 'red' : 'inherit';
+                        span.textContent = porcentajeDisponible;
+                        span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
                     });
                     
                     const progressBar = document.getElementById('quiz-points-progress-edit');
                     if (progressBar) {
-                        const porcentaje = Math.min(100, (puntosUsados / 5) * 100);
-                        progressBar.style.width = porcentaje + '%';
-                        progressBar.textContent = puntosUsados.toFixed(1) + ' / 5.0';
-                        progressBar.className = 'progress-bar ' + (puntosUsados > 5 ? 'bg-danger' : 'bg-success');
+                        const barWidth = Math.min(100, porcentajeUsado);
+                        progressBar.style.width = barWidth + '%';
+                        progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
+                        progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
                     }
                 };
                 
-                // Función para agregar pregunta en edición
+                // Contadores de opciones para edición
+                window.optionCountersEdit = {};
+                
+                // Función para agregar una opción en edición
+                window.addQuestionOptionEdit = function(questionId) {
+                    const optionsContainer = document.getElementById(`options-container-edit-${questionId}`);
+                    const currentOptions = optionsContainer.querySelectorAll('.option-row-edit').length;
+                    
+                    if (currentOptions >= 10) {
+                        Swal.showValidationMessage('Máximo 10 opciones por pregunta');
+                        return;
+                    }
+                    
+                    const optionLetter = window.optionLetters[currentOptions];
+                    const optionHtml = `
+                        <div class="input-group mb-2 option-row-edit" id="option-edit-${questionId}-${optionLetter}">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox" name="correct-answer-edit-${questionId}" value="${optionLetter}" title="Marcar como respuesta correcta">
+                                </div>
+                                <span class="input-group-text"><strong>${optionLetter}</strong></span>
+                            </div>
+                            <input type="text" class="form-control" id="question-option-edit-${optionLetter.toLowerCase()}-${questionId}" placeholder="Opción ${optionLetter}">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeQuestionOptionEdit(${questionId}, '${optionLetter}')" title="Eliminar opción">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    optionsContainer.insertAdjacentHTML('beforeend', optionHtml);
+                    window.optionCountersEdit[questionId] = currentOptions + 1;
+                    updateOptionRemoveButtonsEdit(questionId);
+                };
+                
+                // Función para eliminar una opción en edición
+                window.removeQuestionOptionEdit = function(questionId, optionLetter) {
+                    const optionsContainer = document.getElementById(`options-container-edit-${questionId}`);
+                    const currentOptions = optionsContainer.querySelectorAll('.option-row-edit').length;
+                    
+                    if (currentOptions <= 2) {
+                        Swal.showValidationMessage('Mínimo 2 opciones por pregunta');
+                        return;
+                    }
+                    
+                    const optionElement = document.getElementById(`option-edit-${questionId}-${optionLetter}`);
+                    if (optionElement) {
+                        optionElement.remove();
+                        window.optionCountersEdit[questionId]--;
+                        renumberOptionsEdit(questionId);
+                    }
+                };
+                
+                // Renumerar opciones en edición
+                window.renumberOptionsEdit = function(questionId) {
+                    const optionsContainer = document.getElementById(`options-container-edit-${questionId}`);
+                    const optionRows = optionsContainer.querySelectorAll('.option-row-edit');
+                    
+                    optionRows.forEach((row, index) => {
+                        const newLetter = window.optionLetters[index];
+                        row.id = `option-edit-${questionId}-${newLetter}`;
+                        const checkbox = row.querySelector('input[type="checkbox"]');
+                        if (checkbox) checkbox.value = newLetter;
+                        const letterSpan = row.querySelector('.input-group-text strong');
+                        if (letterSpan) letterSpan.textContent = newLetter;
+                        const textInput = row.querySelector('input[type="text"]');
+                        if (textInput) {
+                            textInput.id = `question-option-edit-${newLetter.toLowerCase()}-${questionId}`;
+                            textInput.placeholder = `Opción ${newLetter}`;
+                        }
+                        const removeBtn = row.querySelector('button');
+                        if (removeBtn) removeBtn.setAttribute('onclick', `removeQuestionOptionEdit(${questionId}, '${newLetter}')`);
+                    });
+                    updateOptionRemoveButtonsEdit(questionId);
+                };
+                
+                // Actualizar visibilidad de botones de eliminar opciones en edición
+                window.updateOptionRemoveButtonsEdit = function(questionId) {
+                    const optionsContainer = document.getElementById(`options-container-edit-${questionId}`);
+                    const optionRows = optionsContainer.querySelectorAll('.option-row-edit');
+                    const removeButtons = optionsContainer.querySelectorAll('.btn-outline-danger');
+                    removeButtons.forEach(btn => {
+                        btn.style.display = optionRows.length > 2 ? 'block' : 'none';
+                    });
+                };
+                
+                // Función para agregar pregunta en edición (con opciones dinámicas y checkboxes)
                 window.addQuizQuestionEdit = function(existingQuestion = null) {
                     const questionId = existingQuestion ? existingQuestion.id : ++window.questionCounterEdit;
                     const container = document.getElementById('quiz-questions-container');
+                    window.optionCountersEdit[questionId] = 0;
                     
-                    const puntosDefault = existingQuestion ? existingQuestion.points : 1.0;
+                    const porcentajeDefault = existingQuestion ? existingQuestion.points : '';
+                    const porcentajeUsado = calcularPuntosTotalesQuizEdit();
+                    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
                     
                     const questionHtml = `
                         <div class="card mb-3" id="question-edit-${questionId}" style="border-left: 3px solid #007bff;">
@@ -2556,52 +2746,22 @@ function editActivity(activityId) {
                                     <input type="text" class="form-control" id="question-text-edit-${questionId}" placeholder="Escribe la pregunta aquí" value="${existingQuestion ? existingQuestion.text : ''}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Ponderación (puntos) <small class="text-muted">Máx: 5.0</small></label>
+                                    <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
                                     <input type="number" class="form-control question-points-input-edit" id="question-points-edit-${questionId}" 
-                                           min="0" max="5" step="0.1" value="${puntosDefault}" placeholder="Puntos de esta pregunta"
-                                           onchange="actualizarPuntosDisponiblesQuizEdit()">
-                                    <small class="form-text text-muted">Disponible: <span class="puntos-disponibles-edit">5.0</span> de 5.0 puntos</small>
+                                           min="0.1" max="100" step="0.1" value="${porcentajeDefault}" placeholder="Ej: 20"
+                                           oninput="actualizarPuntosDisponiblesQuizEdit()">
+                                    <small class="form-text text-muted">Disponible: <span class="puntos-disponibles-edit">${porcentajeDisponible}</span>% de 100%</small>
                                 </div>
-                                <label>Opciones de Respuesta *</label>
-                                <div class="form-group">
-                                    <div class="input-group mb-2">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">
-                                                <input type="radio" name="correct-answer-edit-${questionId}" value="A" ${!existingQuestion || existingQuestion.correctAnswer === 'A' ? 'checked' : ''}>
-                                            </div>
-                                            <span class="input-group-text"><strong>A</strong></span>
-                                        </div>
-                                        <input type="text" class="form-control" id="question-option-a-edit-${questionId}" placeholder="Opción A" value="${existingQuestion ? existingQuestion.options.A : ''}">
-                                    </div>
-                                    <div class="input-group mb-2">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">
-                                                <input type="radio" name="correct-answer-edit-${questionId}" value="B" ${existingQuestion && existingQuestion.correctAnswer === 'B' ? 'checked' : ''}>
-                                            </div>
-                                            <span class="input-group-text"><strong>B</strong></span>
-                                        </div>
-                                        <input type="text" class="form-control" id="question-option-b-edit-${questionId}" placeholder="Opción B" value="${existingQuestion ? existingQuestion.options.B : ''}">
-                                    </div>
-                                    <div class="input-group mb-2">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">
-                                                <input type="radio" name="correct-answer-edit-${questionId}" value="C" ${existingQuestion && existingQuestion.correctAnswer === 'C' ? 'checked' : ''}>
-                                            </div>
-                                            <span class="input-group-text"><strong>C</strong></span>
-                                        </div>
-                                        <input type="text" class="form-control" id="question-option-c-edit-${questionId}" placeholder="Opción C" value="${existingQuestion ? existingQuestion.options.C : ''}">
-                                    </div>
-                                    <div class="input-group mb-2">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">
-                                                <input type="radio" name="correct-answer-edit-${questionId}" value="D" ${existingQuestion && existingQuestion.correctAnswer === 'D' ? 'checked' : ''}>
-                                            </div>
-                                            <span class="input-group-text"><strong>D</strong></span>
-                                        </div>
-                                        <input type="text" class="form-control" id="question-option-d-edit-${questionId}" placeholder="Opción D" value="${existingQuestion ? existingQuestion.options.D : ''}">
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="addQuestionOptionEdit(${questionId})">
+                                        <i class="fas fa-plus"></i> Agregar Opción
+                                    </button>
                                 </div>
-                                <small class="text-muted"><i class="fas fa-info-circle"></i> Selecciona el radio button de la respuesta correcta</small>
+                                <div id="options-container-edit-${questionId}">
+                                    <!-- Las opciones se agregarán aquí -->
+                                </div>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Marca las respuestas correctas con el checkbox. Si hay varias, el porcentaje se distribuye.</small>
                             </div>
                         </div>
                     `;
@@ -2609,7 +2769,27 @@ function editActivity(activityId) {
                     container.insertAdjacentHTML('beforeend', questionHtml);
                     window.quizQuestionsEdit.push(questionId);
                     
-                    // Actualizar puntos disponibles
+                    // Cargar opciones existentes o crear 2 por defecto
+                    if (existingQuestion && existingQuestion.options) {
+                        const optKeys = Object.keys(existingQuestion.options);
+                        // Determinar respuestas correctas (soportar ambos formatos)
+                        const correctas = existingQuestion.correctAnswers || (existingQuestion.correctAnswer ? [existingQuestion.correctAnswer] : []);
+                        
+                        optKeys.forEach((letter, idx) => {
+                            addQuestionOptionEdit(questionId);
+                            const textInput = document.getElementById(`question-option-edit-${letter.toLowerCase()}-${questionId}`);
+                            if (textInput) textInput.value = existingQuestion.options[letter] || '';
+                            // Marcar si es respuesta correcta
+                            if (correctas.includes(letter)) {
+                                const checkbox = document.querySelector(`#option-edit-${questionId}-${letter} input[type="checkbox"]`);
+                                if (checkbox) checkbox.checked = true;
+                            }
+                        });
+                    } else {
+                        addQuestionOptionEdit(questionId);
+                        addQuestionOptionEdit(questionId);
+                    }
+                    
                     setTimeout(() => actualizarPuntosDisponiblesQuizEdit(), 50);
                 };
                 
@@ -2676,8 +2856,8 @@ function editActivity(activityId) {
             const selectedOption = materialSelect.options[materialSelect.selectedIndex];
             const maxPorcentajeMat = parseFloat(selectedOption.dataset.porcentajeDisponible) || 0;
             
-            if (porcentajeMaterial < 0) {
-                Swal.showValidationMessage('El porcentaje no puede ser negativo');
+            if (porcentajeMaterial <= 0) {
+                Swal.showValidationMessage('El porcentaje debe ser mayor a 0%. Cada actividad debe tener un porcentaje asignado.');
                 return false;
             }
             
@@ -2687,7 +2867,7 @@ function editActivity(activityId) {
             }
             
             if (porcentajeMaterial > maxPorcentajeMat) {
-                Swal.showValidationMessage('El porcentaje excede el disponible del material (' + maxPorcentajeMat.toFixed(1) + '% de 100%)');
+                Swal.showValidationMessage('El porcentaje (' + porcentajeMaterial.toFixed(1) + '%) excede el disponible del material (' + maxPorcentajeMat.toFixed(1) + '%). La suma de todas las actividades de un material no puede superar el 100%.');
                 return false;
             }
             
@@ -2702,8 +2882,8 @@ function editActivity(activityId) {
             if ((activity.type === 'quiz' || activity.type === 'evaluacion') && window.quizQuestionsEdit) {
                 const duration = document.getElementById('quiz-duration').value;
                 
-                if (window.quizQuestionsEdit.length < 4) {
-                    Swal.showValidationMessage('Debes tener al menos 4 preguntas');
+                if (window.quizQuestionsEdit.length < 1) {
+                    Swal.showValidationMessage('Debes tener al menos 1 pregunta');
                     return false;
                 }
                 
@@ -2713,25 +2893,58 @@ function editActivity(activityId) {
                 for (const questionId of window.quizQuestionsEdit) {
                     const questionText = document.getElementById(`question-text-edit-${questionId}`).value;
                     const questionPoints = parseFloat(document.getElementById(`question-points-edit-${questionId}`).value) || 0;
-                    const optionA = document.getElementById(`question-option-a-edit-${questionId}`).value;
-                    const optionB = document.getElementById(`question-option-b-edit-${questionId}`).value;
-                    const optionC = document.getElementById(`question-option-c-edit-${questionId}`).value;
-                    const optionD = document.getElementById(`question-option-d-edit-${questionId}`).value;
-                    const correctAnswer = document.querySelector(`input[name="correct-answer-edit-${questionId}"]:checked`)?.value;
                     
                     if (!questionText.trim()) {
                         Swal.showValidationMessage('Todas las preguntas deben tener texto');
                         return false;
                     }
                     
-                    if (!optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim()) {
-                        Swal.showValidationMessage('Todas las opciones de respuesta son requeridas');
+                    // Obtener todas las opciones dinámicamente
+                    const optionsContainer = document.getElementById(`options-container-edit-${questionId}`);
+                    const optionRows = optionsContainer.querySelectorAll('.option-row-edit');
+                    const options = {};
+                    const correctAnswers = [];
+                    
+                    if (optionRows.length < 2) {
+                        Swal.showValidationMessage('Cada pregunta debe tener al menos 2 opciones');
                         return false;
                     }
                     
-                    // Validar que los puntos estén entre 0 y 5
-                    if (questionPoints < 0 || questionPoints > 5) {
-                        Swal.showValidationMessage('Los puntos por pregunta deben estar entre 0 y 5');
+                    let hasEmptyOption = false;
+                    optionRows.forEach((row, index) => {
+                        const letter = window.optionLetters[index];
+                        const textInput = row.querySelector('input[type="text"]');
+                        const checkbox = row.querySelector('input[type="checkbox"]');
+                        
+                        if (!textInput.value.trim()) {
+                            hasEmptyOption = true;
+                        }
+                        
+                        options[letter] = textInput.value;
+                        
+                        if (checkbox && checkbox.checked) {
+                            correctAnswers.push(letter);
+                        }
+                    });
+                    
+                    if (hasEmptyOption) {
+                        Swal.showValidationMessage('Todas las opciones de respuesta deben tener texto');
+                        return false;
+                    }
+                    
+                    if (correctAnswers.length === 0) {
+                        Swal.showValidationMessage('Cada pregunta debe tener al menos una respuesta correcta marcada');
+                        return false;
+                    }
+                    
+                    // Validar que el porcentaje sea > 0
+                    if (questionPoints <= 0) {
+                        Swal.showValidationMessage('Cada pregunta debe tener un porcentaje mayor a 0%');
+                        return false;
+                    }
+                    
+                    if (questionPoints > 100) {
+                        Swal.showValidationMessage('El porcentaje de cada pregunta no puede exceder 100%');
                         return false;
                     }
                     
@@ -2741,19 +2954,15 @@ function editActivity(activityId) {
                         id: questionId,
                         text: questionText,
                         points: questionPoints,
-                        options: {
-                            A: optionA,
-                            B: optionB,
-                            C: optionC,
-                            D: optionD
-                        },
-                        correctAnswer: correctAnswer
+                        options: options,
+                        correctAnswers: correctAnswers,
+                        isMultipleChoice: correctAnswers.length > 1
                     });
                 }
                 
-                // Validar que la suma total no exceda 5.0
-                if (totalQuestionPoints > 5.0) {
-                    Swal.showValidationMessage('La suma de puntos de todas las preguntas no puede exceder 5.0 (actual: ' + totalQuestionPoints.toFixed(1) + ')');
+                // Validar que la suma total no exceda 100%
+                if (totalQuestionPoints > 100) {
+                    Swal.showValidationMessage('La suma de porcentajes de todas las preguntas no puede exceder 100% (actual: ' + totalQuestionPoints.toFixed(1) + '%)');
                     return false;
                 }
                 
@@ -2854,6 +3063,73 @@ function updateCourseSummary() {
     const area = $('#id_area option:selected').text() || 'Sin área';
     const instructor = $('#instructor_id option:selected').text() || 'Sin instructor';
 
+    // Generar resumen de actividades por material
+    let materialActivitySummary = '';
+    if (courseData.materials.length > 0) {
+        let materialesRows = '';
+        courseData.materials.forEach(mat => {
+            const actividadesDelMaterial = courseData.activities.filter(a => a.materialId === mat.id);
+            const sumaPorcentajes = actividadesDelMaterial.reduce((sum, a) => sum + (parseFloat(a.porcentajeMaterial) || 0), 0);
+            const tieneActividades = actividadesDelMaterial.length > 0;
+            const porcentajeCompleto = sumaPorcentajes === 100;
+            const porcentajeExcedido = sumaPorcentajes > 100;
+            
+            let estadoIcon, estadoClass;
+            if (!tieneActividades) {
+                estadoIcon = '<i class="fas fa-exclamation-triangle text-danger"></i>';
+                estadoClass = 'text-danger';
+            } else if (porcentajeExcedido) {
+                estadoIcon = '<i class="fas fa-times-circle text-danger"></i>';
+                estadoClass = 'text-danger';
+            } else if (porcentajeCompleto) {
+                estadoIcon = '<i class="fas fa-check-circle text-success"></i>';
+                estadoClass = 'text-success';
+            } else {
+                estadoIcon = '<i class="fas fa-exclamation-circle text-warning"></i>';
+                estadoClass = 'text-warning';
+            }
+            
+            materialesRows += `
+                <tr>
+                    <td>${estadoIcon} ${mat.title.substring(0, 25)}${mat.title.length > 25 ? '...' : ''}</td>
+                    <td class="text-center">${actividadesDelMaterial.length}</td>
+                    <td class="text-center"><span class="${estadoClass} font-weight-bold">${sumaPorcentajes.toFixed(1)}%</span></td>
+                    <td class="text-center">${mat.porcentajeCurso || 0}%</td>
+                </tr>`;
+        });
+        
+        materialActivitySummary = `
+            <div class="card mt-3">
+                <div class="card-header py-2 bg-light">
+                    <strong><i class="fas fa-chart-pie text-primary"></i> Distribución de Actividades por Material</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Material</th>
+                                <th class="text-center">Actividades</th>
+                                <th class="text-center">% Actividades</th>
+                                <th class="text-center">% del Curso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${materialesRows}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer py-1">
+                    <small class="text-muted">
+                        <i class="fas fa-check-circle text-success"></i> Completo (100%) &nbsp;
+                        <i class="fas fa-exclamation-circle text-warning"></i> Incompleto (&lt;100%) &nbsp;
+                        <i class="fas fa-exclamation-triangle text-danger"></i> Sin actividades &nbsp;
+                        <i class="fas fa-times-circle text-danger"></i> Excedido (&gt;100%)
+                    </small>
+                </div>
+            </div>
+        `;
+    }
+
     const html = `
         <div class="row">
             <div class="col-md-6">
@@ -2875,6 +3151,7 @@ function updateCourseSummary() {
                 </div>
             </div>
         </div>
+        ${materialActivitySummary}
     `;
 
     $('#course-summary').html(html);
@@ -3022,6 +3299,48 @@ function submitCourseData() {
             confirmButtonText: 'Entendido'
         });
         return;
+    }
+
+    // Validar que cada material tenga al menos una actividad
+    if (courseData.materials.length > 0) {
+        const materialesSinActividad = courseData.materials.filter(mat => {
+            const actividadesDelMaterial = courseData.activities.filter(a => a.materialId === mat.id);
+            return actividadesDelMaterial.length === 0;
+        });
+        
+        if (materialesSinActividad.length > 0) {
+            const listaMatSinAct = materialesSinActividad.map(m => `• ${m.title}`).join('<br>');
+            Swal.fire({
+                icon: 'error',
+                title: 'Materiales sin actividades',
+                html: `Cada material debe tener <strong>al menos una actividad</strong> asignada.<br><br>Los siguientes materiales no tienen actividades:<br><br>${listaMatSinAct}<br><br>Ve al <strong>Paso 4</strong> y crea al menos una actividad (Tarea, Quiz o Evaluación) para cada material.`,
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+    }
+
+    // Validar que la suma de porcentajes de actividades por material no exceda 100%
+    if (courseData.materials.length > 0) {
+        const materialesExcedidos = [];
+        courseData.materials.forEach(mat => {
+            const actividadesDelMaterial = courseData.activities.filter(a => a.materialId === mat.id);
+            const sumaPorcentajes = actividadesDelMaterial.reduce((sum, a) => sum + (parseFloat(a.porcentajeMaterial) || 0), 0);
+            if (sumaPorcentajes > 100) {
+                materialesExcedidos.push({ title: mat.title, suma: sumaPorcentajes });
+            }
+        });
+        
+        if (materialesExcedidos.length > 0) {
+            const listaExcedidos = materialesExcedidos.map(m => `• ${m.title}: <strong>${m.suma.toFixed(1)}%</strong>`).join('<br>');
+            Swal.fire({
+                icon: 'error',
+                title: 'Porcentaje de actividades excedido',
+                html: `La suma de los porcentajes de las actividades no puede superar el <strong>100%</strong> por material.<br><br>Materiales con exceso:<br><br>${listaExcedidos}<br><br>Ajusta los porcentajes de las actividades en el <strong>Paso 4</strong>.`,
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
     }
 
     // Limpiar datos de materiales antes de enviar (remover objetos File del JSON)
