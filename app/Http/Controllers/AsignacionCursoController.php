@@ -351,7 +351,7 @@ class AsignacionCursoController extends Controller
                         'estado' => 'activo',
                         'asignado_por' => Auth::id(),
                         'fecha_asignacion' => now(),
-                        'docente_id' => $docenteId, // Actualizar docente al reactivar
+                        'docente_id' => $docenteId ?? $asignacionExistente->docente_id, // Actualizar docente si se envía, o mantener el previo
                     ]);
                     
                     // Reiniciar progreso del estudiante en el curso
@@ -590,7 +590,7 @@ class AsignacionCursoController extends Controller
                         'estado' => 'activo',
                         'asignado_por' => Auth::id(),
                         'fecha_asignacion' => now(),
-                        'docente_id' => $docenteIdMasivo, // Actualizar docente al reactivar
+                        'docente_id' => $docenteIdMasivo ?? $asignacionExistente->docente_id, // Actualizar docente si se envía, o mantener el previo
                     ];
                     $asignacionExistente->update($updateDataMasivo);
                     

@@ -786,9 +786,9 @@ class AcademicoController extends Controller
         $user = Auth::user();
 
         // Verificar inscripción
-        $inscrito = DB::table('curso_estudiante')
+        $inscrito = DB::table('curso_estudiantes')
             ->where('curso_id', $curso->id)
-            ->where('user_id', $user->id)
+            ->where('estudiante_id', $user->id)
             ->exists();
 
         if (!$inscrito) {
