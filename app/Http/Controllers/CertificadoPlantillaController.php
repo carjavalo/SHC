@@ -193,6 +193,8 @@ class CertificadoPlantillaController extends Controller
                     'email' => $est->email,
                     'nota_final' => round($resumen['nota_final'], 1),
                     'aprobado' => $resumen['aprobado'],
+                    'fecha_inscripcion' => $est->pivot->fecha_inscripcion ? \Carbon\Carbon::parse($est->pivot->fecha_inscripcion)->format('Y-m-d') : null,
+                    'fecha_completado' => $est->pivot->ultima_actividad ? \Carbon\Carbon::parse($est->pivot->ultima_actividad)->format('Y-m-d') : null,
                 ];
             });
 

@@ -294,10 +294,10 @@
                             <p class="text-muted" style="font-size:13px;">Otorga el presente certificado a:</p>
                         </div>
 
-                        <div class="draggable-element mb-4">
-                            <h1 class="text-uppercase font-weight-bold" id="certNombreCompleto" style="font-size:2.8rem;color:#1e293b;letter-spacing:1px;">NOMBRE APELLIDO1 APELLIDO2</h1>
+                        <div class="draggable-element mb-4" style="width:100%;">
+                            <h1 class="text-uppercase font-weight-bold" id="certNombreCompleto" style="font-size:2.8rem;color:#1e293b;letter-spacing:1px;text-align:center;width:100%;">NOMBRE APELLIDO1 APELLIDO2</h1>
                             <div style="height:4px;width:96px;background:rgba(30,58,138,0.2);border-radius:4px;" class="mx-auto mt-1"></div>
-                            <p class="text-muted font-weight-bold mt-1" id="certDocumento" style="font-size:13px;">C.C. 00.000.000 de Cali</p>
+                            <p class="text-muted font-weight-bold mt-1" id="certDocumento" style="font-size:13px;text-align:center;width:100%;">C.C. 00.000.000 de Cali</p>
                         </div>
 
                         <div class="draggable-element mb-5" style="max-width:640px;">
@@ -686,6 +686,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         opcion.dataset.documento = est.numero_documento;
                         opcion.dataset.aprobado = '1';
                         opcion.dataset.notaFinal = est.nota_final;
+                        opcion.dataset.fechaInscripcion = est.fecha_inscripcion || '';
+                        opcion.dataset.fechaCompletado = est.fecha_completado || '';
                         opcion.textContent = est.name + ' ' + est.apellido1 + ' ' + est.apellido2 + ' (Nota: ' + est.nota_final + ')';
                         grpAprobados.appendChild(opcion);
                     });
@@ -750,6 +752,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
         document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
         document.getElementById('inputDocumento').value = opt.dataset.documento || '';
+
+        // Actualizar fechas del certificado con las fechas individuales del estudiante
+        if (opt.dataset.fechaInscripcion) {
+            document.getElementById('inputFechaInicio').value = opt.dataset.fechaInscripcion;
+        }
+        if (opt.dataset.fechaCompletado) {
+            document.getElementById('inputFechaFin').value = opt.dataset.fechaCompletado;
+        }
+
         actualizarCertificado();
     });
 
@@ -768,25 +779,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (certNombre) certNombre.textContent = (nombres + ' ' + ap1 + ' ' + ap2).toUpperCase();
         if (certDoc) certDoc.textContent = 'C.C. ' + doc + ' de Cali';
 
-        // Datos del curso, horas y fechas: solo actualizar si NO hay plantilla cargada
-        // (cuando hay plantilla, estos datos ya están fijos en el HTML del certificado)
+        // Fechas: siempre se actualizan según las fechas individuales del estudiante
+        const fInicio = document.getElementById('inputFechaInicio').value;
+        const fFin = document.getElementById('inputFechaFin').value;
+        const certFI = document.getElementById('certFechaInicio');
+        const certFF = document.getElementById('certFechaFin');
+        if (certFI) certFI.textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
+        if (certFF) certFF.textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
+
+        // Datos del curso y firma: solo actualizar si NO hay plantilla cargada
         if (!plantillaCargada) {
             const curso = document.getElementById('inputCursoNombre').value || 'NOMBRE DEL CURSO';
             const horas = document.getElementById('inputHoras').value || '40';
-            const fInicio = document.getElementById('inputFechaInicio').value;
-            const fFin = document.getElementById('inputFechaFin').value;
             const certCurso = document.getElementById('certCursoNombre');
             const certHoras = document.getElementById('certHoras');
-            const certFI = document.getElementById('certFechaInicio');
-            const certFF = document.getElementById('certFechaFin');
             if (certCurso) certCurso.textContent = curso;
             if (certHoras) certHoras.textContent = horas;
-            if (certFI) certFI.textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
-            if (certFF) certFF.textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
-        }
-
-        // Firma y cargo: solo actualizar si NO hay plantilla cargada
-        if (!plantillaCargada) {
             const certFN = document.getElementById('certFirmaNombre');
             const certFC = document.getElementById('certFirmaCargo');
             if (certFN) certFN.textContent = firmaNombre.toUpperCase();
