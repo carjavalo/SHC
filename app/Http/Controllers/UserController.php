@@ -46,10 +46,10 @@ class UserController extends Controller
     {
         $availableRoles = User::getAvailableRoles();
         
-        // Si el usuario autenticado es Operador, solo puede asignar Registrado, Operador o Instructor GYM
+        // Si el usuario autenticado es Operador, solo puede asignar Estudiante, Registrado, Docente u Operador
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return in_array($role, ['Registrado', 'Operador', 'Instructor GYM']);
+                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador']);
             }));
         }
         
@@ -86,10 +86,10 @@ class UserController extends Controller
             'sede_id' => ['nullable', 'exists:sedes,id'],
         ]);
         
-        // Validación adicional: Operadores solo pueden asignar Registrado, Operador o Instructor GYM
-        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Registrado', 'Operador', 'Instructor GYM'])) {
+        // Validación adicional: Operadores solo pueden asignar Estudiante, Registrado, Docente u Operador
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Registrado, Operador e Instructor GYM.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente y Operador.'])
                 ->withInput();
         }
 
@@ -128,10 +128,10 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $availableRoles = User::getAvailableRoles();
         
-        // Si el usuario autenticado es Operador, solo puede asignar Registrado, Operador o Instructor GYM
+        // Si el usuario autenticado es Operador, solo puede asignar Estudiante, Registrado, Docente u Operador
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return in_array($role, ['Registrado', 'Operador', 'Instructor GYM']);
+                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador']);
             }));
         }
         
@@ -170,10 +170,10 @@ class UserController extends Controller
             'sede_id' => ['nullable', 'exists:sedes,id'],
         ]);
         
-        // Validación adicional: Operadores solo pueden asignar Registrado, Operador o Instructor GYM
-        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Registrado', 'Operador', 'Instructor GYM'])) {
+        // Validación adicional: Operadores solo pueden asignar Estudiante, Registrado, Docente u Operador
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Registrado, Operador e Instructor GYM.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente y Operador.'])
                 ->withInput();
         }
 
