@@ -42,7 +42,8 @@ class CertificadoPlantillaController extends Controller
             'nombre' => 'required|string|max:255',
             'elementos_json' => 'nullable|string',
             'html_content' => 'nullable|string',
-            'fondo_base64' => 'nullable|string'
+            'fondo_base64' => 'nullable|string',
+            'curso_id' => 'nullable|exists:cursos,id'
         ]);
 
         $plantilla = new PlantillaCertificado();
@@ -62,7 +63,12 @@ class CertificadoPlantillaController extends Controller
 
         $plantilla->save();
 
-        return redirect()->route('configuracion.editor-certificados.index')->with('success', 'Plantilla guardada correctamente.');
+        // Asignar automáticamente la plantilla al curso seleccionado
+        if ($request->filled('curso_id')) {
+            Curso::where('id', $request->curso_id)->update(['plantilla_certificado_id' => $plantilla->id]);
+        }
+
+        return redirect()->route('configuracion.editor-certificados.index')->with('success', 'Plantilla guardada y asignada al curso correctamente.');
     }
 
     public function destroy(PlantillaCertificado $plantilla)

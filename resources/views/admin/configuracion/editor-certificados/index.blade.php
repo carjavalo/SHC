@@ -530,6 +530,7 @@
           <input type="hidden" name="html_content" id="html_content_input">
           <input type="hidden" name="fondo_base64" id="fondo_base64_input">
           <input type="hidden" name="elementos_json" id="elementos_json_input">
+          <input type="hidden" name="curso_id" id="curso_id_input">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -994,6 +995,10 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('html_content_input').value = htmlContent;
           document.getElementById('fondo_base64_input').value = base64Bg;
           document.getElementById('elementos_json_input').value = JSON.stringify(elementosObj);
+
+          // Asignar el curso seleccionado para vincularlo automáticamente
+          const cursoSel = document.getElementById('selectCurso');
+          document.getElementById('curso_id_input').value = cursoSel ? cursoSel.value : '';
       });
 
       // ===== Cargar Plantilla Seleccionada =====
