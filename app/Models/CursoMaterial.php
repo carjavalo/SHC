@@ -168,14 +168,16 @@ class CursoMaterial extends Model
 
     /**
      * Obtener el porcentaje disponible para nuevas actividades
+     * Los porcentajes de actividades son relativos al material (suman hasta 100%)
      */
     public function getPorcentajeDisponibleActividadesAttribute(): float
     {
-        return $this->porcentaje_curso - $this->porcentaje_actividades_asignado;
+        return 100 - $this->porcentaje_actividades_asignado;
     }
 
     /**
-     * Validar que los porcentajes de actividades no excedan el porcentaje del material
+     * Validar que los porcentajes de actividades no excedan 100%
+     * Los porcentajes de actividades representan su peso DENTRO del material (0-100%)
      */
     public function validarPorcentajeActividades(float $nuevoPorcentaje, ?int $actividadIdExcluir = null): bool
     {
@@ -185,12 +187,17 @@ class CursoMaterial extends Model
             })
             ->sum('porcentaje_curso');
         
-        return ($porcentajeActual + $nuevoPorcentaje) <= $this->porcentaje_curso;
+        return ($porcentajeActual + $nuevoPorcentaje) <= 100;
     }
 
     /**
      * Calcular la nota de un estudiante en este material
      * La nota se calcula sumando las notas ponderadas de todas las actividades
+     * 
+     * Los porcentaje_curso de las actividades representan su peso DENTRO del material
+     * (suman 100% entre las actividades de un mismo material), NO son porcentajes
+     * absolutos del curso. Por eso se normaliza dividiendo entre la suma total
+     * de porcentajes de actividades del material.
      */
     public function calcularNotaEstudiante($userId): float
     {
@@ -200,14 +207,20 @@ class CursoMaterial extends Model
 
         $notaMaterial = 0;
         
+        // Calcular el total de pesos de actividades para normalizar correctamente
+        $totalPesoActividades = $this->actividades->sum('porcentaje_curso');
+        
+        if ($totalPesoActividades <= 0) {
+            return 0;
+        }
+        
         foreach ($this->actividades as $actividad) {
             $notaActividad = $actividad->calcularNotaEstudiante($userId);
             // La nota de la actividad ya está en escala 0-5.0
-            // Ponderamos según el porcentaje de la actividad respecto al material
-            if ($this->porcentaje_curso > 0) {
-                $pesoRelativo = $actividad->porcentaje_curso / $this->porcentaje_curso;
-                $notaMaterial += ($notaActividad * $pesoRelativo);
-            }
+            // Ponderamos según el porcentaje de la actividad respecto al total de actividades del material
+            // Ej: si actividad tiene 20% y total actividades es 100%, pesoRelativo = 0.20
+            $pesoRelativo = $actividad->porcentaje_curso / $totalPesoActividades;
+            $notaMaterial += ($notaActividad * $pesoRelativo);
         }
         
         return min(round($notaMaterial, 2), 5.0);
