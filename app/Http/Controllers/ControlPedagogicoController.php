@@ -30,7 +30,7 @@ class ControlPedagogicoController extends Controller
         $cursoId = $request->get('curso_id', $cursos->first()->id ?? null);
         $cursoActual = Curso::with(['materiales' => function($query) {
             $query->select('*'); // Asegurar que se seleccionen todos los campos
-        }, 'actividades'])->find($cursoId);
+        }, 'actividades', 'plantillaCertificado'])->find($cursoId);
         
         if (!$cursoActual) {
             return redirect()->back()->with('error', 'No hay cursos disponibles');
@@ -395,7 +395,11 @@ class ControlPedagogicoController extends Controller
             return [
                 'id' => $estudiante->id,
                 'nombre' => $estudiante->name,
+                'apellido1' => $estudiante->apellido1 ?? '',
+                'apellido2' => $estudiante->apellido2 ?? '',
                 'email' => $estudiante->email,
+                'numero_documento' => $estudiante->numero_documento ?? '',
+                'tipo_documento' => $estudiante->tipo_documento ?? '',
                 'avatar' => $estudiante->avatar ?? null,
                 'calificaciones' => $calificaciones,
                 'progreso' => $progreso,
@@ -611,5 +615,46 @@ class ControlPedagogicoController extends Controller
         }
         
         return $estructura;
+    }
+
+    /**
+     * Vista previa del certificado para un estudiante desde Control Pedagógico
+     */
+    public function previewCertificado(Request $request, Curso $curso, User $estudiante)
+    {
+        $user = Auth::user();
+        
+        // Solo admins, operadores y docentes pueden ver la vista previa
+        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
+            abort(403, 'No tienes permisos para ver este certificado.');
+        }
+
+        // Verificar que el estudiante está inscrito en el curso
+        $inscrito = DB::table('curso_estudiantes')
+            ->where('curso_id', $curso->id)
+            ->where('estudiante_id', $estudiante->id)
+            ->exists();
+
+        if (!$inscrito) {
+            abort(404, 'El estudiante no está inscrito en este curso.');
+        }
+
+        // Verificar que el curso tiene plantilla de certificado
+        $plantilla = $curso->plantillaCertificado;
+        if (!$plantilla) {
+            abort(404, 'Este curso no tiene una plantilla de certificado configurada.');
+        }
+
+        // Obtener resumen y nota final
+        $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
+        $notaFinal = number_format($resumen['nota_final'] ?? 0, 1);
+
+        return view('academico.curso.certificado', [
+            'curso' => $curso,
+            'user' => $estudiante,
+            'resumen' => $resumen,
+            'plantilla' => $plantilla,
+            'notaFinal' => $notaFinal,
+        ]);
     }
 }

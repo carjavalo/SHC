@@ -463,7 +463,24 @@
                                 <td class="status-col text-center sticky-right-2">
                                     <span class="status-badge status-{{ $estudiante['estado'] }}">
                                         @if($estudiante['estado'] == 'passed')
-                                            <i class="fas fa-check-circle"></i> Aprobado
+                                            @if($cursoActual->plantillaCertificado)
+                                                <a href="javascript:void(0)" 
+                                                   class="btn-certificado-preview"
+                                                   data-estudiante-id="{{ $estudiante['id'] }}"
+                                                   data-estudiante-nombre="{{ $estudiante['nombre'] }} {{ $estudiante['apellido1'] }} {{ $estudiante['apellido2'] }}"
+                                                   data-estudiante-documento="{{ $estudiante['tipo_documento'] ? $estudiante['tipo_documento'] . ': ' : '' }}{{ $estudiante['numero_documento'] }}"
+                                                   data-curso-id="{{ $cursoActual->id }}"
+                                                   data-curso-nombre="{{ $cursoActual->titulo }}"
+                                                   data-fecha-inicio="{{ $cursoActual->fecha_inicio ? \Carbon\Carbon::parse($cursoActual->fecha_inicio)->translatedFormat('d \d\e F \d\e Y') : 'N/A' }}"
+                                                   data-fecha-fin="{{ $cursoActual->fecha_fin ? \Carbon\Carbon::parse($cursoActual->fecha_fin)->translatedFormat('d \d\e F \d\e Y') : 'N/A' }}"
+                                                   title="Click para ver certificado"
+                                                   style="text-decoration: none; color: inherit; cursor: pointer;">
+                                                    <i class="fas fa-check-circle"></i> Aprobado
+                                                    <i class="fas fa-certificate ml-1" style="font-size: 0.7rem; color: #ffc107;"></i>
+                                                </a>
+                                            @else
+                                                <i class="fas fa-check-circle"></i> Aprobado
+                                            @endif
                                         @elseif($estudiante['estado'] == 'at_risk')
                                             <i class="fas fa-exclamation-triangle"></i> En Riesgo
                                         @else
@@ -482,6 +499,60 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vista Previa de Certificado -->
+<div class="modal fade" id="certificadoPreviewModal" tabindex="-1" role="dialog" aria-labelledby="certificadoPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width: 1100px;">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a5f 0%, #2c4370 100%); color: white; border: none;">
+                <h5 class="modal-title" id="certificadoPreviewModalLabel">
+                    <i class="fas fa-certificate"></i> Vista Previa del Certificado
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" style="color: white; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-0" style="background: #525659;">
+                <!-- Info del estudiante -->
+                <div class="cert-info-bar" style="background: #f8f9fa; padding: 12px 20px; border-bottom: 2px solid #e9ecef;">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Estudiante</small>
+                            <strong id="certInfoNombre" class="text-dark"></strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Identificación</small>
+                            <strong id="certInfoDocumento" class="text-dark"></strong>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Fecha Inicio</small>
+                            <strong id="certInfoFechaInicio" class="text-dark"></strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Fecha Fin</small>
+                            <strong id="certInfoFechaFin" class="text-dark"></strong>
+                        </div>
+                    </div>
+                </div>
+                <!-- Iframe con el certificado -->
+                <div style="text-align: center; padding: 20px;">
+                    <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white;" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #e9ecef; background: #f8f9fa;">
+                <a id="certOpenNewTab" href="#" target="_blank" class="btn btn-outline-primary">
+                    <i class="fas fa-external-link-alt"></i> Abrir en nueva pestaña
+                </a>
+                <button type="button" id="certPrintBtn" class="btn btn-primary" style="background: #1e3a5f; border-color: #1e3a5f;">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -1447,6 +1518,40 @@
             align-items: flex-start;
         }
     }
+
+    /* Estilos para botón de certificado en badge Aprobado */
+    .btn-certificado-preview {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        transition: all 0.2s ease;
+    }
+    .btn-certificado-preview:hover {
+        filter: brightness(0.9);
+        transform: scale(1.05);
+    }
+    .status-passed .btn-certificado-preview {
+        color: #155724;
+    }
+    .status-passed:has(.btn-certificado-preview) {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-passed:has(.btn-certificado-preview):hover {
+        background: #b8e6c8;
+        box-shadow: 0 2px 8px rgba(39,174,96,0.3);
+    }
+
+    /* Modal certificado responsive iframe */
+    #certificadoPreviewModal .modal-body {
+        overflow-x: auto;
+    }
+    @media (max-width: 1100px) {
+        #certificadoIframe {
+            width: 100% !important;
+            height: 500px !important;
+        }
+    }
 </style>
 @stop
 
@@ -2095,6 +2200,49 @@
             $(this).closest('.retry-panel-card').find('.retry-collapse-icon').css('transform', 'rotate(180deg)');
         }).on('hide.bs.collapse', function() {
             $(this).closest('.retry-panel-card').find('.retry-collapse-icon').css('transform', 'rotate(0deg)');
+        });
+
+        // Click en botón de certificado (Aprobado)
+        $(document).on('click', '.btn-certificado-preview', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const estudianteId = $(this).data('estudiante-id');
+            const estudianteNombre = $(this).data('estudiante-nombre');
+            const estudianteDocumento = $(this).data('estudiante-documento');
+            const cursoId = $(this).data('curso-id');
+            const cursoNombre = $(this).data('curso-nombre');
+            const fechaInicio = $(this).data('fecha-inicio');
+            const fechaFin = $(this).data('fecha-fin');
+
+            // Rellenar info del estudiante en el modal
+            $('#certInfoNombre').text(estudianteNombre);
+            $('#certInfoDocumento').text(estudianteDocumento || 'No registrado');
+            $('#certInfoFechaInicio').text(fechaInicio);
+            $('#certInfoFechaFin').text(fechaFin);
+
+            // Construir URL del certificado
+            const certUrl = `{{ url('academico/control-pedagogico/preview-certificado') }}/${cursoId}/${estudianteId}`;
+            
+            // Configurar iframe y enlace nueva pestaña
+            $('#certificadoIframe').attr('src', certUrl);
+            $('#certOpenNewTab').attr('href', certUrl);
+
+            // Botón imprimir
+            $('#certPrintBtn').off('click').on('click', function() {
+                const iframe = document.getElementById('certificadoIframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.print();
+                }
+            });
+
+            // Mostrar modal
+            $('#certificadoPreviewModal').modal('show');
+        });
+
+        // Limpiar iframe al cerrar modal
+        $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
+            $('#certificadoIframe').attr('src', '');
         });
     });
 </script>
