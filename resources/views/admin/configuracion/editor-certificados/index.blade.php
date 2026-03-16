@@ -884,47 +884,111 @@ document.addEventListener('DOMContentLoaded', function() {
               }
           });
       }
-    // ===== Estilos comunes para inyectar en ventanas nuevas =====
-    const estilosVentana = `
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <style>
-            @media print {
+    // ===== Función para abrir certificado en nueva ventana (DOM nativo, sin document.write para el fondo) =====
+    function abrirCertificadoEnVentana(autoImprimir) {
+        const certEl = document.getElementById('certificate');
+        const win = window.open('', '_blank');
+        if (!win) { alert('El navegador bloqueó la ventana emergente. Permita pop-ups para este sitio.'); return; }
+        const doc = win.document;
+        doc.open();
+        doc.write('<!DOCTYPE html><html><head><title>Certificado</title>');
+        doc.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+        doc.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">');
+        doc.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
+        doc.write('</head><body><div id="certOutput"></div></body></html>');
+        doc.close();
+
+        // Esperar a que el documento esté listo para manipular el DOM
+        win.addEventListener('load', function() {
+            const d = win.document;
+
+            // Inyectar estilos — mantener 960x680 SIEMPRE para no descuadrar posiciones absolutas
+            const style = d.createElement('style');
+            style.textContent = `
                 @page { size: landscape; margin: 0; }
-                body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; padding: 0 !important; background: white; }
-                .cert { width: 100vw !important; height: 100vh !important; box-shadow: none !important; transform: none !important; }
+                * { box-sizing: border-box; }
+                html, body {
+                    margin: 0; padding: 0;
+                    font-family: 'Inter', sans-serif;
+                    width: 100%; height: 100%;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                }
+                body {
+                    background: #525659;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                @media print {
+                    body { background: white; }
+                    #certOutput {
+                        width: 100vw;
+                        height: 100vh;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        overflow: hidden;
+                    }
+                    .cert {
+                        /* Mantener tamaño original y escalar para llenar la página */
+                        width: 960px !important;
+                        height: 680px !important;
+                        transform: scale(calc(100vw / 960)) !important;
+                        transform-origin: center center !important;
+                        box-shadow: none !important;
+                    }
+                }
+                .cert {
+                    width: 960px;
+                    height: 680px;
+                    background-size: 100% 100%;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    position: relative;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    background-color: white;
+                    overflow: hidden;
+                }
+                .draggable-element { outline: none !important; cursor: default !important; }
+                .draggable-element:hover { outline: none !important; }
+            `;
+            d.head.appendChild(style);
+
+            // Clonar el certificado del editor al div de salida
+            const container = d.getElementById('certOutput');
+            const clone = certEl.cloneNode(true);
+            clone.removeAttribute('id');
+            clone.className = 'cert';
+            clone.style.cssText = certEl.style.cssText; // Copia TODOS los estilos inline incluyendo background-image
+            clone.style.width = '960px';
+            clone.style.height = '680px';
+            clone.style.maxWidth = 'none';
+            clone.style.transform = 'none';
+            clone.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+
+            // Desactivar interactividad de los elementos arrastrables
+            clone.querySelectorAll('.draggable-element').forEach(function(el) {
+                el.style.cursor = 'default';
+                el.onmousedown = null;
+                el.oncontextmenu = null;
+                el.ondragstart = null;
+            });
+
+            container.appendChild(clone);
+
+            // Auto-imprimir si se solicita
+            if (autoImprimir) {
+                setTimeout(function() { win.print(); }, 1000);
             }
-            body { margin: 0; font-family: 'Inter', sans-serif; background: #525659; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-            .cert { 
-                width: 960px; 
-                height: 680px; 
-                background-size: 100% 100%; 
-                background-repeat: no-repeat; 
-                background-position: center; 
-                position: relative; 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-                background-color: white;
-                overflow: hidden;
-            }
-            .draggable-element { outline: none !important; cursor: default !important; }
-            .draggable-element:hover { outline: none !important; }
-        </style>
-    `;
+        });
+    }
 
     // ===== Vista previa (abrir en nueva pestaña) =====
     document.getElementById('btnVistaPrevia').addEventListener('click', function() {
-        const certEl = document.getElementById('certificate');
-        // bgImg needs to be handled properly because it might have quotes already
-        const bgImgRaw = certEl.style.backgroundImage || '';
-        const win = window.open('', '_blank');
-        win.document.write('<html><head><title>Vista Previa Certificado</title>');
-        win.document.write(estilosVentana);
-        win.document.write('</head><body>');
-        // use single quotes for style attribute to avoid double quotes break
-        win.document.write("<div class='cert' style=\"background-image: " + bgImgRaw + ";\">" + certEl.innerHTML + "</div>");
-        win.document.write('</body></html>');
-        win.document.close();
+        abrirCertificadoEnVentana(false);
     });
 
     // ===== Generar certificado (print) =====
@@ -935,7 +999,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnGenerarCertificado').title = 'Seleccione un estudiante aprobado para generar el certificado';
 
     document.getElementById('btnGenerarCertificado').addEventListener('click', function(e) {
-        // Triple validación: variable + select value + dataset
         const selEst = document.getElementById('selectEstudiante');
         if (!estudianteAprobado || !selEst.value) {
             e.preventDefault();
@@ -943,16 +1006,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('⚠️ No se puede generar el certificado. Debe seleccionar un estudiante que haya aprobado el curso.');
             return false;
         }
-        const certEl = document.getElementById('certificate');
-        const bgImgRaw = certEl.style.backgroundImage || '';
-        const win = window.open('', '_blank');
-        win.document.write('<html><head><title>Certificado</title>');
-        win.document.write(estilosVentana);
-        win.document.write('</head><body>');
-        win.document.write("<div class='cert' style=\"background-image: " + bgImgRaw + ";\">" + certEl.innerHTML + "</div>");
-        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},800);</scr' + 'ipt>');
-        win.document.write('</body></html>');
-        win.document.close();
+        abrirCertificadoEnVentana(true);
     });
 
     // Inicializar
