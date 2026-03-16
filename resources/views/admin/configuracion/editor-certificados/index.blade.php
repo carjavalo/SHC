@@ -884,15 +884,45 @@ document.addEventListener('DOMContentLoaded', function() {
               }
           });
       }
+    // ===== Estilos comunes para inyectar en ventanas nuevas =====
+    const estilosVentana = `
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <style>
+            @media print {
+                @page { size: landscape; margin: 0; }
+                body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; padding: 0 !important; background: white; }
+                .cert { width: 100vw !important; height: 100vh !important; box-shadow: none !important; transform: none !important; }
+            }
+            body { margin: 0; font-family: 'Inter', sans-serif; background: #525659; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+            .cert { 
+                width: 960px; 
+                height: 680px; 
+                background-size: 100% 100%; 
+                background-repeat: no-repeat; 
+                background-position: center; 
+                position: relative; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+                background-color: white;
+                overflow: hidden;
+            }
+            .draggable-element { outline: none !important; cursor: default !important; }
+            .draggable-element:hover { outline: none !important; }
+        </style>
+    `;
+
     // ===== Vista previa (abrir en nueva pestaña) =====
     document.getElementById('btnVistaPrevia').addEventListener('click', function() {
         const certEl = document.getElementById('certificate');
+        // bgImg needs to be handled properly because it might have quotes already
+        const bgImgRaw = certEl.style.backgroundImage || '';
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Vista Previa Certificado</title>');
-        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;font-family:Inter,sans-serif;} .cert{width:960px;min-height:680px;background-size:100% 100%;background-repeat:no-repeat;background-position:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}</style>');
+        win.document.write(estilosVentana);
         win.document.write('</head><body>');
-        win.document.write('<div class="cert">' + certEl.innerHTML + '</div>');
+        // use single quotes for style attribute to avoid double quotes break
+        win.document.write("<div class='cert' style=\"background-image: " + bgImgRaw + ";\">" + certEl.innerHTML + "</div>");
         win.document.write('</body></html>');
         win.document.close();
     });
@@ -914,13 +944,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         const certEl = document.getElementById('certificate');
+        const bgImgRaw = certEl.style.backgroundImage || '';
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Certificado</title>');
-        win.document.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-        win.document.write('<style>@page{size:landscape;margin:0;}body{margin:0;font-family:Inter,sans-serif;} .cert{width:100vw;height:100vh;background-size:100% 100%;background-repeat:no-repeat;background-position:center;position:relative;}</style>');
+        win.document.write(estilosVentana);
         win.document.write('</head><body>');
-        win.document.write('<div class="cert" style="background-image:' + certEl.style.backgroundImage + '">' + certEl.innerHTML + '</div>');
-        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},500);</scr' + 'ipt>');
+        win.document.write("<div class='cert' style=\"background-image: " + bgImgRaw + ";\">" + certEl.innerHTML + "</div>");
+        win.document.write('<scr' + 'ipt>setTimeout(function(){window.print();},800);</scr' + 'ipt>');
         win.document.write('</body></html>');
         win.document.close();
     });
