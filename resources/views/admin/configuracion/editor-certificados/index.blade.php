@@ -91,6 +91,17 @@
                             </select>
                         </div>
 
+                        {{-- Selección de estudiante --}}
+                        <div class="mb-4" id="containerSelectEstudiante" style="display:none;">
+                            <h6 class="text-uppercase text-muted font-weight-bold" style="font-size:10px;letter-spacing:2px;">
+                                <i class="fas fa-user-graduate mr-1"></i> Seleccionar Estudiante
+                            </h6>
+                            <select class="form-control form-control-sm mt-2" id="selectEstudiante">
+                                <option value="">-- Seleccione un estudiante --</option>
+                            </select>
+                            <small class="text-muted" style="font-size:10px;" id="infoEstudiantes"></small>
+                        </div>
+
                         <hr>
 
                         {{-- Imagen de fondo --}}
@@ -452,27 +463,47 @@ document.addEventListener('DOMContentLoaded', function() {
         return d + ' de ' + meses[m] + ' de ' + y;
     }
 
-    // ===== Selección de usuario → llena campos de identidad =====
+    // ===== Selección de docente → carga cursos del docente =====
     const selectDocente = document.getElementById('selectDocente');
     selectDocente.addEventListener('change', function() {
         const opt = this.options[this.selectedIndex];
+        const containerEst = document.getElementById('containerSelectEstudiante');
+        const selectEstudianteEl = document.getElementById('selectEstudiante');
+
         if (!this.value) {
             document.getElementById('inputNombres').value = '';
             document.getElementById('inputApellido1').value = '';
             document.getElementById('inputApellido2').value = '';
             document.getElementById('inputDocumento').value = '';
+            // Resetear curso y estudiante
+            document.getElementById('selectCurso').innerHTML = '<option value="">-- Seleccione un curso --</option>';
+            containerEst.style.display = 'none';
+            selectEstudianteEl.innerHTML = '<option value="">-- Seleccione un estudiante --</option>';
+            document.getElementById('infoEstudiantes').textContent = '';
+            document.getElementById('inputCursoNombre').value = '';
+            document.getElementById('inputHoras').value = '';
+            document.getElementById('inputFechaInicio').value = '';
+            document.getElementById('inputFechaFin').value = '';
             actualizarCertificado();
             return;
         }
-        document.getElementById('inputNombres').value = opt.dataset.name || '';
-        document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
-        document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
-        document.getElementById('inputDocumento').value = opt.dataset.documento || '';
-          actualizarCertificado();
+
+        // Guardar datos del docente para la firma
+        document.getElementById('inputFirmaNombre').value = (opt.dataset.name || '') + ' ' + (opt.dataset.apellido1 || '') + ' ' + (opt.dataset.apellido2 || '');
+        actualizarCertificado();
           
           // Cargar cursos al cambiar el docente
           const cursoSelect = document.getElementById('selectCurso');
           cursoSelect.innerHTML = '<option value="">Cargando...</option>';
+          // Resetear estudiante
+          containerEst.style.display = 'none';
+          selectEstudianteEl.innerHTML = '<option value="">-- Seleccione un estudiante --</option>';
+          document.getElementById('infoEstudiantes').textContent = '';
+          document.getElementById('inputNombres').value = '';
+          document.getElementById('inputApellido1').value = '';
+          document.getElementById('inputApellido2').value = '';
+          document.getElementById('inputDocumento').value = '';
+
           fetch('/configuracion/editor-certificados/docente/' + opt.value + '/cursos')
               .then(res => res.json())
               .then(cursos => {
@@ -488,15 +519,27 @@ document.addEventListener('DOMContentLoaded', function() {
               });
       });
 
-    // ===== Selección de curso → llena campos de contenido =====
+    // ===== Selección de curso → llena campos de contenido y carga estudiantes =====
     const selectCurso = document.getElementById('selectCurso');
     selectCurso.addEventListener('change', function() {
         const opt = this.options[this.selectedIndex];
+        const containerEst = document.getElementById('containerSelectEstudiante');
+        const selectEstudiante = document.getElementById('selectEstudiante');
+
         if (!this.value) {
             document.getElementById('inputCursoNombre').value = '';
             document.getElementById('inputHoras').value = '';
             document.getElementById('inputFechaInicio').value = '';
             document.getElementById('inputFechaFin').value = '';
+            // Ocultar y resetear select de estudiantes
+            containerEst.style.display = 'none';
+            selectEstudiante.innerHTML = '<option value="">-- Seleccione un estudiante --</option>';
+            document.getElementById('infoEstudiantes').textContent = '';
+            // Limpiar datos del estudiante
+            document.getElementById('inputNombres').value = '';
+            document.getElementById('inputApellido1').value = '';
+            document.getElementById('inputApellido2').value = '';
+            document.getElementById('inputDocumento').value = '';
             actualizarCertificado();
             return;
         }
@@ -504,6 +547,110 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('inputHoras').value = opt.dataset.duracion || '';
         document.getElementById('inputFechaInicio').value = opt.dataset.fechaInicio || '';
         document.getElementById('inputFechaFin').value = opt.dataset.fechaFin || '';
+        actualizarCertificado();
+
+        // Cargar estudiantes del curso seleccionado
+        containerEst.style.display = 'block';
+        selectEstudiante.innerHTML = '<option value="">Cargando estudiantes...</option>';
+        document.getElementById('infoEstudiantes').textContent = '';
+
+        fetch('/configuracion/editor-certificados/curso/' + this.value + '/estudiantes')
+            .then(res => res.json())
+            .then(estudiantes => {
+                selectEstudiante.innerHTML = '<option value="">-- Seleccione un estudiante --</option>';
+                let aprobados = 0;
+                let reprobados = 0;
+
+                // Separar aprobados y reprobados
+                const listaAprobados = [];
+                const listaReprobados = [];
+                estudiantes.forEach(est => {
+                    if (est.aprobado) {
+                        aprobados++;
+                        listaAprobados.push(est);
+                    } else {
+                        reprobados++;
+                        listaReprobados.push(est);
+                    }
+                });
+
+                // Agregar aprobados (seleccionables)
+                if (listaAprobados.length > 0) {
+                    const grpAprobados = document.createElement('optgroup');
+                    grpAprobados.label = '✅ Aprobados (' + aprobados + ')';
+                    listaAprobados.forEach(est => {
+                        const opcion = document.createElement('option');
+                        opcion.value = est.id;
+                        opcion.dataset.name = est.name;
+                        opcion.dataset.apellido1 = est.apellido1;
+                        opcion.dataset.apellido2 = est.apellido2;
+                        opcion.dataset.documento = est.numero_documento;
+                        opcion.dataset.aprobado = '1';
+                        opcion.dataset.notaFinal = est.nota_final;
+                        opcion.textContent = est.name + ' ' + est.apellido1 + ' ' + est.apellido2 + ' (Nota: ' + est.nota_final + ')';
+                        grpAprobados.appendChild(opcion);
+                    });
+                    selectEstudiante.appendChild(grpAprobados);
+                }
+
+                // Agregar reprobados (deshabilitados, no seleccionables)
+                if (listaReprobados.length > 0) {
+                    const grpReprobados = document.createElement('optgroup');
+                    grpReprobados.label = '❌ Reprobados (' + reprobados + ') — No se puede certificar';
+                    listaReprobados.forEach(est => {
+                        const opcion = document.createElement('option');
+                        opcion.value = '';
+                        opcion.disabled = true;
+                        opcion.style.color = '#aaa';
+                        opcion.textContent = est.name + ' ' + est.apellido1 + ' ' + est.apellido2 + ' (Nota: ' + est.nota_final + ') — REPROBADO';
+                        grpReprobados.appendChild(opcion);
+                    });
+                    selectEstudiante.appendChild(grpReprobados);
+                }
+
+                document.getElementById('infoEstudiantes').innerHTML = estudiantes.length + ' estudiante(s) inscrito(s) — <strong style="color:green;">' + aprobados + ' aprobado(s)</strong>, <span style="color:#c00;">' + reprobados + ' reprobado(s)</span>';
+            })
+            .catch(err => {
+                console.error('Error al cargar estudiantes', err);
+                selectEstudiante.innerHTML = '<option value="">-- Error al cargar --</option>';
+            });
+    });
+
+    // ===== Selección de estudiante → llena campos de identidad =====
+    const selectEstudiante = document.getElementById('selectEstudiante');
+    let estudianteAprobado = false;
+
+    selectEstudiante.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const btnGenerar = document.getElementById('btnGenerarCertificado');
+
+        // Si no seleccionó nada o el value está vacío (reprobado/disabled)
+        if (!this.value) {
+            document.getElementById('inputNombres').value = '';
+            document.getElementById('inputApellido1').value = '';
+            document.getElementById('inputApellido2').value = '';
+            document.getElementById('inputDocumento').value = '';
+            estudianteAprobado = false;
+            btnGenerar.disabled = true;
+            btnGenerar.style.opacity = '0.5';
+            btnGenerar.style.pointerEvents = 'none';
+            btnGenerar.title = 'Seleccione un estudiante aprobado para generar el certificado';
+            actualizarCertificado();
+            return;
+        }
+
+        // Solo los aprobados tienen value != '' (los reprobados tienen value="")
+        estudianteAprobado = true;
+
+        // Estudiante aprobado: habilitar botón y rellenar datos
+        btnGenerar.disabled = false;
+        btnGenerar.style.opacity = '1';
+        btnGenerar.style.pointerEvents = 'auto';
+        btnGenerar.title = '';
+        document.getElementById('inputNombres').value = opt.dataset.name || '';
+        document.getElementById('inputApellido1').value = opt.dataset.apellido1 || '';
+        document.getElementById('inputApellido2').value = opt.dataset.apellido2 || '';
+        document.getElementById('inputDocumento').value = opt.dataset.documento || '';
         actualizarCertificado();
     });
 
@@ -751,7 +898,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===== Generar certificado (print) =====
-    document.getElementById('btnGenerarCertificado').addEventListener('click', function() {
+    // Inicialmente deshabilitado hasta que se seleccione un estudiante aprobado
+    document.getElementById('btnGenerarCertificado').disabled = true;
+    document.getElementById('btnGenerarCertificado').style.opacity = '0.5';
+    document.getElementById('btnGenerarCertificado').style.pointerEvents = 'none';
+    document.getElementById('btnGenerarCertificado').title = 'Seleccione un estudiante aprobado para generar el certificado';
+
+    document.getElementById('btnGenerarCertificado').addEventListener('click', function(e) {
+        // Triple validación: variable + select value + dataset
+        const selEst = document.getElementById('selectEstudiante');
+        if (!estudianteAprobado || !selEst.value) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('⚠️ No se puede generar el certificado. Debe seleccionar un estudiante que haya aprobado el curso.');
+            return false;
+        }
         const certEl = document.getElementById('certificate');
         const win = window.open('', '_blank');
         win.document.write('<html><head><title>Certificado</title>');

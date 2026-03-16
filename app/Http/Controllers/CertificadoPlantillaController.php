@@ -99,6 +99,35 @@ class CertificadoPlantillaController extends Controller
 
         return response()->json($cursos);
     }
+
+    /**
+     * Obtener estudiantes inscritos en un curso con estado de aprobación
+     */
+    public function getEstudiantesPorCurso(Curso $curso)
+    {
+        $this->verificarAcceso();
+
+        // Estudiantes inscritos activos en el curso
+        $estudiantes = $curso->estudiantes()
+            ->wherePivot('estado', 'activo')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($est) use ($curso) {
+                $resumen = $curso->getResumenCalificacionesEstudiante($est->id);
+                return [
+                    'id' => $est->id,
+                    'name' => $est->name,
+                    'apellido1' => $est->apellido1 ?? '',
+                    'apellido2' => $est->apellido2 ?? '',
+                    'numero_documento' => $est->numero_documento ?? '',
+                    'email' => $est->email,
+                    'nota_final' => round($resumen['nota_final'], 1),
+                    'aprobado' => $resumen['aprobado'],
+                ];
+            });
+
+        return response()->json($estudiantes);
+    }
 }
 
 
