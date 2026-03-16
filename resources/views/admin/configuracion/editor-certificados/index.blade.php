@@ -463,6 +463,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return d + ' de ' + meses[m] + ' de ' + y;
     }
 
+    // ===== Bandera para saber si hay una plantilla cargada =====
+    let plantillaCargada = false;
+
     // ===== Selección de docente → carga cursos del docente =====
     const selectDocente = document.getElementById('selectDocente');
     selectDocente.addEventListener('change', function() {
@@ -488,8 +491,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Guardar datos del docente para la firma
-        document.getElementById('inputFirmaNombre').value = (opt.dataset.name || '') + ' ' + (opt.dataset.apellido1 || '') + ' ' + (opt.dataset.apellido2 || '');
+        // Guardar datos del docente para la firma SOLO si no hay plantilla cargada
+        if (!plantillaCargada) {
+            document.getElementById('inputFirmaNombre').value = (opt.dataset.name || '') + ' ' + (opt.dataset.apellido1 || '') + ' ' + (opt.dataset.apellido2 || '');
+        }
         actualizarCertificado();
           
           // Cargar cursos al cambiar el docente
@@ -854,9 +859,16 @@ document.addEventListener('DOMContentLoaded', function() {
               });
           });
 
+          // Guardar firma y cargo en los elementos para que se persistan con la plantilla
+          const elementosObj = {
+              items: elementos,
+              firma_nombre: document.getElementById('inputFirmaNombre').value || '',
+              firma_cargo: document.getElementById('inputFirmaCargo').value || ''
+          };
+
           document.getElementById('html_content_input').value = htmlContent;
           document.getElementById('fondo_base64_input').value = base64Bg;
-          document.getElementById('elementos_json_input').value = JSON.stringify(elementos);
+          document.getElementById('elementos_json_input').value = JSON.stringify(elementosObj);
       });
 
       // ===== Cargar Plantilla Seleccionada =====
@@ -877,10 +889,27 @@ document.addEventListener('DOMContentLoaded', function() {
                           if (data.elementos_json && data.elementos_json.fondo_base64) {
                               certEl.style.backgroundImage = 'url(' + data.elementos_json.fondo_base64 + ')';
                           }
+
+                          // Restaurar firma y cargo guardados en la plantilla
+                          if (data.elementos_json) {
+                              const firmaNombre = data.elementos_json.firma_nombre || '';
+                              const firmaCargo = data.elementos_json.firma_cargo || '';
+                              if (firmaNombre) {
+                                  document.getElementById('inputFirmaNombre').value = firmaNombre;
+                              }
+                              if (firmaCargo) {
+                                  document.getElementById('inputFirmaCargo').value = firmaCargo;
+                              }
+                          }
+
+                          // Marcar que hay plantilla cargada para proteger firma/cargo
+                          plantillaCargada = true;
+                          actualizarCertificado();
                       });
               } else {
                   document.getElementById('certificate').innerHTML = '';
                   document.getElementById('certificate').style.backgroundImage = 'none';
+                  plantillaCargada = false;
               }
           });
       }
