@@ -174,7 +174,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Rutas de Editor de Certificados
         Route::prefix('editor-certificados')->name('editor-certificados.')->group(function () {
             Route::get('/', [\App\Http\Controllers\CertificadoPlantillaController::class, 'index'])->name('index');
+            Route::get('/data', [\App\Http\Controllers\CertificadoPlantillaController::class, 'getData'])->name('data');
             Route::post('/guardar', [\App\Http\Controllers\CertificadoPlantillaController::class, 'store'])->name('store');
+            Route::put('/{plantilla}', [\App\Http\Controllers\CertificadoPlantillaController::class, 'update'])->name('update');
             Route::delete('/{plantilla}', [\App\Http\Controllers\CertificadoPlantillaController::class, 'destroy'])->name('destroy');
             Route::get('/docente/{docente}/cursos', [\App\Http\Controllers\CertificadoPlantillaController::class, 'getCursosPorDocente'])->name('docente.cursos');
             Route::get('/curso/{curso}/estudiantes', [\App\Http\Controllers\CertificadoPlantillaController::class, 'getEstudiantesPorCurso'])->name('curso.estudiantes');

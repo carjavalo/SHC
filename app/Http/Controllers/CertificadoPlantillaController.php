@@ -71,10 +71,17 @@ class CertificadoPlantillaController extends Controller
 
         $cursosUsando = $plantilla->cursos()->count();
         if ($cursosUsando > 0) {
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'No se puede eliminar la plantilla porque está asignada a ' . $cursosUsando . ' cursos.'], 422);
+            }
             return redirect()->back()->with('error', 'No se puede eliminar la plantilla porque está asignada a ' . $cursosUsando . ' cursos.');
         }
 
         $plantilla->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Plantilla eliminada correctamente.']);
+        }
         return redirect()->route('configuracion.editor-certificados.index')->with('success', 'Plantilla eliminada correctamente.');
     }
 
@@ -82,6 +89,69 @@ class CertificadoPlantillaController extends Controller
     {
         $this->verificarAcceso();
         return response()->json($plantilla);
+    }
+
+    /**
+     * Devolver datos de plantillas para DataTable (JSON)
+     */
+    public function getData()
+    {
+        $this->verificarAcceso();
+
+        $plantillas = PlantillaCertificado::latest()->get()->map(function ($p) {
+            $elementos = $p->elementos_json ?? [];
+            return [
+                'id' => $p->id,
+                'nombre' => $p->nombre,
+                'firma_nombre' => $elementos['firma_nombre'] ?? '-',
+                'firma_cargo' => $elementos['firma_cargo'] ?? '-',
+                'cursos_count' => $p->cursos()->count(),
+                'created_at' => $p->created_at ? $p->created_at->format('d/m/Y H:i') : '-',
+            ];
+        });
+
+        return response()->json(['data' => $plantillas]);
+    }
+
+    /**
+     * Actualizar una plantilla (nombre, firma, cargo)
+     */
+    public function update(Request $request, PlantillaCertificado $plantilla)
+    {
+        $this->verificarAcceso();
+
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'firma_nombre' => 'nullable|string|max:255',
+            'firma_cargo' => 'nullable|string|max:255',
+        ]);
+
+        $plantilla->nombre = $request->nombre;
+
+        // Actualizar firma y cargo dentro de elementos_json
+        $elementos = $plantilla->elementos_json ?? [];
+        $elementos['firma_nombre'] = $request->firma_nombre ?? '';
+        $elementos['firma_cargo'] = $request->firma_cargo ?? '';
+        $plantilla->elementos_json = $elementos;
+
+        // Actualizar también en el html_content si existe
+        if ($plantilla->html_content) {
+            $html = $plantilla->html_content;
+            // Actualizar el texto de firma en el HTML del certificado
+            $html = preg_replace(
+                '/(id="certFirmaNombre"[^>]*>)[^<]*(</','$1' . strtoupper($request->firma_nombre ?? '') . '$2',
+                $html
+            );
+            $html = preg_replace(
+                '/(id="certFirmaCargo"[^>]*>)[^<]*(</','$1' . strtoupper($request->firma_cargo ?? '') . '$2',
+                $html
+            );
+            $plantilla->html_content = $html;
+        }
+
+        $plantilla->save();
+
+        return response()->json(['success' => true, 'message' => 'Plantilla actualizada correctamente.']);
     }
 
     public function getCursosPorDocente(User $docente)

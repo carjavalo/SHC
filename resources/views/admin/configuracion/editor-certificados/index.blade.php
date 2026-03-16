@@ -2,6 +2,7 @@
 
 @section('title', 'Editor de Certificados')
 
+@section('plugins.Sweetalert2', true)
 @section('content_header')
     <div class="container-fluid">
         <div class="row mb-2">
@@ -42,6 +43,9 @@
                 @endforeach
             </select>
             @endif
+            <button class="btn btn-outline-primary btn-sm mr-2" id="btnGestionarPlantillas" data-toggle="modal" data-target="#modalGestionPlantillas">
+                <i class="fas fa-th-list mr-1"></i> Gestionar
+            </button>
             <button class="btn btn-outline-success btn-sm mr-2" id="btnGuardarPlantilla" data-toggle="modal" data-target="#modalGuardarPlantilla">
                 <i class="fas fa-save mr-1"></i> Guardar Plantilla
             </button>
@@ -416,6 +420,96 @@
     }
 </style>
 
+<!-- Modal para Gestionar Plantillas -->
+<div class="modal fade" id="modalGestionPlantillas" tabindex="-1" role="dialog" aria-labelledby="modalGestionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
+        <h5 class="modal-title" id="modalGestionLabel"><i class="fas fa-th-list mr-2"></i>Gestión de Plantillas de Certificados</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="table-responsive">
+          <table id="tablaPlantillas" class="table table-hover table-striped w-100" style="font-size:13px;">
+            <thead style="background:#f1f5f9;">
+              <tr>
+                <th style="width:40px;">#</th>
+                <th>Nombre</th>
+                <th style="width:130px;">Firma</th>
+                <th style="width:130px;">Cargo</th>
+                <th style="width:100px;">Cursos</th>
+                <th style="width:140px;">Creada</th>
+                <th style="width:160px;text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Vista Previa de Plantilla -->
+<div class="modal fade" id="modalVistaPlantilla" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
+        <h5 class="modal-title"><i class="fas fa-eye mr-2"></i>Vista Previa: <span id="vistaPlantillaNombre"></span></h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-3 text-center" style="background:#525659;overflow:auto;">
+        <div id="vistaPlantillaContenido" style="width:960px;height:680px;margin:0 auto;background:white;position:relative;background-size:100% 100%;background-repeat:no-repeat;background-position:center;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Editar Nombre de Plantilla -->
+<div class="modal fade" id="modalEditarPlantilla" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="formEditarPlantilla">
+        <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;">
+          <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>Editar Plantilla</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editPlantillaId">
+          <div class="form-group">
+            <label for="editPlantillaNombre">Nombre de la plantilla</label>
+            <input type="text" class="form-control" id="editPlantillaNombre" required>
+          </div>
+          <div class="form-group">
+            <label for="editPlantillaFirma">Nombre de la Firma</label>
+            <input type="text" class="form-control" id="editPlantillaFirma" placeholder="Ej: Dr. Juan Pérez">
+          </div>
+          <div class="form-group">
+            <label for="editPlantillaCargo">Cargo Responsable</label>
+            <input type="text" class="form-control" id="editPlantillaCargo" placeholder="Ej: Director de Docencia">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Modal para Guardar Plantilla -->
 <div class="modal fade" id="modalGuardarPlantilla" tabindex="-1" role="dialog" aria-labelledby="modalGuardarLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -665,21 +759,39 @@ document.addEventListener('DOMContentLoaded', function() {
         const ap1 = document.getElementById('inputApellido1').value || 'APELLIDO1';
         const ap2 = document.getElementById('inputApellido2').value || 'APELLIDO2';
         const doc = document.getElementById('inputDocumento').value || '00.000.000';
-        const curso = document.getElementById('inputCursoNombre').value || 'NOMBRE DEL CURSO';
-        const horas = document.getElementById('inputHoras').value || '40';
-        const fInicio = document.getElementById('inputFechaInicio').value;
-        const fFin = document.getElementById('inputFechaFin').value;
         const firmaNombre = document.getElementById('inputFirmaNombre').value || 'FIRMACOR';
         const firmaCargo = document.getElementById('inputFirmaCargo').value || 'CARGOCOR';
 
-        document.getElementById('certNombreCompleto').textContent = (nombres + ' ' + ap1 + ' ' + ap2).toUpperCase();
-        document.getElementById('certDocumento').textContent = 'C.C. ' + doc + ' de Cali';
-        document.getElementById('certCursoNombre').textContent = curso;
-        document.getElementById('certHoras').textContent = horas;
-        document.getElementById('certFechaInicio').textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
-        document.getElementById('certFechaFin').textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
-        document.getElementById('certFirmaNombre').textContent = firmaNombre.toUpperCase();
-        document.getElementById('certFirmaCargo').textContent = firmaCargo.toUpperCase();
+        // Siempre actualizar nombre y documento del estudiante (es lo único que cambia)
+        const certNombre = document.getElementById('certNombreCompleto');
+        const certDoc = document.getElementById('certDocumento');
+        if (certNombre) certNombre.textContent = (nombres + ' ' + ap1 + ' ' + ap2).toUpperCase();
+        if (certDoc) certDoc.textContent = 'C.C. ' + doc + ' de Cali';
+
+        // Datos del curso, horas y fechas: solo actualizar si NO hay plantilla cargada
+        // (cuando hay plantilla, estos datos ya están fijos en el HTML del certificado)
+        if (!plantillaCargada) {
+            const curso = document.getElementById('inputCursoNombre').value || 'NOMBRE DEL CURSO';
+            const horas = document.getElementById('inputHoras').value || '40';
+            const fInicio = document.getElementById('inputFechaInicio').value;
+            const fFin = document.getElementById('inputFechaFin').value;
+            const certCurso = document.getElementById('certCursoNombre');
+            const certHoras = document.getElementById('certHoras');
+            const certFI = document.getElementById('certFechaInicio');
+            const certFF = document.getElementById('certFechaFin');
+            if (certCurso) certCurso.textContent = curso;
+            if (certHoras) certHoras.textContent = horas;
+            if (certFI) certFI.textContent = fInicio ? formatearFecha(fInicio) : '01 de Enero';
+            if (certFF) certFF.textContent = fFin ? formatearFecha(fFin) : '15 de Febrero de 2024';
+        }
+
+        // Firma y cargo: solo actualizar si NO hay plantilla cargada
+        if (!plantillaCargada) {
+            const certFN = document.getElementById('certFirmaNombre');
+            const certFC = document.getElementById('certFirmaCargo');
+            if (certFN) certFN.textContent = firmaNombre.toUpperCase();
+            if (certFC) certFC.textContent = firmaCargo.toUpperCase();
+        }
     }
 
     // Escuchar cambios en los campos editables (firma, detalle)
@@ -859,11 +971,16 @@ document.addEventListener('DOMContentLoaded', function() {
               });
           });
 
-          // Guardar firma y cargo en los elementos para que se persistan con la plantilla
+          // Guardar firma, cargo y datos del curso para que se persistan con la plantilla
           const elementosObj = {
               items: elementos,
               firma_nombre: document.getElementById('inputFirmaNombre').value || '',
-              firma_cargo: document.getElementById('inputFirmaCargo').value || ''
+              firma_cargo: document.getElementById('inputFirmaCargo').value || '',
+              curso_nombre: document.getElementById('inputCursoNombre').value || '',
+              curso_horas: document.getElementById('inputHoras').value || '',
+              curso_fecha_inicio: document.getElementById('inputFechaInicio').value || '',
+              curso_fecha_fin: document.getElementById('inputFechaFin').value || '',
+              detalle_adicional: document.getElementById('inputDetalle').value || ''
           };
 
           document.getElementById('html_content_input').value = htmlContent;
@@ -890,19 +1007,19 @@ document.addEventListener('DOMContentLoaded', function() {
                               certEl.style.backgroundImage = 'url(' + data.elementos_json.fondo_base64 + ')';
                           }
 
-                          // Restaurar firma y cargo guardados en la plantilla
+                          // Restaurar firma, cargo y datos del curso guardados en la plantilla
                           if (data.elementos_json) {
-                              const firmaNombre = data.elementos_json.firma_nombre || '';
-                              const firmaCargo = data.elementos_json.firma_cargo || '';
-                              if (firmaNombre) {
-                                  document.getElementById('inputFirmaNombre').value = firmaNombre;
-                              }
-                              if (firmaCargo) {
-                                  document.getElementById('inputFirmaCargo').value = firmaCargo;
-                              }
+                              const ej = data.elementos_json;
+                              if (ej.firma_nombre) document.getElementById('inputFirmaNombre').value = ej.firma_nombre;
+                              if (ej.firma_cargo) document.getElementById('inputFirmaCargo').value = ej.firma_cargo;
+                              if (ej.curso_nombre) document.getElementById('inputCursoNombre').value = ej.curso_nombre;
+                              if (ej.curso_horas) document.getElementById('inputHoras').value = ej.curso_horas;
+                              if (ej.curso_fecha_inicio) document.getElementById('inputFechaInicio').value = ej.curso_fecha_inicio;
+                              if (ej.curso_fecha_fin) document.getElementById('inputFechaFin').value = ej.curso_fecha_fin;
+                              if (ej.detalle_adicional) document.getElementById('inputDetalle').value = ej.detalle_adicional;
                           }
 
-                          // Marcar que hay plantilla cargada para proteger firma/cargo
+                          // Marcar que hay plantilla cargada para proteger datos fijos
                           plantillaCargada = true;
                           actualizarCertificado();
                       });
@@ -917,7 +1034,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function abrirCertificadoEnVentana(autoImprimir) {
         const certEl = document.getElementById('certificate');
         const win = window.open('', '_blank');
-        if (!win) { alert('El navegador bloqueó la ventana emergente. Permita pop-ups para este sitio.'); return; }
+        if (!win) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ventana bloqueada',
+                text: 'El navegador bloqueó la ventana emergente. Permita pop-ups para este sitio.',
+                confirmButtonColor: '#1e3a8a'
+            });
+            return;
+        }
         const doc = win.document;
         doc.open();
         doc.write('<!DOCTYPE html><html><head><title>Certificado</title>');
@@ -1032,7 +1157,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!estudianteAprobado || !selEst.value) {
             e.preventDefault();
             e.stopPropagation();
-            alert('⚠️ No se puede generar el certificado. Debe seleccionar un estudiante que haya aprobado el curso.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'No se puede generar el certificado. Debe seleccionar un estudiante que haya aprobado el curso.',
+                confirmButtonColor: '#1e3a8a'
+            });
             return false;
         }
         abrirCertificadoEnVentana(true);
@@ -1057,8 +1187,275 @@ document.addEventListener('DOMContentLoaded', function() {
             elementoSeleccionado = null;
         }
     });
+
+    // ================================================================
+    // ===== Gestión de Plantillas - DataTable con acciones CRUD =====
+    // ================================================================
+    let tablaPlantillasInstance = null;
+
+    $('#modalGestionPlantillas').on('shown.bs.modal', function() {
+        if (tablaPlantillasInstance) {
+            tablaPlantillasInstance.ajax.reload();
+        } else {
+            tablaPlantillasInstance = $('#tablaPlantillas').DataTable({
+                ajax: {
+                    url: '/configuracion/editor-certificados/data',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'nombre', render: function(data) {
+                        return '<span class="font-weight-bold" style="color:#1e3a8a;">' + data + '</span>';
+                    }},
+                    { data: 'firma_nombre', render: function(data) {
+                        return data && data !== '-' ? '<i class="fas fa-signature mr-1 text-muted"></i>' + data : '<span class="text-muted">-</span>';
+                    }},
+                    { data: 'firma_cargo', render: function(data) {
+                        return data && data !== '-' ? '<i class="fas fa-briefcase mr-1 text-muted"></i>' + data : '<span class="text-muted">-</span>';
+                    }},
+                    { data: 'cursos_count', className: 'text-center', render: function(data) {
+                        if (data > 0) return '<span class="badge badge-info">' + data + ' curso(s)</span>';
+                        return '<span class="badge badge-secondary">Sin asignar</span>';
+                    }},
+                    { data: 'created_at' },
+                    { data: null, orderable: false, className: 'text-center', render: function(data, type, row) {
+                        return '<div class="btn-group btn-group-sm">' +
+                            '<button class="btn btn-outline-info btn-sm btn-ver-plantilla" data-id="' + row.id + '" title="Vista Previa">' +
+                                '<i class="fas fa-eye"></i>' +
+                            '</button>' +
+                            '<button class="btn btn-outline-warning btn-sm btn-editar-plantilla" data-id="' + row.id + '" title="Editar">' +
+                                '<i class="fas fa-edit"></i>' +
+                            '</button>' +
+                            '<button class="btn btn-outline-success btn-sm btn-cargar-plantilla" data-id="' + row.id + '" title="Cargar en Editor">' +
+                                '<i class="fas fa-file-import"></i>' +
+                            '</button>' +
+                            '<button class="btn btn-outline-danger btn-sm btn-eliminar-plantilla" data-id="' + row.id + '" data-nombre="' + row.nombre + '" data-cursos="' + row.cursos_count + '" title="Eliminar">' +
+                                '<i class="fas fa-trash-alt"></i>' +
+                            '</button>' +
+                        '</div>';
+                    }}
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+                    emptyTable: 'No hay plantillas de certificados creadas',
+                    zeroRecords: 'No se encontraron plantillas'
+                },
+                order: [[0, 'desc']],
+                pageLength: 10,
+                responsive: true,
+                dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
+            });
+        }
+    });
+
+    // Acción: Ver vista previa de plantilla
+    $(document).on('click', '.btn-ver-plantilla', function() {
+        const id = $(this).data('id');
+        fetch('/configuracion/editor-certificados/' + id + '/json')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('vistaPlantillaNombre').textContent = data.nombre;
+                const container = document.getElementById('vistaPlantillaContenido');
+                container.innerHTML = data.html_content || '<p class="text-white mt-5">Sin contenido HTML</p>';
+                if (data.elementos_json && data.elementos_json.fondo_base64) {
+                    container.style.backgroundImage = 'url(' + data.elementos_json.fondo_base64 + ')';
+                } else {
+                    container.style.backgroundImage = 'none';
+                }
+                // Desactivar interactividad
+                container.querySelectorAll('.draggable-element').forEach(function(el) {
+                    el.style.cursor = 'default';
+                    el.onmousedown = null;
+                });
+                $('#modalVistaPlantilla').modal('show');
+            });
+    });
+
+    // Acción: Editar plantilla
+    $(document).on('click', '.btn-editar-plantilla', function() {
+        const id = $(this).data('id');
+        fetch('/configuracion/editor-certificados/' + id + '/json')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('editPlantillaId').value = data.id;
+                document.getElementById('editPlantillaNombre').value = data.nombre;
+                const elems = data.elementos_json || {};
+                document.getElementById('editPlantillaFirma').value = elems.firma_nombre || '';
+                document.getElementById('editPlantillaCargo').value = elems.firma_cargo || '';
+                $('#modalEditarPlantilla').modal('show');
+            });
+    });
+
+    // Submit editar plantilla
+    document.getElementById('formEditarPlantilla').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('editPlantillaId').value;
+        const nombre = document.getElementById('editPlantillaNombre').value;
+        const firma = document.getElementById('editPlantillaFirma').value;
+        const cargo = document.getElementById('editPlantillaCargo').value;
+
+        fetch('/configuracion/editor-certificados/' + id, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ nombre: nombre, firma_nombre: firma, firma_cargo: cargo })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                $('#modalEditarPlantilla').modal('hide');
+                tablaPlantillasInstance.ajax.reload();
+                // Actualizar el select de plantillas
+                actualizarSelectPlantillas();
+                // Mostrar notificación
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Actualizado!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire('Error', 'Error al actualizar la plantilla.', 'error');
+            }
+        })
+        .catch(() => Swal.fire('Error', 'Error de conexión al actualizar.', 'error'));
+    });
+
+    // Acción: Cargar plantilla en editor desde datatable
+    $(document).on('click', '.btn-cargar-plantilla', function() {
+        const id = $(this).data('id');
+        const selectPlantilla = document.getElementById('selectPlantilla');
+        if (selectPlantilla) {
+            selectPlantilla.value = id;
+            selectPlantilla.dispatchEvent(new Event('change'));
+        }
+        $('#modalGestionPlantillas').modal('hide');
+        Swal.fire({
+            icon: 'info',
+            title: 'Plantilla Cargada',
+            text: 'La plantilla ha sido cargada en el editor.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    });
+
+    // Acción: Eliminar plantilla
+    $(document).on('click', '.btn-eliminar-plantilla', function() {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre');
+        const cursos = $(this).data('cursos');
+
+        if (cursos > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No se puede eliminar',
+                text: 'La plantilla "' + nombre + '" está asignada a ' + cursos + ' curso(s).',
+                confirmButtonColor: '#1e3a8a'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Eliminar Plantilla?',
+            html: '¿Está seguro de eliminar la plantilla <b>"' + nombre + '"</b>?<br>Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/configuracion/editor-certificados/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => {
+                    if (r.redirected) {
+                        tablaPlantillasInstance.ajax.reload();
+                        actualizarSelectPlantillas();
+                        Swal.fire('¡Eliminado!', 'Plantilla eliminada correctamente.', 'success');
+                        return null;
+                    }
+                    return r.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    tablaPlantillasInstance.ajax.reload();
+                    actualizarSelectPlantillas();
+                    if (data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                    } else {
+                        Swal.fire('¡Eliminado!', 'Plantilla eliminada correctamente.', 'success');
+                    }
+                })
+                .catch(() => {
+                    tablaPlantillasInstance.ajax.reload();
+                    actualizarSelectPlantillas();
+                    Swal.fire('Error', 'Ocurrió un error al intentar eliminar la plantilla.', 'error');
+                });
+            }
+        });
+    });
+
+    // Función auxiliar: Actualizar select de plantillas sin recargar la página
+    function actualizarSelectPlantillas() {
+        fetch('/configuracion/editor-certificados/data')
+            .then(r => r.json())
+            .then(response => {
+                const sel = document.getElementById('selectPlantilla');
+                if (!sel) return;
+                const currentVal = sel.value;
+                sel.innerHTML = '<option value="">-- Cargar --</option>';
+                (response.data || []).forEach(function(p) {
+                    sel.innerHTML += '<option value="' + p.id + '">' + p.nombre + '</option>';
+                });
+                if (currentVal) sel.value = currentVal;
+            });
+    }
+
+    // Toast de notificación simple
+    function mostrarToast(tipo, mensaje) {
+        const colores = { success: '#28a745', error: '#dc3545', warning: '#ffc107', info: '#17a2b8' };
+        const iconos = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:14px 24px;border-radius:8px;color:white;font-family:Inter,sans-serif;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.2);display:flex;align-items:center;gap:10px;animation:slideInRight 0.3s ease;background:' + (colores[tipo] || colores.info);
+        toast.innerHTML = '<i class="fas fa-' + (iconos[tipo] || iconos.info) + '"></i> ' + mensaje;
+        document.body.appendChild(toast);
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.4s ease';
+            setTimeout(function() { toast.remove(); }, 400);
+        }, 3000);
+    }
+
 });
 </script>
+<style>
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+#tablaPlantillas_wrapper .dataTables_filter input {
+    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+    padding: 4px 12px;
+}
+#tablaPlantillas thead th {
+    border-bottom: 2px solid #1e3a8a;
+    color: #1e3a8a;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+</style>
 @stop
 
 
