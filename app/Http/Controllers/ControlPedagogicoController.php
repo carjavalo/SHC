@@ -622,45 +622,58 @@ class ControlPedagogicoController extends Controller
      */
     public function previewCertificado(Request $request, Curso $curso, User $estudiante)
     {
-        $user = Auth::user();
-        
-        // Solo admins, operadores y docentes pueden ver la vista previa
-        if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
-            abort(403, 'No tienes permisos para ver este certificado.');
+        try {
+            $user = Auth::user();
+
+            // Solo admins, operadores y docentes pueden ver la vista previa
+            if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
+                abort(403, 'No tienes permisos para ver este certificado.');
+            }
+
+            // Verificar que el estudiante está inscrito en el curso
+            $inscrito = DB::table('curso_estudiantes')
+                ->where('curso_id', $curso->id)
+                ->where('estudiante_id', $estudiante->id)
+                ->exists();
+
+            if (!$inscrito) {
+                abort(404, 'El estudiante no está inscrito en este curso.');
+            }
+
+            // Verificar que el curso tiene plantilla de certificado
+            $plantilla = $curso->plantillaCertificado;
+            if (!$plantilla) {
+                abort(404, 'Este curso no tiene una plantilla de certificado configurada.');
+            }
+
+            // Obtener resumen y nota final de forma segura
+            $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
+            $notaFinal = number_format(floatval($resumen['nota_final'] ?? 0), 1);
+
+            // Obtener o crear registro de certificado emitido con código de verificación
+            $certificadoEmitido = null;
+            try {
+                $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
+                    $curso->id, $estudiante->id, floatval($resumen['nota_final'] ?? 0), $plantilla->id
+                );
+            } catch (\Throwable $e) {
+                // Si la tabla no existe o hay error de BD, continuar sin certificado emitido
+                \Log::warning('No se pudo crear/obtener certificado emitido: ' . $e->getMessage());
+            }
+
+            return view('academico.curso.certificado', [
+                'curso' => $curso,
+                'user' => $estudiante,
+                'resumen' => $resumen,
+                'plantilla' => $plantilla,
+                'notaFinal' => $notaFinal,
+                'certificadoEmitido' => $certificadoEmitido,
+            ]);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e; // Re-lanzar abort(403), abort(404), etc.
+        } catch (\Throwable $e) {
+            \Log::error('Error en previewCertificado: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+            abort(500, 'Error al generar la vista previa del certificado: ' . $e->getMessage());
         }
-
-        // Verificar que el estudiante está inscrito en el curso
-        $inscrito = DB::table('curso_estudiantes')
-            ->where('curso_id', $curso->id)
-            ->where('estudiante_id', $estudiante->id)
-            ->exists();
-
-        if (!$inscrito) {
-            abort(404, 'El estudiante no está inscrito en este curso.');
-        }
-
-        // Verificar que el curso tiene plantilla de certificado
-        $plantilla = $curso->plantillaCertificado;
-        if (!$plantilla) {
-            abort(404, 'Este curso no tiene una plantilla de certificado configurada.');
-        }
-
-        // Obtener resumen y nota final
-        $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
-        $notaFinal = number_format($resumen['nota_final'] ?? 0, 1);
-
-        // Obtener o crear registro de certificado emitido con código de verificación
-        $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
-            $curso->id, $estudiante->id, $resumen['nota_final'] ?? 0, $plantilla->id
-        );
-
-        return view('academico.curso.certificado', [
-            'curso' => $curso,
-            'user' => $estudiante,
-            'resumen' => $resumen,
-            'plantilla' => $plantilla,
-            'notaFinal' => $notaFinal,
-            'certificadoEmitido' => $certificadoEmitido,
-        ]);
     }
 }
