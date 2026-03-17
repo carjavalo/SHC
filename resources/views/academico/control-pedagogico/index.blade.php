@@ -539,9 +539,14 @@
                     </div>
                 </div>
                 <!-- Iframe con el certificado (escalado para caber en el modal) -->
-                <div id="certIframeWrapper" style="display: flex; justify-content: center; align-items: center; padding: 15px; overflow: hidden;">
+                <div id="certIframeWrapper" style="display: flex; justify-content: center; align-items: flex-start; padding: 15px; overflow: hidden; position: relative;">
+                    <!-- Loading indicator -->
+                    <div id="certLoadingIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #fff;"></i>
+                        <p style="color: #ccc; margin-top: 10px; font-family: 'Inter',sans-serif;">Cargando certificado...</p>
+                    </div>
                     <div id="certIframeScaler" style="width: 960px; height: 680px; transform-origin: top center; flex-shrink: 0;">
-                        <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
+                        <iframe id="certificadoIframe" src="" onload="if(this.src){document.getElementById('certLoadingIndicator').style.display='none'; scaleCertificateIframe();}" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>
@@ -2224,6 +2229,7 @@
             const certUrl = `{{ url('academico/control-pedagogico/preview-certificado') }}/${cursoId}/${estudianteId}`;
             
             // Configurar iframe y enlace nueva pestaña
+            document.getElementById('certLoadingIndicator').style.display = 'block';
             $('#certificadoIframe').attr('src', certUrl);
             $('#certOpenNewTab').attr('href', certUrl);
 
@@ -2264,6 +2270,7 @@
         // Limpiar iframe al cerrar modal
         $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
             $('#certificadoIframe').attr('src', '');
+            document.getElementById('certLoadingIndicator').style.display = 'block';
         });
     });
 </script>

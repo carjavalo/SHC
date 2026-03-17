@@ -620,14 +620,25 @@ class ControlPedagogicoController extends Controller
     /**
      * Vista previa del certificado para un estudiante desde Control Pedagógico
      */
-    public function previewCertificado(Request $request, Curso $curso, User $estudiante)
+    public function previewCertificado(Request $request, $cursoId, $estudianteId)
     {
         try {
-            $user = Auth::user();
+            $authUser = Auth::user();
 
             // Solo admins, operadores y docentes pueden ver la vista previa
-            if (!in_array($user->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
-                abort(403, 'No tienes permisos para ver este certificado.');
+            if (!in_array($authUser->role, ['Super Admin', 'Administrador', 'Operador', 'Docente'])) {
+                return $this->certificadoError('No tienes permisos para ver este certificado.');
+            }
+
+            // Buscar curso y estudiante manualmente para manejar errores amigablemente
+            $curso = Curso::with(['materiales.actividades', 'plantillaCertificado'])->find($cursoId);
+            if (!$curso) {
+                return $this->certificadoError('El curso no fue encontrado.');
+            }
+
+            $estudiante = User::find($estudianteId);
+            if (!$estudiante) {
+                return $this->certificadoError('El estudiante no fue encontrado.');
             }
 
             // Verificar que el estudiante está inscrito en el curso
@@ -637,13 +648,13 @@ class ControlPedagogicoController extends Controller
                 ->exists();
 
             if (!$inscrito) {
-                abort(404, 'El estudiante no está inscrito en este curso.');
+                return $this->certificadoError('El estudiante no está inscrito en este curso.');
             }
 
             // Verificar que el curso tiene plantilla de certificado
             $plantilla = $curso->plantillaCertificado;
             if (!$plantilla) {
-                abort(404, 'Este curso no tiene una plantilla de certificado configurada.');
+                return $this->certificadoError('Este curso no tiene una plantilla de certificado configurada.');
             }
 
             // Obtener resumen y nota final de forma segura
@@ -657,7 +668,6 @@ class ControlPedagogicoController extends Controller
                     $curso->id, $estudiante->id, floatval($resumen['nota_final'] ?? 0), $plantilla->id
                 );
             } catch (\Throwable $e) {
-                // Si la tabla no existe o hay error de BD, continuar sin certificado emitido
                 \Log::warning('No se pudo crear/obtener certificado emitido: ' . $e->getMessage());
             }
 
@@ -669,11 +679,34 @@ class ControlPedagogicoController extends Controller
                 'notaFinal' => $notaFinal,
                 'certificadoEmitido' => $certificadoEmitido,
             ]);
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            throw $e; // Re-lanzar abort(403), abort(404), etc.
         } catch (\Throwable $e) {
             \Log::error('Error en previewCertificado: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
-            abort(500, 'Error al generar la vista previa del certificado: ' . $e->getMessage());
+            return $this->certificadoError('Error al generar el certificado: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Devolver una página HTML de error amigable para el iframe del certificado
+     */
+    private function certificadoError(string $mensaje): \Illuminate\Http\Response
+    {
+        $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+        <style>
+            body { margin:0; font-family: "Inter","Segoe UI",sans-serif; background:#525659;
+                   display:flex; justify-content:center; align-items:center; min-height:100vh; }
+            .error-box { background:#fff; border-radius:12px; padding:40px 50px; text-align:center;
+                         box-shadow:0 10px 30px rgba(0,0,0,.3); max-width:500px; }
+            .error-box i { font-size:48px; color:#e74c3c; margin-bottom:16px; display:block; }
+            .error-box h3 { color:#1e3a5f; margin:0 0 12px; font-size:18px; }
+            .error-box p  { color:#64748b; margin:0; font-size:14px; line-height:1.5; }
+        </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        </head><body>
+        <div class="error-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>No se puede mostrar el certificado</h3>
+            <p>' . e($mensaje) . '</p>
+        </div></body></html>';
+        return response($html, 200)->header('Content-Type', 'text/html');
     }
 }

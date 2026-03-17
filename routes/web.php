@@ -128,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('control-pedagogico/reset-actividad', [ControlPedagogicoController::class, 'resetActividad'])->name('control-pedagogico.reset-actividad');
         Route::post('control-pedagogico/toggle-actividad', [ControlPedagogicoController::class, 'toggleActividad'])->name('control-pedagogico.toggle-actividad');
         Route::post('control-pedagogico/reset-actividad-grupo', [ControlPedagogicoController::class, 'resetActividadGrupo'])->name('control-pedagogico.reset-actividad-grupo');
-        Route::get('control-pedagogico/preview-certificado/{curso}/{estudiante}', [ControlPedagogicoController::class, 'previewCertificado'])->name('control-pedagogico.preview-certificado');
+        Route::get('control-pedagogico/preview-certificado/{curso}/{estudiante}', [ControlPedagogicoController::class, 'previewCertificado'])->name('control-pedagogico.preview-certificado')->withoutMiddleware([]);
         
         // Cursos disponibles para estudiantes
         Route::get('cursos-disponibles', [AcademicoController::class, 'cursosDisponibles'])->name('cursos.disponibles');

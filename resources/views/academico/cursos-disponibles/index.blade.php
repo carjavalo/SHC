@@ -132,7 +132,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body p-0" style="background: #525659; overflow-x: auto;">
+                <div class="modal-body p-0" style="background: #525659; overflow: hidden;">
                     <div class="cert-info-bar" style="background: #f8f9fa; padding: 12px 20px; border-bottom: 2px solid #e9ecef;">
                         <div class="row align-items-center">
                             <div class="col-md-4">
@@ -153,8 +153,14 @@
                             </div>
                         </div>
                     </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; max-width: 100%;" allowfullscreen></iframe>
+                    <div id="certIframeWrapper2" style="display: flex; justify-content: center; align-items: flex-start; padding: 15px; overflow: hidden; position: relative;">
+                        <div id="certLoadingIndicator2" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #fff;"></i>
+                            <p style="color: #ccc; margin-top: 10px; font-family: 'Inter',sans-serif;">Cargando certificado...</p>
+                        </div>
+                        <div id="certIframeScaler2" style="width: 960px; height: 680px; transform-origin: top center; flex-shrink: 0;">
+                            <iframe id="certificadoIframe" src="" onload="if(this.src){var li=document.getElementById('certLoadingIndicator2');if(li)li.style.display='none'; if(typeof scaleCertificateIframe2==='function')scaleCertificateIframe2();}" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #e9ecef; background: #f8f9fa;">
@@ -324,6 +330,8 @@
             const certUrl = `{{ url('academico/curso') }}/${cursoId}/certificado`;
             
             $('#certificadoIframe').attr('src', certUrl);
+            var li2 = document.getElementById('certLoadingIndicator2');
+            if (li2) li2.style.display = 'block';
             $('#certOpenNewTab').attr('href', certUrl);
 
             $('#certPrintBtn').off('click').on('click', function() {
@@ -338,6 +346,28 @@
 
         $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
             $('#certificadoIframe').attr('src', '');
+            var li2 = document.getElementById('certLoadingIndicator2');
+            if (li2) li2.style.display = 'block';
+        });
+
+        // Escalar iframe para que quepa en el modal manteniendo proporciones
+        function scaleCertificateIframe2() {
+            var wrapper = document.getElementById('certIframeWrapper2');
+            var scaler = document.getElementById('certIframeScaler2');
+            if (!wrapper || !scaler) return;
+            var availableWidth = wrapper.clientWidth - 30;
+            var nativeW = 960, nativeH = 680;
+            var scale = Math.min(1, availableWidth / nativeW);
+            scaler.style.transform = 'scale(' + scale + ')';
+            wrapper.style.height = (nativeH * scale + 30) + 'px';
+        }
+        $('#certificadoPreviewModal').on('shown.bs.modal', function() {
+            scaleCertificateIframe2();
+        });
+        $(window).on('resize', function() {
+            if ($('#certificadoPreviewModal').is(':visible')) {
+                scaleCertificateIframe2();
+            }
         });
     </script>
 @stop
