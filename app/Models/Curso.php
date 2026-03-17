@@ -320,7 +320,7 @@ class Curso extends Model
         foreach ($this->materiales as $material) {
             $notaMaterial = $material->calcularNotaEstudiante($userId);
             // Ponderar la nota del material según su porcentaje en el curso
-            $notaFinal += ($notaMaterial * $material->porcentaje_curso / 100);
+            $notaFinal += ($notaMaterial * floatval($material->porcentaje_curso ?? 0) / 100);
         }
         
         // La nota final está en escala 0-5.0

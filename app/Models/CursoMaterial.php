@@ -219,7 +219,7 @@ class CursoMaterial extends Model
             // La nota de la actividad ya está en escala 0-5.0
             // Ponderamos según el porcentaje de la actividad respecto al total de actividades del material
             // Ej: si actividad tiene 20% y total actividades es 100%, pesoRelativo = 0.20
-            $pesoRelativo = $actividad->porcentaje_curso / $totalPesoActividades;
+            $pesoRelativo = floatval($actividad->porcentaje_curso ?? 0) / $totalPesoActividades;
             $notaMaterial += ($notaActividad * $pesoRelativo);
         }
         
