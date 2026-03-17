@@ -1,1 +1,0 @@
-<?php \ = file_get_contents('app/Models/Curso.php'); \ = str_replace('\ += (\ * \->porcentaje_curso / 100);', '\ += (\ * floatval(\->porcentaje_curso ?? 0) / 100);', \); file_put_contents('app/Models/Curso.php', \);
