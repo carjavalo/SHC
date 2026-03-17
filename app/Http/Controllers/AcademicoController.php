@@ -367,6 +367,8 @@ class AcademicoController extends Controller
             ->get();
 
         $materialesVistos = $this->getMaterialesVistos($curso->id, $user->id);
+        
+        $resumen = $curso->tieneEstudiante($user->id) ? $curso->getResumenCalificacionesEstudiante($user->id) : ['aprobado' => false];
 
         return view('academico.curso.materiales', compact('curso', 'materiales', 'resumen', 'materialesVistos'));
     }
