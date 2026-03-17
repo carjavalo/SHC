@@ -17,7 +17,13 @@ use App\Http\Controllers\VinculacionContratoController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\PublicidadProductoController;
 use App\Http\Controllers\CertificadoEditorController;
+use App\Http\Controllers\VerificacionCertificadoController;
 use Illuminate\Support\Facades\Route;
+
+// ── Rutas públicas de verificación de certificados (sin autenticación) ──
+Route::get('/verificar-certificado', [VerificacionCertificadoController::class, 'formulario'])->name('verificar.formulario');
+Route::post('/verificar-certificado', [VerificacionCertificadoController::class, 'buscar'])->name('verificar.buscar');
+Route::get('/verificar-certificado/{codigo}', [VerificacionCertificadoController::class, 'verificar'])->name('verificar.certificado');
 
 Route::get('/', function () {
     if (auth()->check()) {

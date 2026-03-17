@@ -868,7 +868,12 @@ class AcademicoController extends Controller
             abort(404, 'Este curso aún no tiene un diseño de certificado configurado. Contacte a soporte.');
         }
 
-        return view('academico.curso.certificado', compact('curso', 'user', 'resumen', 'plantilla', 'notaFinal'));
+        // Obtener o crear registro de certificado emitido con código de verificación
+        $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
+            $curso->id, $user->id, $resumen['nota_final'], $plantilla->id
+        );
+
+        return view('academico.curso.certificado', compact('curso', 'user', 'resumen', 'plantilla', 'notaFinal', 'certificadoEmitido'));
     }
 }
 

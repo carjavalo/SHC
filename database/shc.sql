@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-03-2026 a las 14:14:44
+-- Tiempo de generación: 17-03-2026 a las 15:11:59
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -84,14 +84,6 @@ CREATE TABLE `cache` (
   `value` mediumtext NOT NULL,
   `expiration` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `cache`
---
-
-INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-('laravel_cache_tres@docente.com|192.168.2.200', 'i:1;', 1773753232),
-('laravel_cache_tres@docente.com|192.168.2.200:timer', 'i:1773753232;', 1773753232);
 
 -- --------------------------------------------------------
 
@@ -247,8 +239,8 @@ INSERT INTO `curso_actividad_entrega` (`id`, `curso_id`, `actividad_id`, `user_i
 (14, 20, 43, 36, 'ya lo hice', 0.00, 'como fue', 'entregas/XabAqV0PkCKPDAhYmrQXCOKdqEzAKvleSSz2GCsV.jpg', 4.00, 'sos el mejor', 'revisado', '2026-03-13 16:36:20', '2026-03-13 21:36:20', NULL, '2026-03-13 21:36:20'),
 (15, 20, 44, 36, '{\"respuestas\":{\"1\":\"A\",\"2\":[\"A\",\"D\"],\"3\":[\"A\",\"B\",\"C\"],\"4\":\"A\",\"5\":[\"A\",\"C\"]},\"resultados\":[{\"pregunta_id\":1,\"pregunta\":\"que tono de piel tiene\",\"respuesta_estudiante\":\"A) Negro\",\"respuesta_correcta\":\"A) Negro\",\"es_correcta\":true,\"puntos\":0.5,\"porcentaje_pregunta\":10,\"es_multiple\":false},{\"pregunta_id\":2,\"pregunta\":\"Tu eres\",\"respuesta_estudiante\":\"A) Adulto, D) Mayor\",\"respuesta_correcta\":\"A) Adulto, D) Mayor\",\"es_correcta\":true,\"puntos\":1,\"porcentaje_pregunta\":20,\"es_multiple\":true},{\"pregunta_id\":3,\"pregunta\":\"Te gustan\",\"respuesta_estudiante\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"respuesta_correcta\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"es_correcta\":true,\"puntos\":2,\"porcentaje_pregunta\":40,\"es_multiple\":true},{\"pregunta_id\":4,\"pregunta\":\"Yo  soy\",\"respuesta_estudiante\":\"A) Carlos\",\"respuesta_correcta\":\"A) Carlos\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":false},{\"pregunta_id\":5,\"pregunta\":\"Yo me llamo\",\"respuesta_estudiante\":\"A) Carlos, C) Jairton\",\"respuesta_correcta\":\"A) Carlos, C) Jairton\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":true}],\"tiempo_transcurrido\":\"30\"}', 5.00, NULL, NULL, 5.00, NULL, 'aprobado', '2026-03-13 21:29:28', NULL, NULL, '2026-03-13 21:29:28'),
 (16, 20, 45, 36, 'ya', 0.00, 'brebe', 'entregas/1tE6yVFZsE0iBvcWGYbo4oQf7ldR1HF4cfC6NEAT.jpg', 5.00, 'perro panzon', 'revisado', '2026-03-13 16:39:18', '2026-03-13 21:39:18', NULL, '2026-03-13 21:39:18'),
-(17, 20, 42, 46, 'ya', 0.00, 'ok', 'entregas/uD9s4sPVNmLEQbO14IMw7gTJetJOLoMrJpR9aGLi.jpg', 4.00, 'No joda', 'revisado', '2026-03-16 21:54:09', '2026-03-16 21:54:09', NULL, '2026-03-16 21:54:09'),
-(18, 20, 43, 46, 'ok', 0.00, 'bien', 'entregas/3xkVPCHIs9Ln9uVeWAHwkjko404w6x5HaSLDFxOa.jpg', 4.00, 'que lastima', 'revisado', '2026-03-17 13:12:18', '2026-03-17 13:12:18', NULL, '2026-03-17 13:12:18'),
+(17, 20, 42, 46, 'ya', 0.00, 'ok', 'entregas/uD9s4sPVNmLEQbO14IMw7gTJetJOLoMrJpR9aGLi.jpg', 1.00, 'No joda', 'revisado', '2026-03-17 13:50:03', '2026-03-17 13:50:03', NULL, '2026-03-17 13:50:03'),
+(18, 20, 43, 46, 'ok', 0.00, 'bien', 'entregas/3xkVPCHIs9Ln9uVeWAHwkjko404w6x5HaSLDFxOa.jpg', 4.00, 'que lastima', 'revisado', '2026-03-17 14:05:54', '2026-03-17 14:05:54', NULL, '2026-03-17 14:05:54'),
 (21, 20, 44, 46, '{\"respuestas\":{\"1\":\"A\",\"2\":[\"A\",\"D\"],\"3\":[\"A\"],\"4\":\"A\",\"5\":[\"B\",\"D\"]},\"resultados\":[{\"pregunta_id\":1,\"pregunta\":\"que tono de piel tiene\",\"respuesta_estudiante\":\"A) Negro\",\"respuesta_correcta\":\"A) Negro\",\"es_correcta\":true,\"puntos\":0.5,\"porcentaje_pregunta\":10,\"es_multiple\":false},{\"pregunta_id\":2,\"pregunta\":\"Tu eres\",\"respuesta_estudiante\":\"A) Adulto, D) Mayor\",\"respuesta_correcta\":\"A) Adulto, D) Mayor\",\"es_correcta\":true,\"puntos\":1,\"porcentaje_pregunta\":20,\"es_multiple\":true},{\"pregunta_id\":3,\"pregunta\":\"Te gustan\",\"respuesta_estudiante\":\"A) Acuerpadas\",\"respuesta_correcta\":\"A) Acuerpadas, B) Altas, C) Medio Gorditas\",\"es_correcta\":false,\"puntos\":0.67,\"porcentaje_pregunta\":40,\"es_multiple\":true},{\"pregunta_id\":4,\"pregunta\":\"Yo  soy\",\"respuesta_estudiante\":\"A) Carlos\",\"respuesta_correcta\":\"A) Carlos\",\"es_correcta\":true,\"puntos\":0.75,\"porcentaje_pregunta\":15,\"es_multiple\":false},{\"pregunta_id\":5,\"pregunta\":\"Yo me llamo\",\"respuesta_estudiante\":\"B) Andres, D) Pedro\",\"respuesta_correcta\":\"A) Carlos, C) Jairton\",\"es_correcta\":false,\"puntos\":0,\"porcentaje_pregunta\":15,\"es_multiple\":true}],\"tiempo_transcurrido\":\"39\"}', 2.92, NULL, NULL, 2.92, NULL, 'revisado', '2026-03-13 21:37:40', NULL, NULL, '2026-03-13 21:37:40'),
 (22, 20, 45, 46, 'ok', 0.00, 'su madre', 'entregas/WZABz0NVslekODLf7LAGJzCm8BxSy6nww06PR2Ne.jpg', 4.00, 'vaya joder', 'revisado', '2026-03-16 18:46:57', '2026-03-16 18:46:57', NULL, '2026-03-16 18:46:57');
 
@@ -774,9 +766,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('7YSHbJy6Qr2RpiuD1kFzahdU1dyTXXjsK7bpcvi8', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZ1RDbDR2Z3R1Qm9RS3lnckNjRnhpa2RPbzNmZ0pzZDBIa3dVM2h3SyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NTY6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvYWNhZGVtaWNvL2N1cnNvLzIwL2NlcnRpZmljYWRvIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1773753201),
 ('C62yit4XijsoKzOjAQgg2rsusf4Y7NHSEnl4uaxx', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiaWJpTjBGaUR5aXByMHhHRDFiT3VrbTh3WVdtOWVHZjJxWG01aFh5UyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1773752760),
-('dywZcztO2CkfvQ55RRMQfMfcFnCs8xTHjFK9mYlE', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiT3BmdnFRMUFIRGZvQ1BNeExTNkdNOFlOWXhiWHFMdm95THd0MVBWOSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjgwOiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL2NvbmZpZ3VyYWNpb24vZWRpdG9yLWNlcnRpZmljYWRvcy9jdXJzby8yMC9lc3R1ZGlhbnRlcyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1773753153);
+('dywZcztO2CkfvQ55RRMQfMfcFnCs8xTHjFK9mYlE', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiT3BmdnFRMUFIRGZvQ1BNeExTNkdNOFlOWXhiWHFMdm95THd0MVBWOSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjMxOiJodHRwOi8vMTkyLjE2OC4yLjIwMDo4MDAxL3VzZXJzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1773756067),
+('NKpt3m8LJPghDDwu6MpQzdwlf36jgFX20tJQGdIz', 77, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiUFZwVnZIZHVYU1NaTjBYeld6WmhTQm5TZ3RhYW5iczJORlcyNloyVyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODA6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvYWNhZGVtaWNvL2NvbnRyb2wtcGVkYWdvZ2ljby9wcmV2aWV3LWNlcnRpZmljYWRvLzIwLzQ2Ijt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Nzc7fQ==', 1773756372);
 
 -- --------------------------------------------------------
 
@@ -815,7 +807,7 @@ INSERT INTO `users` (`id`, `name`, `apellido1`, `apellido2`, `email`, `phone`, `
 (38, 'Usuario', 'Prueba', 'Verificado', 'test@example.com', '+51987654324', 'Estudiante', 'DNI', '87654321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$8RjSJS9V/WqEVYGKw8HQAuTI7G73FXCIcfbbCpK4sXUopD1dwyLCi', NULL, '2025-06-17 03:03:26', '2026-01-23 01:37:27'),
 (44, 'Jhon Andres', 'Carrillo', 'Bolaños', 'touma11913@gmail.com', '311 6306106', 'Operador', 'Cédula', '1143995780', NULL, NULL, NULL, '2025-12-12 18:00:34', '$2y$12$a8e/Y0JRjQieHsX2QgkUDertB9rhX/hSRx1m7XVpW8Xu6NGA.DdXy', 'QLPyS1gPoibKzWluPR9pge5TrlaGCqlENxxcOayq9iriFUIGGC265udoTN8Z', '2025-12-12 18:00:32', '2026-01-21 20:42:23'),
 (45, 'DocenteCurso', 'Prueba', 'Prueba', 'uno@docente.com', '+51987654326', 'Docente', 'Cédula', '987654321123', NULL, NULL, NULL, '2026-01-05 23:19:48', '$2y$12$MXkIdaF70ayAirlxuhBJie.8UqI.fo5gm0tXPW8b.KSOkY.m9iaWi', NULL, '2026-01-05 23:19:46', '2026-01-21 20:42:23'),
-(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Estudiante', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'LGjD9ITkgA2RjmsCh5FmjWLKBYdd8BTpl6ggds1J0c4ro6XQkOp9cfGyhhcW', '2026-01-06 17:36:28', '2026-03-13 21:37:40'),
+(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Estudiante', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', '8WnjN2Tkmtk765ewb5ufEecFkIWMuBNMIWVOYAVrMQyE10k1FDhChBjwQnd2', '2026-01-06 17:36:28', '2026-03-13 21:37:40'),
 (63, 'Julanin', 'pacual', 'Prueba', 'carjavalo1@hotmail.com', '3002588545', 'Estudiante', 'Cédula', '36985214147', NULL, 1, 1, '2026-01-24 02:12:10', '$2y$12$GZd5Ndjp/jiIPSia67J.le7qhOU/QvF3BtXRJxjmSTur0MHwIHKBi', NULL, '2026-01-24 02:11:04', '2026-02-05 01:56:04'),
 (74, 'Cinco', 'estudiante', 'Cinco', 'cinco@estudiante.com', '30003252232', 'Estudiante', 'Cédula', '123123123', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$UzocY2Q84yz39A0b6nSK1OfliXrtev1nQ95zXIcwjCATkvVncfMYq', NULL, '2026-02-05 23:48:14', '2026-02-05 23:48:14'),
 (75, 'seis', 'estudiante', 'seis', 'seis@estudiante.com', '3152555363', 'Estudiante', 'Cédula', '555555555', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$YLMxY6I0DPt2ZF0KG8iMl.qi1AeEcpJhj3UwJ7Di0Lcxl1CmMKHOK', NULL, '2026-02-05 23:48:17', '2026-02-05 23:48:17'),
@@ -1084,7 +1076,8 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (419, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-17 12:12:32', '2026-03-17 12:12:32', '2026-03-17 12:12:32'),
 (420, 77, 'dos@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-17 13:12:01', '2026-03-17 13:12:01', '2026-03-17 13:12:01'),
 (421, NULL, 'tres@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'failed', 'unverified', 'Credenciales inválidas', '2026-03-17 13:12:52', '2026-03-17 13:12:52', '2026-03-17 13:12:52'),
-(422, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-17 13:13:02', '2026-03-17 13:13:02', '2026-03-17 13:13:02');
+(422, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-17 13:13:02', '2026-03-17 13:13:02', '2026-03-17 13:13:02'),
+(423, 77, 'dos@docente.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-17 13:49:29', '2026-03-17 13:49:29', '2026-03-17 13:49:29');
 
 -- --------------------------------------------------------
 
@@ -1520,7 +1513,9 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (405, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-17 08:11:57\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:11:57', '2026-03-17 13:11:57'),
 (406, 77, 'login', 'Session', NULL, 'Inicio de sesión: dos@docente.com', '{\"email\":\"dos@docente.com\",\"login_time\":\"2026-03-17 08:12:01\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:12:01', '2026-03-17 13:12:01'),
 (407, 77, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-17 08:12:45\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:12:45', '2026-03-17 13:12:45'),
-(408, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-17 08:13:02\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:13:02', '2026-03-17 13:13:02');
+(408, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-17 08:13:02\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:13:02', '2026-03-17 13:13:02'),
+(409, 46, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-17 08:49:14\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:49:14', '2026-03-17 13:49:14'),
+(410, 77, 'login', 'Session', NULL, 'Inicio de sesión: dos@docente.com', '{\"email\":\"dos@docente.com\",\"login_time\":\"2026-03-17 08:49:29\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-17 13:49:29', '2026-03-17 13:49:29');
 
 -- --------------------------------------------------------
 
@@ -1928,13 +1923,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=423;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=424;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=409;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=411;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`

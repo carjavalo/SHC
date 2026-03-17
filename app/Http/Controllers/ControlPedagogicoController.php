@@ -649,12 +649,18 @@ class ControlPedagogicoController extends Controller
         $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
         $notaFinal = number_format($resumen['nota_final'] ?? 0, 1);
 
+        // Obtener o crear registro de certificado emitido con código de verificación
+        $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
+            $curso->id, $estudiante->id, $resumen['nota_final'] ?? 0, $plantilla->id
+        );
+
         return view('academico.curso.certificado', [
             'curso' => $curso,
             'user' => $estudiante,
             'resumen' => $resumen,
             'plantilla' => $plantilla,
             'notaFinal' => $notaFinal,
+            'certificadoEmitido' => $certificadoEmitido,
         ]);
     }
 }

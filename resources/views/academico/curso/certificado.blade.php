@@ -77,6 +77,69 @@
             font-family: 'Inter', sans-serif;
         }
         .btn-print:hover { background: #152c6e; }
+
+        /* Barra de verificación en la parte inferior del certificado */
+        .cert-verification-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 28px;
+            background: rgba(30, 58, 138, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 50;
+            border-top: 1px solid rgba(30, 58, 138, 0.12);
+        }
+        .cert-verification-bar .verify-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.5;
+        }
+        .cert-verification-bar .verify-text {
+            font-family: 'Inter', monospace;
+            font-size: 8px;
+            color: #475569;
+            letter-spacing: 0.5px;
+        }
+        .cert-verification-bar .verify-code {
+            font-family: monospace;
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #1e3a8a;
+            letter-spacing: 1.5px;
+            background: rgba(30, 58, 138, 0.06);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .cert-verification-bar .verify-url {
+            font-family: 'Inter', sans-serif;
+            font-size: 7.5px;
+            color: #64748b;
+        }
+        .cert-qr-container {
+            position: absolute;
+            bottom: 32px;
+            right: 16px;
+            z-index: 50;
+            text-align: center;
+        }
+        .cert-qr-container img, .cert-qr-container canvas {
+            width: 48px !important;
+            height: 48px !important;
+            border: 1px solid rgba(30, 58, 138, 0.15);
+            border-radius: 4px;
+            background: white;
+            padding: 2px;
+        }
+        .cert-qr-container .qr-label {
+            font-size: 6px;
+            color: #94a3b8;
+            margin-top: 1px;
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -89,10 +152,45 @@
     <div class="cert-container" id="certCanvas" 
          style="background-image: url('{{ $plantilla->elementos_json['fondo_base64'] ?? '' }}')">
         {!! $plantilla->html_content !!}
+
+        {{-- QR Code de verificación (generado localmente con JS) --}}
+        @if(isset($certificadoEmitido))
+        <div class="cert-qr-container">
+            <div id="certQRCode"></div>
+            <div class="qr-label">Verificar</div>
+        </div>
+
+        {{-- Barra inferior de verificación --}}
+        <div class="cert-verification-bar">
+            <svg class="verify-icon" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4" stroke="#059669" stroke-width="2.5"/>
+            </svg>
+            <span class="verify-text">Código de verificación:</span>
+            <span class="verify-code">{{ $certificadoEmitido->codigo_verificacion }}</span>
+            <span class="verify-url">{{ $certificadoEmitido->url_verificacion }}</span>
+        </div>
+        @endif
     </div>
 
+    <!-- QR Code generator library (local) -->
+    <script src="{{ asset('js/qrcode.min.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // === Generar QR de verificación ===
+            @if(isset($certificadoEmitido))
+            const qrContainer = document.getElementById('certQRCode');
+            if (qrContainer) {
+                new QRCode(qrContainer, {
+                    text: "{{ $certificadoEmitido->url_verificacion }}",
+                    width: 48,
+                    height: 48,
+                    colorDark: '#1e3a8a',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+            @endif
             // === Datos dinámicos del estudiante y curso ===
             const nombreCompleto = "{{ mb_strtoupper(trim(($user->name ?? '') . ' ' . ($user->apellido1 ?? '') . ' ' . ($user->apellido2 ?? ''))) }}";
             const numeroDocumento = "{{ $user->numero_documento ?? '' }}";
