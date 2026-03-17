@@ -646,28 +646,13 @@ class ControlPedagogicoController extends Controller
         }
 
         // Obtener resumen y nota final
-        try {
-            $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
-        } catch (\Throwable $e) {
-            \Log::error('Error calculando resumen de calificaciones: ' . $e->getMessage());
-            $resumen = [
-                'nota_final' => 0,
-                'nota_minima_aprobacion' => $curso->nota_minima_aprobacion ?? 3,
-                'aprobado' => false,
-                'materiales' => [],
-            ];
-        }
+        $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
         $notaFinal = number_format($resumen['nota_final'] ?? 0, 1);
 
         // Obtener o crear registro de certificado emitido con código de verificación
-        $certificadoEmitido = null;
-        try {
-            $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
-                $curso->id, $estudiante->id, $resumen['nota_final'] ?? 0, $plantilla->id
-            );
-        } catch (\Throwable $e) {
-            \Log::warning('No se pudo obtener/crear certificado emitido: ' . $e->getMessage());
-        }
+        $certificadoEmitido = \App\Models\CertificadoEmitido::obtenerOCrear(
+            $curso->id, $estudiante->id, $resumen['nota_final'] ?? 0, $plantilla->id
+        );
 
         return view('academico.curso.certificado', [
             'curso' => $curso,
