@@ -538,9 +538,11 @@
                         </div>
                     </div>
                 </div>
-                <!-- Iframe con el certificado -->
-                <div style="text-align: center; padding: 20px;">
-                    <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white;" allowfullscreen></iframe>
+                <!-- Iframe con el certificado (escalado para caber en el modal) -->
+                <div id="certIframeWrapper" style="display: flex; justify-content: center; align-items: center; padding: 15px; overflow: hidden;">
+                    <div id="certIframeScaler" style="width: 960px; height: 680px; transform-origin: top center; flex-shrink: 0;">
+                        <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #e9ecef; background: #f8f9fa;">
@@ -1542,15 +1544,12 @@
         box-shadow: 0 2px 8px rgba(39,174,96,0.3);
     }
 
-    /* Modal certificado responsive iframe */
+    /* Modal certificado responsive iframe - escalado proporcional */
     #certificadoPreviewModal .modal-body {
-        overflow-x: auto;
+        overflow: hidden;
     }
-    @media (max-width: 1100px) {
-        #certificadoIframe {
-            width: 100% !important;
-            height: 500px !important;
-        }
+    #certIframeWrapper {
+        transition: height 0.2s ease;
     }
 </style>
 @stop
@@ -2238,6 +2237,28 @@
 
             // Mostrar modal
             $('#certificadoPreviewModal').modal('show');
+        });
+
+        // Escalar iframe para que quepa en el modal manteniendo proporciones
+        function scaleCertificateIframe() {
+            const wrapper = document.getElementById('certIframeWrapper');
+            const scaler = document.getElementById('certIframeScaler');
+            if (!wrapper || !scaler) return;
+            const availableWidth = wrapper.clientWidth - 30; // 15px padding a cada lado
+            const nativeW = 960;
+            const nativeH = 680;
+            const scale = Math.min(1, availableWidth / nativeW);
+            scaler.style.transform = 'scale(' + scale + ')';
+            wrapper.style.height = (nativeH * scale + 30) + 'px';
+        }
+
+        $('#certificadoPreviewModal').on('shown.bs.modal', function() {
+            scaleCertificateIframe();
+        });
+        $(window).on('resize', function() {
+            if ($('#certificadoPreviewModal').is(':visible')) {
+                scaleCertificateIframe();
+            }
         });
 
         // Limpiar iframe al cerrar modal
