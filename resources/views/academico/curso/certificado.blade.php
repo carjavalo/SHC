@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificado - {{ $curso->titulo }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        @page { size: landscape; margin: 0; }
+        @page { size: 960px 680px; margin: 0; }
         body { 
             margin: 0; 
             font-family: 'Inter', sans-serif; 
@@ -33,13 +35,22 @@
             body { 
                 background: white; 
                 display: block; 
-                min-height: auto; 
+                min-height: auto;
+                margin: 0;
+                padding: 0;
             }
             .cert-container { 
-                width: 100vw; 
-                height: 100vh; 
-                box-shadow: none;
+                width: 960px; 
+                height: 680px; 
+                box-shadow: none !important;
                 margin: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            /* Prevenir que Bootstrap oculte o desestructure elementos absolutos en impresión */
+            .cert-container * {
+                visibility: visible !important;
             }
             .no-print { display: none !important; }
         }
@@ -82,37 +93,82 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Load user and course data into the template fields
-            const userData = {
-                nombreCompleto: "{{ mb_strtoupper($user->name . ' ' . $user->apellido1 . ' ' . $user->apellido2) }}",
-                documento: "{{ $user->numero_documento ? 'C.C. ' . $user->numero_documento : 'C.C. ____________' }}",
-                cursoNombre: "{{ mb_strtoupper($curso->titulo) }}",
-                horas: "{{ $curso->duracion_horas ?? '40' }}",
-                fechaInicio: "{{ $curso->fecha_inicio ? \Carbon\Carbon::parse($curso->fecha_inicio)->translatedFormat('d \d\e F') : 'Inicio' }}",
-                fechaFin: "{{ $curso->fecha_fin ? \Carbon\Carbon::parse($curso->fecha_fin)->translatedFormat('d \d\e F \d\e Y') : 'Fin' }}",
-                firmaNombre: "{{ mb_strtoupper($curso->instructor->name ?? 'Firma') }}",
-                firmaCargo: "INSTRUCTOR DE CURSO"
-            };
+            // === Datos dinámicos del estudiante y curso ===
+            const nombreCompleto = "{{ mb_strtoupper(trim(($user->name ?? '') . ' ' . ($user->apellido1 ?? '') . ' ' . ($user->apellido2 ?? ''))) }}";
+            const numeroDocumento = "{{ $user->numero_documento ?? '' }}";
+            const cursoNombre = "{{ mb_strtoupper($curso->titulo) }}";
+            const horas = "{{ $curso->duracion_horas ?? '40' }}";
 
-            const mapIds = {
-                'certNombreCompleto': userData.nombreCompleto,
-                'certDocumento': userData.documento,
-                'certCursoNombre': userData.cursoNombre,
-                'certHoras': userData.horas,
-                'certFechaInicio': userData.fechaInicio,
-                'certFechaFin': userData.fechaFin,
-                'certFirmaNombre': userData.firmaNombre,
-                'certFirmaCargo': userData.firmaCargo
-            };
+            @php
+                // Obtener fecha de inscripción real del estudiante al curso
+                $inscripcion = \DB::table('curso_estudiantes')
+                    ->where('curso_id', $curso->id)
+                    ->where('estudiante_id', $user->id)
+                    ->first();
+                
+                $fechaInicioEstudiante = $inscripcion && $inscripcion->fecha_inscripcion 
+                    ? $inscripcion->fecha_inscripcion 
+                    : $curso->fecha_inicio;
 
-            for (const [id, value] of Object.entries(mapIds)) {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.textContent = value;
+                // Formatear la fecha con Carbon
+                $fechaInicioFormateada = $fechaInicioEstudiante 
+                    ? \Carbon\Carbon::parse($fechaInicioEstudiante)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                    : 'Inicio';
+                $fechaFinFormateada = $curso->fecha_fin 
+                    ? \Carbon\Carbon::parse($curso->fecha_fin)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                    : 'Fin';
+                // Capitalizar nombre del mes (marzo → Marzo)
+                $fechaInicioFormateada = preg_replace_callback('/de ([a-záéíóúñ])/u', function($m) {
+                    return 'de ' . mb_strtoupper($m[1]);
+                }, $fechaInicioFormateada, 1);
+                $fechaFinFormateada = preg_replace_callback('/de ([a-záéíóúñ])/u', function($m) {
+                    return 'de ' . mb_strtoupper($m[1]);
+                }, $fechaFinFormateada, 1);
+            @endphp
+            const fechaInicio = "{{ $fechaInicioFormateada }}";
+            const fechaFin = "{{ $fechaFinFormateada }}";
+
+            // === Reemplazar SOLO los campos dinámicos del estudiante ===
+
+            // Nombre completo del estudiante
+            const elNombre = document.getElementById('certNombreCompleto');
+            if (elNombre) elNombre.textContent = nombreCompleto;
+
+            // Documento: preservar el formato original de la plantilla, solo cambiar el número
+            const elDoc = document.getElementById('certDocumento');
+            if (elDoc) {
+                const textoOriginal = elDoc.textContent || '';
+                if (numeroDocumento) {
+                    // Extraer los dígitos actuales del documento original (ej. 6427785448)
+                    const docMatch = textoOriginal.match(/\d+/);
+                    if (docMatch) {
+                        // Reemplazar el número existente por el nuevo
+                        elDoc.textContent = textoOriginal.replace(docMatch[0], numeroDocumento);
+                    } else {
+                        // Fallback: insertar después de "C.C. " o equivalente
+                        elDoc.textContent = textoOriginal.replace(/(C\.C\.|T\.I\.|C\.E\.|P\.A\.|Pasaporte:)\s*[^\s]*/i, '$1 ' + numeroDocumento);
+                    }
                 }
             }
 
-            // Remove editor interaction classes or fix them
+            // Nombre del curso
+            const elCurso = document.getElementById('certCursoNombre');
+            if (elCurso) elCurso.textContent = cursoNombre;
+
+            // Horas
+            const elHoras = document.getElementById('certHoras');
+            if (elHoras) elHoras.textContent = horas;
+
+            // Fechas de inicio y fin del curso
+            const elFI = document.getElementById('certFechaInicio');
+            if (elFI) elFI.textContent = fechaInicio;
+            const elFF = document.getElementById('certFechaFin');
+            if (elFF) elFF.textContent = fechaFin;
+
+            // === certFirmaNombre y certFirmaCargo NO se tocan ===
+            // Se dejan con los valores originales configurados en la plantilla del certificado
+
+            // Limpiar clases del editor
             document.querySelectorAll('.draggable-element').forEach(el => {
                 el.classList.remove('draggable-element');
                 el.style.cursor = 'default';

@@ -119,6 +119,58 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Vista Previa de Certificado -->
+    <div class="modal fade" id="certificadoPreviewModal" tabindex="-1" role="dialog" aria-labelledby="certificadoPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width: 1100px;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a5f 0%, #2c4370 100%); color: white; border: none;">
+                    <h5 class="modal-title" id="certificadoPreviewModalLabel">
+                        <i class="fas fa-certificate"></i> Vista Previa del Certificado
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" style="color: white; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0" style="background: #525659; overflow-x: auto;">
+                    <div class="cert-info-bar" style="background: #f8f9fa; padding: 12px 20px; border-bottom: 2px solid #e9ecef;">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Estudiante</small>
+                                <strong id="certInfoNombre" class="text-dark"></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Identificación</small>
+                                <strong id="certInfoDocumento" class="text-dark"></strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small class="text-muted d-block">Fecha Inicio</small>
+                                <strong id="certInfoFechaInicio" class="text-dark"></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Fecha Fin</small>
+                                <strong id="certInfoFechaFin" class="text-dark"></strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <iframe id="certificadoIframe" src="" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; max-width: 100%;" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e9ecef; background: #f8f9fa;">
+                    <a id="certOpenNewTab" href="#" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt"></i> Abrir en nueva pestaña
+                    </a>
+                    <button type="button" id="certPrintBtn" class="btn btn-primary" style="background: #1e3a5f; border-color: #1e3a5f;">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('extra_css')
@@ -251,5 +303,41 @@
                 }
             });
         }
+
+        // Preview de certificado para el estudiante
+        $(document).on('click', '.btn-certificado-preview-student', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const estudianteNombre = $(this).data('estudiante-nombre');
+            const estudianteDocumento = $(this).data('estudiante-documento');
+            const cursoId = $(this).data('curso-id');
+            const cursoNombre = $(this).data('curso-nombre');
+            const fechaInicio = $(this).data('fecha-inicio');
+            const fechaFin = $(this).data('fecha-fin');
+
+            $('#certInfoNombre').text(estudianteNombre);
+            $('#certInfoDocumento').text(estudianteDocumento || 'No registrado');
+            $('#certInfoFechaInicio').text(fechaInicio);
+            $('#certInfoFechaFin').text(fechaFin);
+
+            const certUrl = `{{ url('academico/curso') }}/${cursoId}/certificado`;
+            
+            $('#certificadoIframe').attr('src', certUrl);
+            $('#certOpenNewTab').attr('href', certUrl);
+
+            $('#certPrintBtn').off('click').on('click', function() {
+                const iframe = document.getElementById('certificadoIframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.print();
+                }
+            });
+
+            $('#certificadoPreviewModal').modal('show');
+        });
+
+        $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
+            $('#certificadoIframe').attr('src', '');
+        });
     </script>
 @stop

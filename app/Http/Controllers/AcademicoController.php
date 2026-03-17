@@ -173,7 +173,7 @@ class AcademicoController extends Controller
                 
                 // Estudiante inscrito - mostrar botones de acceso
                 if ($isEnrolled) {
-                    return '
+                    $html = '
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-info btn-sm" onclick="verCurso(' . $curso->id . ')" title="Ver detalles">
                                 <i class="fas fa-eye"></i>
@@ -186,6 +186,62 @@ class AcademicoController extends Controller
                             </button>
                         </div>
                     ';
+                    
+                    // Solo para estudiantes normales (no administradores en vista de estudiante, o si queremos mostrarlo a todos, está bien)
+                    // Mostrar badge del estado al lado de los botones de acciones
+                    $notaFinal = $curso->calcularNotaFinalEstudiante($user->id);
+                    $porcentaje = ($notaFinal / 5.0) * 100;
+                    
+                    if ($porcentaje >= 60) {
+                        $estadoStr = 'Aprobado';
+                        $estadoCls = 'status-passed';
+                        $icono = 'fas fa-check-circle';
+                    } elseif ($porcentaje >= 50) {
+                        $estadoStr = 'En Riesgo';
+                        $estadoCls = 'status-at_risk';
+                        $icono = 'fas fa-exclamation-triangle';
+                    } else {
+                        $estadoStr = 'Reprobado';
+                        $estadoCls = 'status-failed';
+                        $icono = 'fas fa-times-circle';
+                    }
+                    
+                    $studentName = htmlentities($user->name . ' ' . $user->apellido1 . ' ' . $user->apellido2);
+                    $studentDoc = htmlentities($user->tipo_documento . ': ' . $user->numero_documento);
+                    $courseName = htmlentities($curso->titulo);
+                    $fechaInicio = $curso->fecha_inicio ? \Carbon\Carbon::parse($curso->fecha_inicio)->translatedFormat('d \d\e F \d\e Y') : 'N/A';
+                    $fechaFin = $curso->fecha_fin ? \Carbon\Carbon::parse($curso->fecha_fin)->translatedFormat('d \d\e F \d\e Y') : 'N/A';
+                    
+                    // Inline styles for badge directly attached
+                    $badgeStyle = 'display:inline-flex; align-items:center; gap:0.375rem; padding:0.375rem 0.875rem; border-radius:20px; font-weight:600; font-size:0.8125rem; white-space:nowrap;';
+                    if ($estadoStr === 'Aprobado') {
+                        $badgeStyle .= ' background:#d4edda; color:#155724;';
+                    } elseif ($estadoStr === 'En Riesgo') {
+                        $badgeStyle .= ' background:#fff3cd; color:#856404;';
+                    } else {
+                        $badgeStyle .= ' background:#f8d7da; color:#721c24;';
+                    }
+
+                    $badgeHtml = '<span class="ml-2 ' . $estadoCls . '" style="' . $badgeStyle . '">';
+                    
+                    if ($estadoStr === 'Aprobado' && $curso->plantilla_certificado_id) {
+                        $badgeHtml .= '<a href="javascript:void(0)" class="btn-certificado-preview-student" 
+                            data-curso-id="'.$curso->id.'" 
+                            data-curso-nombre="'.$courseName.'"
+                            data-estudiante-nombre="'.$studentName.'"
+                            data-estudiante-documento="'.$studentDoc.'"
+                            data-fecha-inicio="'.$fechaInicio.'"
+                            data-fecha-fin="'.$fechaFin.'"
+                            title="Click para ver certificado" style="text-decoration: none; color: #155724; cursor: pointer; display:inline-flex; align-items:center; gap: 2px; transition: all 0.2s ease;">
+                            <i class="'.$icono.'"></i> '.$estadoStr.'
+                            <i class="fas fa-certificate ml-1" style="font-size: 0.8rem; color: #ffc107;"></i>
+                        </a>';
+                    } else {
+                        $badgeHtml .= '<i class="'.$icono.'"></i> ' . $estadoStr;
+                    }
+                    $badgeHtml .= '</span>';
+                    
+                    return '<div style="display:flex; align-items:center;">' . $html . $badgeHtml . '</div>';
                 }
                 
                 // Estudiante NO inscrito - mostrar botón de inscripción
