@@ -52,6 +52,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas de usuarios
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('users', UserController::class);
+    
+    // Roles solo accesible por Super Admin
+    Route::resource('roles', \App\Http\Controllers\RoleController::class)->middleware(\App\Http\Middleware\CheckSuperAdminRole::class);
 
     // Rutas de seguimiento de accesos
     Route::prefix('tracking')->name('tracking.')->group(function () {

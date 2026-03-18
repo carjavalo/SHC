@@ -374,6 +374,13 @@ return [
                             'icon' => 'fas fa-fw fa-list',
                             'active' => ['users', 'users/create', 'users/*/edit', 'users/*'],
                         ],
+                        [
+                            'text' => 'Lista de Roles',
+                            'url' => 'roles',
+                            'icon' => 'fas fa-fw fa-user-tag',
+                            'active' => ['roles', 'roles/*'],
+                            'role' => ['Super Admin'],
+                        ],
                     ],
                 ],
                 [

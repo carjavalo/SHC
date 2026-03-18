@@ -63,8 +63,15 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public static function getAvailableRoles(): array
     {
-        // Obtener los roles disponibles (Instructor GYM removido)
-        return ['Super Admin', 'Administrador', 'Docente', 'Estudiante', 'Registrado', 'Operador'];
+        // Obtener los roles directamente desde la tabla de roles
+        $roles = \App\Models\Role::pluck('name')->toArray();
+        
+        // Si por alguna razón la tabla está vacía, devuelve el listado base para evitar errores
+        if (empty($roles)) {
+            return ['Super Admin', 'Administrador', 'Docente', 'Estudiante', 'Registrado', 'Operador'];
+        }
+        
+        return $roles;
     }
 
     /**
@@ -89,6 +96,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
+    }
+
+    /**
+     * Check if user is Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'Super Admin';
     }
 
     /**
