@@ -127,15 +127,15 @@
             text-align: center;
         }
         .cert-qr-container img, .cert-qr-container canvas {
-            width: 48px !important;
-            height: 48px !important;
+            width: 144px !important;
+            height: 144px !important;
             border: 1px solid rgba(30, 58, 138, 0.15);
             border-radius: 4px;
             background: white;
-            padding: 2px;
+            padding: 3px;
         }
         .cert-qr-container .qr-label {
-            font-size: 6px;
+            font-size: 8px;
             color: #94a3b8;
             margin-top: 1px;
             font-family: 'Inter', sans-serif;
@@ -220,8 +220,8 @@
             if (qrContainer) {
                 new QRCode(qrContainer, {
                     text: "{{ $certificadoEmitido->url_verificacion }}",
-                    width: 48,
-                    height: 48,
+                    width: 144,
+                    height: 144,
                     colorDark: '#1e3a8a',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.M
@@ -281,20 +281,12 @@
             const elNombre = document.getElementById('certNombreCompleto');
             if (elNombre) elNombre.textContent = nombreCompleto;
 
-            // Documento: preservar el formato original de la plantilla, solo cambiar el número
+            // Documento: mostrar solo el tipo y el número (ej. "CC 12345678") sin texto adicional
             const elDoc = document.getElementById('certDocumento');
             if (elDoc) {
-                const textoOriginal = elDoc.textContent || '';
                 if (numeroDocumento) {
-                    // Extraer los dígitos actuales del documento original (ej. 6427785448)
-                    const docMatch = textoOriginal.match(/\d+/);
-                    if (docMatch) {
-                        // Reemplazar el número existente por el nuevo
-                        elDoc.textContent = textoOriginal.replace(docMatch[0], numeroDocumento);
-                    } else {
-                        // Fallback: insertar después de "C.C. " o equivalente
-                        elDoc.textContent = textoOriginal.replace(/(C\.C\.|T\.I\.|C\.E\.|P\.A\.|Pasaporte:)\s*[^\s]*/i, '$1 ' + numeroDocumento);
-                    }
+                    const tipoDoc = "{{ mb_strtoupper(str_replace('.', '', $user->tipo_documento ?? 'CC')) }}";
+                    elDoc.textContent = tipoDoc + ' ' + numeroDocumento;
                 }
             }
 
