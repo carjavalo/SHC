@@ -197,7 +197,7 @@
                     { data: 'actions', name: 'actions', orderable: false, searchable: false }
                 ],
                 order: [[0, 'desc']],
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+                language: { url: '{{ asset('js/datatables-spanish.json') }}' }
             });
 
             $('#nombre').on('input keyup', function() {

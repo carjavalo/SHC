@@ -278,7 +278,7 @@
                     }
                 ],
                 language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    url: '{{ asset('js/datatables-spanish.json') }}'
                 },
                 pageLength: 10,
                 lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],

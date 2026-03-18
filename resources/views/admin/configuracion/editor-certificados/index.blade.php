@@ -1249,7 +1249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }}
                 ],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+                    url: '{{ asset('js/datatables-spanish.json') }}',
                     emptyTable: 'No hay plantillas de certificados creadas',
                     zeroRecords: 'No se encontraron plantillas'
                 },

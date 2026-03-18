@@ -243,7 +243,7 @@
                     { data: 'acciones', name: 'acciones', orderable: false, searchable: false }
                 ],
                 language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    url: '{{ asset('js/datatables-spanish.json') }}'
                 },
                 order: [[0, 'asc']]
             });

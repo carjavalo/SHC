@@ -319,7 +319,7 @@
                                 </div>
                                 
                                 <div class="position-relative" style="background: #f0f4f7; height: 250px; overflow: hidden;">
-                                    <img id="preview-product-image" src="https://via.placeholder.com/400x300/e2e8f0/64748b?text=Sin+Imagen" class="w-100 h-100" style="object-fit: cover; opacity: 0.7;">
+                                    <img id="preview-product-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial,sans-serif' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3ESin Imagen%3C/text%3E%3C/svg%3E" class="w-100 h-100" style="object-fit: cover; opacity: 0.7;">
                                 </div>
 
                                 <div class="card-body p-3">
@@ -514,7 +514,7 @@ $(document).ready(function() {
     $('#tabla-productos').DataTable({
         responsive: true,
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
+            url: '{{ asset("js/datatables-spanish.json") }}'
         },
         order: [[5, 'asc']]
     });
@@ -593,7 +593,7 @@ $(document).ready(function() {
         fileInput.value = '';
         $('#image-preview-container').hide();
         $('#drop-zone').show();
-        $('#preview-product-image').attr('src', 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Sin+Imagen').css('opacity', '0.7');
+        $('#preview-product-image').attr('src', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial,sans-serif' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3ESin Imagen%3C/text%3E%3C/svg%3E").css('opacity', '0.7');
     });
     
     // Vista previa en tiempo real
@@ -714,7 +714,7 @@ $(document).ready(function() {
         $('#producto_id').val('');
         $('#image-preview-container').hide();
         $('#drop-zone').show();
-        $('#preview-product-image').attr('src', 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Sin+Imagen').css('opacity', '0.7');
+        $('#preview-product-image').attr('src', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial,sans-serif' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3ESin Imagen%3C/text%3E%3C/svg%3E").css('opacity', '0.7');
         $('#preview-titulo').text('Título del Producto');
         $('#preview-precio').text('$0.00');
         $('#preview-categoria').text('Categoría');
@@ -744,7 +744,7 @@ $(document).ready(function() {
         } else {
             $('#image-preview-container').hide();
             $('#drop-zone').show();
-            $('#preview-product-image').attr('src', 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Sin+Imagen').css('opacity', '0.7');
+            $('#preview-product-image').attr('src', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial,sans-serif' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3ESin Imagen%3C/text%3E%3C/svg%3E").css('opacity', '0.7');
         }
         
         $('#modal-producto').modal('show');

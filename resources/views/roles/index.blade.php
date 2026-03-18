@@ -1,6 +1,6 @@
-ï»¿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 
-@section('title', 'GestiÃ³n de Roles')
+@section('title', 'Gestión de Roles')
 
 @section('content_header')
     <h1>Roles</h1>
@@ -21,9 +21,9 @@
                 <table id="roles-table" class="table table-striped table-hover table-bordered responsive nowrap" width="100%">
                     <thead class="bg-primary text-white">
                         <tr>
-                            <th>NÂº</th>
+                            <th>Nº</th>
                             <th>Nombre</th>
-                            <th>DescripciÃ³n</th>
+                            <th>Descripción</th>
                             <th width="150px">Acciones</th>
                         </tr>
                     </thead>
@@ -54,9 +54,9 @@
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="col-sm-12 control-label">DescripciÃ³n</label>
+                            <label class="col-sm-12 control-label">Descripción</label>
                             <div class="col-sm-12">
-                                <textarea id="description" name="description" required placeholder="DescripciÃ³n del rol" class="form-control"></textarea>
+                                <textarea id="description" name="description" required placeholder="Descripción del rol" class="form-control"></textarea>
                             </div>
                         </div>
                         <div class="col-sm-offset-2 col-sm-10 mt-4">
@@ -98,7 +98,7 @@
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                url: '{{ asset('js/datatables-spanish.json') }}'
             },
             responsive: true,
             autoWidth: false,
@@ -147,7 +147,7 @@
                     table.draw();
                     Swal.fire({
                         icon: 'success',
-                        title: 'Â¡Ã‰xito!',
+                        title: '¡Éxito!',
                         text: data.success,
                         timer: 2000,
                         showConfirmButton: false
@@ -168,7 +168,7 @@
                         });
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error de validaciÃ³n',
+                            title: 'Error de validación',
                             html: errorString
                         });
                     }
@@ -180,13 +180,13 @@
             var role_id = $(this).data("id");
             
             Swal.fire({
-                title: 'Â¿EstÃ¡s seguro?',
-                text: "Â¡No podrÃ¡s revertir esto!",
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'SÃ­, eliminarlo',
+                confirmButtonText: 'Sí, eliminarlo',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -197,7 +197,7 @@
                             table.draw();
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Â¡Eliminado!',
+                                title: '¡Eliminado!',
                                 text: data.success,
                                 timer: 2000,
                                 showConfirmButton: false
@@ -208,7 +208,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'OcurriÃ³ un error al eliminar el rol'
+                                text: 'Ocurrió un error al eliminar el rol'
                             });
                         }
                     });
