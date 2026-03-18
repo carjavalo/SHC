@@ -330,30 +330,13 @@
             const certUrl = `{{ url('academico/curso') }}/${cursoId}/certificado?iframe=1`;
             const certUrlNewTab = `{{ url('academico/curso') }}/${cursoId}/certificado`;
             
-            // Mostrar loading y limpiar iframe previo
+            // Mostrar loading
             var li2 = document.getElementById('certLoadingIndicator2');
             if (li2) li2.style.display = 'block';
-            const iframe = document.getElementById('certificadoIframe');
-            iframe.removeAttribute('srcdoc');
-            iframe.removeAttribute('src');
+            
+            // Cargar en iframe directamente (X-Frame-Options: SAMEORIGIN permite esto)
+            $('#certificadoIframe').attr('src', certUrl);
             $('#certOpenNewTab').attr('href', certUrlNewTab);
-
-            // Cargar certificado via AJAX y usar srcdoc (evita X-Frame-Options)
-            fetch(certUrl, {
-                credentials: 'same-origin',
-                headers: { 'Accept': 'text/html' }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.text();
-            })
-            .then(html => {
-                iframe.srcdoc = html;
-            })
-            .catch(error => {
-                console.error('Error cargando certificado:', error);
-                iframe.src = certUrl;
-            });
 
             $('#certPrintBtn').off('click').on('click', function() {
                 const iframeEl = document.getElementById('certificadoIframe');
@@ -366,9 +349,7 @@
         });
 
         $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
-            const iframe = document.getElementById('certificadoIframe');
-            iframe.removeAttribute('srcdoc');
-            iframe.removeAttribute('src');
+            $('#certificadoIframe').attr('src', '');
             var li2 = document.getElementById('certLoadingIndicator2');
             if (li2) li2.style.display = 'block';
         });

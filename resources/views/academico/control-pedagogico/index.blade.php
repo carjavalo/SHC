@@ -2229,33 +2229,12 @@
             const certUrl = `{{ url('academico/control-pedagogico/preview-certificado') }}/${cursoId}/${estudianteId}?iframe=1`;
             const certUrlNewTab = `{{ url('academico/control-pedagogico/preview-certificado') }}/${cursoId}/${estudianteId}`;
             
-            // Mostrar loading y limpiar iframe previo
+            // Mostrar loading
             document.getElementById('certLoadingIndicator').style.display = 'block';
-            const iframe = document.getElementById('certificadoIframe');
-            iframe.removeAttribute('srcdoc');
-            iframe.removeAttribute('src');
             
-            // Enlace nueva pestaña (sin iframe=1)
+            // Cargar en iframe directamente (X-Frame-Options: SAMEORIGIN permite esto)
+            $('#certificadoIframe').attr('src', certUrl);
             $('#certOpenNewTab').attr('href', certUrlNewTab);
-
-            // Cargar certificado via AJAX y usar srcdoc (evita X-Frame-Options)
-            fetch(certUrl, {
-                credentials: 'same-origin',
-                headers: { 'Accept': 'text/html' }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.text();
-            })
-            .then(html => {
-                // Inyectar HTML directamente en el iframe via srcdoc
-                iframe.srcdoc = html;
-            })
-            .catch(error => {
-                console.error('Error cargando certificado:', error);
-                // Fallback: intentar carga directa por src
-                iframe.src = certUrl;
-            });
 
             // Botón imprimir
             $('#certPrintBtn').off('click').on('click', function() {
@@ -2293,9 +2272,7 @@
 
         // Limpiar iframe al cerrar modal
         $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
-            const iframe = document.getElementById('certificadoIframe');
-            iframe.removeAttribute('srcdoc');
-            iframe.removeAttribute('src');
+            $('#certificadoIframe').attr('src', '');
             document.getElementById('certLoadingIndicator').style.display = 'block';
         });
     });
