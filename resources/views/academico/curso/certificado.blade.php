@@ -235,22 +235,34 @@
             const horas = "{{ $curso->duracion_horas ?? '40' }}";
 
             @php
-                // Obtener fecha de inscripción real del estudiante al curso
+                // Obtener datos de inscripción real del estudiante al curso
                 $inscripcion = \DB::table('curso_estudiantes')
                     ->where('curso_id', $curso->id)
                     ->where('estudiante_id', $user->id)
                     ->first();
                 
+                // Fecha inicio = fecha de inscripción del estudiante (cuando inició el curso)
                 $fechaInicioEstudiante = $inscripcion && $inscripcion->fecha_inscripcion 
                     ? $inscripcion->fecha_inscripcion 
                     : $curso->fecha_inicio;
 
-                // Formatear la fecha con Carbon
+                // Fecha fin = cuando el estudiante terminó el curso
+                // Prioridad: 1) fecha_emision del certificado, 2) ultima_actividad del estudiante, 3) fecha_fin del curso
+                $fechaFinEstudiante = null;
+                if (isset($certificadoEmitido) && $certificadoEmitido && $certificadoEmitido->fecha_emision) {
+                    $fechaFinEstudiante = $certificadoEmitido->fecha_emision;
+                } elseif ($inscripcion && $inscripcion->ultima_actividad) {
+                    $fechaFinEstudiante = $inscripcion->ultima_actividad;
+                } else {
+                    $fechaFinEstudiante = $curso->fecha_fin;
+                }
+
+                // Formatear las fechas con Carbon
                 $fechaInicioFormateada = $fechaInicioEstudiante 
                     ? \Carbon\Carbon::parse($fechaInicioEstudiante)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
                     : 'Inicio';
-                $fechaFinFormateada = $curso->fecha_fin 
-                    ? \Carbon\Carbon::parse($curso->fecha_fin)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                $fechaFinFormateada = $fechaFinEstudiante 
+                    ? \Carbon\Carbon::parse($fechaFinEstudiante)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
                     : 'Fin';
                 // Capitalizar nombre del mes (marzo → Marzo)
                 $fechaInicioFormateada = preg_replace_callback('/de ([a-záéíóúñ])/u', function($m) {

@@ -145,6 +145,33 @@
                         <span class="data-label"><i class="fas fa-star me-1"></i> Nota Final</span>
                         <span class="data-value">{{ $certificado->nota_final }}</span>
                     </div>
+                    @php
+                        // Obtener fechas reales del estudiante en el curso
+                        $inscripcionCert = \DB::table('curso_estudiantes')
+                            ->where('curso_id', $certificado->curso_id)
+                            ->where('estudiante_id', $certificado->estudiante_id)
+                            ->first();
+                        
+                        // Fecha inicio = fecha de inscripción del estudiante
+                        $fechaInicioCert = $inscripcionCert && $inscripcionCert->fecha_inscripcion 
+                            ? \Carbon\Carbon::parse($inscripcionCert->fecha_inscripcion)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                            : 'N/A';
+                        
+                        // Fecha fin = fecha emisión del certificado (cuando terminó el curso)
+                        $fechaFinCert = $certificado->fecha_emision 
+                            ? $certificado->fecha_emision->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                            : ($inscripcionCert && $inscripcionCert->ultima_actividad 
+                                ? \Carbon\Carbon::parse($inscripcionCert->ultima_actividad)->locale('es')->isoFormat('DD [de] MMMM [de] YYYY') 
+                                : 'N/A');
+                    @endphp
+                    <div class="data-row">
+                        <span class="data-label"><i class="fas fa-calendar-plus me-1"></i> Fecha de Inicio</span>
+                        <span class="data-value">{{ $fechaInicioCert }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label"><i class="fas fa-calendar-check me-1"></i> Fecha de Finalización</span>
+                        <span class="data-value">{{ $fechaFinCert }}</span>
+                    </div>
                     <div class="data-row">
                         <span class="data-label"><i class="fas fa-calendar me-1"></i> Fecha de Emisión</span>
                         <span class="data-value">
