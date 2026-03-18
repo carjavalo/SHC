@@ -152,15 +152,17 @@
 
     <!-- Container that uses the background and HTML structure from the DB -->
     @php
-        // Usar URL del archivo de fondo (más eficiente y compatible con cPanel)
+        // Obtener URL del fondo - el accessor ya maneja fallback a base64
         $fondoUrl = $plantilla->fondo_url;
-        // Si no hay URL de archivo, fallback al base64 del JSON
-        if (!$fondoUrl) {
+        // Doble protección: si fondo_url retornó vacío, usar base64 directo
+        if (empty($fondoUrl)) {
             $fondoUrl = $plantilla->elementos_json['fondo_base64'] ?? '';
         }
+        // Escapar comillas simples en data URIs para evitar romper el CSS
+        $fondoUrlSafe = str_replace("'", "%27", $fondoUrl);
     @endphp
     <div class="cert-container" id="certCanvas" 
-         style="background-image: url('{{ $fondoUrl }}')">
+         style="background-image: url('{{ $fondoUrlSafe }}')">
         {!! $plantilla->html_content !!}
 
         {{-- QR Code de verificación (generado localmente con JS) --}}
@@ -187,6 +189,31 @@
     <script src="{{ asset('js/qrcode.min.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // === Verificar que la imagen de fondo cargó correctamente ===
+            const certCanvas = document.getElementById('certCanvas');
+            if (certCanvas) {
+                const bgImage = getComputedStyle(certCanvas).backgroundImage;
+                // Si el fondo es una URL de archivo (no base64), verificar que cargue
+                if (bgImage && bgImage.includes('url(') && !bgImage.includes('data:image')) {
+                    const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+                    if (urlMatch && urlMatch[1]) {
+                        const img = new Image();
+                        img.onerror = function() {
+                            // La imagen de archivo no cargó - intentar con base64 inline
+                            console.warn('Fondo de certificado no accesible, usando base64 fallback');
+                            @php
+                                $base64Fallback = $plantilla->elementos_json['fondo_base64'] ?? '';
+                            @endphp
+                            const base64Bg = @json($base64Fallback);
+                            if (base64Bg) {
+                                certCanvas.style.backgroundImage = 'url(' + base64Bg + ')';
+                            }
+                        };
+                        img.src = urlMatch[1];
+                    }
+                }
+            }
+
             // === Generar QR de verificación ===
             @if(isset($certificadoEmitido))
             const qrContainer = document.getElementById('certQRCode');

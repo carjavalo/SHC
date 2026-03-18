@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('fondo_path')->nullable();
-            $table->json('elementos_json')->nullable(); // Store positions, texts, logos coordinates.
-            $table->text('html_content')->nullable(); // Cached HTML version if needed
+            $table->longText('elementos_json')->nullable(); // JSON with positions, texts, logos, fondo_base64
+            $table->longText('html_content')->nullable(); // Cached HTML (can be very large with inline images)
             $table->timestamps();
         });
     }
