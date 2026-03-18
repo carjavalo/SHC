@@ -63,6 +63,14 @@ class CertificadoPlantillaController extends Controller
 
         $plantilla->save();
 
+        // Generar archivo de fondo en disco para mejor rendimiento y compatibilidad con cPanel
+        // Esto invoca el accessor fondo_url que extrae el base64 y lo guarda como archivo
+        try {
+            $plantilla->fondo_url;
+        } catch (\Throwable $e) {
+            \Log::warning('No se pudo generar archivo de fondo para plantilla #' . $plantilla->id . ': ' . $e->getMessage());
+        }
+
         // Asignar automáticamente la plantilla al curso seleccionado
         if ($request->filled('curso_id')) {
             Curso::where('id', $request->curso_id)->update(['plantilla_certificado_id' => $plantilla->id]);
@@ -156,6 +164,18 @@ class CertificadoPlantillaController extends Controller
         }
 
         $plantilla->save();
+
+        // Regenerar archivo de fondo si hubo cambios en elementos_json
+        try {
+            // Eliminar archivo previo para forzar regeneración
+            $relativePath = 'certificados/fondos/plantilla_' . $plantilla->id . '.png';
+            if (\Storage::disk('public')->exists($relativePath)) {
+                \Storage::disk('public')->delete($relativePath);
+            }
+            $plantilla->fondo_url;
+        } catch (\Throwable $e) {
+            \Log::warning('No se pudo regenerar fondo para plantilla #' . $plantilla->id);
+        }
 
         return response()->json(['success' => true, 'message' => 'Plantilla actualizada correctamente.']);
     }

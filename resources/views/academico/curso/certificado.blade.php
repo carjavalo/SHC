@@ -149,8 +149,16 @@
     </div>
 
     <!-- Container that uses the background and HTML structure from the DB -->
+    @php
+        // Usar URL del archivo de fondo (más eficiente y compatible con cPanel)
+        $fondoUrl = $plantilla->fondo_url;
+        // Si no hay URL de archivo, fallback al base64 del JSON
+        if (!$fondoUrl) {
+            $fondoUrl = $plantilla->elementos_json['fondo_base64'] ?? '';
+        }
+    @endphp
     <div class="cert-container" id="certCanvas" 
-         style="background-image: url('{{ $plantilla->elementos_json['fondo_base64'] ?? '' }}')">
+         style="background-image: url('{{ $fondoUrl }}')">
         {!! $plantilla->html_content !!}
 
         {{-- QR Code de verificación (generado localmente con JS) --}}
