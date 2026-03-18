@@ -28,22 +28,44 @@ class PlantillaCertificado extends Model
      * Obtener la URL del fondo del certificado.
      * Extrae el base64 del JSON, lo guarda como archivo de imagen en disco
      * y devuelve la URL pública. Si ya existe, devuelve la URL directamente.
-     * Esto evita inyectar ~141KB de base64 en el HTML y resuelve problemas
-     * de columnas TEXT truncadas en cPanel.
+     * Detecta automáticamente el formato real (JPEG/PNG) para evitar
+     * problemas con X-Content-Type-Options: nosniff.
      */
     public function getFondoUrlAttribute(): ?string
     {
         try {
-            // Ruta relativa del archivo de fondo
-            $relativePath = 'certificados/fondos/plantilla_' . $this->id . '.png';
+            // Extraer el base64 del JSON para detectar formato
+            $base64 = $this->elementos_json['fondo_base64'] ?? null;
 
-            // Si ya existe el archivo guardado, devolver la URL
+            // Detectar extensión real del formato de imagen
+            $extension = 'png'; // default
+            if ($base64) {
+                if (str_contains($base64, 'data:image/jpeg') || str_contains($base64, 'data:image/jpg')) {
+                    $extension = 'jpg';
+                } elseif (str_contains($base64, 'data:image/webp')) {
+                    $extension = 'webp';
+                } elseif (str_contains($base64, 'data:image/gif')) {
+                    $extension = 'gif';
+                }
+            }
+
+            // Ruta relativa del archivo de fondo (con extensión correcta)
+            $relativePath = 'certificados/fondos/plantilla_' . $this->id . '.' . $extension;
+
+            // Si ya existe el archivo con la extensión correcta, devolver la URL
             if (Storage::disk('public')->exists($relativePath)) {
                 return asset('storage/' . $relativePath);
             }
 
-            // Extraer el base64 del JSON
-            $base64 = $this->elementos_json['fondo_base64'] ?? null;
+            // Limpiar archivos con extensión incorrecta (migración automática)
+            $possibleExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+            foreach ($possibleExtensions as $ext) {
+                $oldPath = 'certificados/fondos/plantilla_' . $this->id . '.' . $ext;
+                if ($ext !== $extension && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
             if (!$base64) {
                 return null;
             }
@@ -60,7 +82,16 @@ class PlantillaCertificado extends Model
                 return null;
             }
 
-            // Guardar como archivo
+            // Si no se pudo detectar por el prefijo base64, detectar por magic bytes
+            if ($extension === 'png' && strlen($decodedImage) >= 2) {
+                $firstBytes = unpack('C2', $decodedImage);
+                if ($firstBytes[1] === 0xFF && $firstBytes[2] === 0xD8) {
+                    $extension = 'jpg';
+                    $relativePath = 'certificados/fondos/plantilla_' . $this->id . '.' . $extension;
+                }
+            }
+
+            // Guardar como archivo con extensión correcta
             Storage::disk('public')->put($relativePath, $decodedImage);
 
             // Actualizar fondo_path en la BD
@@ -70,7 +101,7 @@ class PlantillaCertificado extends Model
         } catch (\Throwable $e) {
             Log::warning("PlantillaCertificado #{$this->id}: Error al obtener fondo URL - " . $e->getMessage());
 
-            // Fallback: devolver el base64 original si existe
+            // Fallback: devolver el base64 original directamente (funciona siempre)
             $base64 = $this->elementos_json['fondo_base64'] ?? null;
             return $base64 ?: null;
         }
