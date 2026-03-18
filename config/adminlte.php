@@ -381,6 +381,13 @@ return [
                             'active' => ['roles', 'roles/*'],
                             'role' => ['Super Admin'],
                         ],
+                        [
+                            'text' => 'Asignar Permisos',
+                            'url' => 'permisos',
+                            'icon' => 'fas fa-fw fa-key',
+                            'active' => ['permisos', 'permisos/*'],
+                            'role' => ['Super Admin'],
+                        ],
                     ],
                 ],
                 [
