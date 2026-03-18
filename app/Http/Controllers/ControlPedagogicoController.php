@@ -671,14 +671,22 @@ class ControlPedagogicoController extends Controller
                 \Log::warning('No se pudo crear/obtener certificado emitido: ' . $e->getMessage());
             }
 
-            return view('academico.curso.certificado', [
+            // Detectar si se carga en iframe (preview modal)
+            $enIframe = $request->query('iframe', false);
+
+            $response = response()->view('academico.curso.certificado', [
                 'curso' => $curso,
                 'user' => $estudiante,
                 'resumen' => $resumen,
                 'plantilla' => $plantilla,
                 'notaFinal' => $notaFinal,
                 'certificadoEmitido' => $certificadoEmitido,
+                'enIframe' => $enIframe,
             ]);
+
+            // Permitir carga en iframe del mismo origen
+            $response->header('X-Frame-Options', 'SAMEORIGIN');
+            return $response;
         } catch (\Throwable $e) {
             \Log::error('Error en previewCertificado: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
             return $this->certificadoError('Error al generar el certificado: ' . $e->getMessage());

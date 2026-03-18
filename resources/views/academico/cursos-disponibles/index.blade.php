@@ -159,7 +159,7 @@
                             <p style="color: #ccc; margin-top: 10px; font-family: 'Inter',sans-serif;">Cargando certificado...</p>
                         </div>
                         <div id="certIframeScaler2" style="width: 960px; height: 680px; transform-origin: top center; flex-shrink: 0;">
-                            <iframe id="certificadoIframe" src="" onload="if(this.src){var li=document.getElementById('certLoadingIndicator2');if(li)li.style.display='none'; if(typeof scaleCertificateIframe2==='function')scaleCertificateIframe2();}" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
+                            <iframe id="certificadoIframe" onload="var li=document.getElementById('certLoadingIndicator2');if(li)li.style.display='none'; if(typeof scaleCertificateIframe2==='function')scaleCertificateIframe2();" style="width: 960px; height: 680px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; display: block;" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -327,17 +327,38 @@
             $('#certInfoFechaInicio').text(fechaInicio);
             $('#certInfoFechaFin').text(fechaFin);
 
-            const certUrl = `{{ url('academico/curso') }}/${cursoId}/certificado`;
+            const certUrl = `{{ url('academico/curso') }}/${cursoId}/certificado?iframe=1`;
+            const certUrlNewTab = `{{ url('academico/curso') }}/${cursoId}/certificado`;
             
-            $('#certificadoIframe').attr('src', certUrl);
+            // Mostrar loading y limpiar iframe previo
             var li2 = document.getElementById('certLoadingIndicator2');
             if (li2) li2.style.display = 'block';
-            $('#certOpenNewTab').attr('href', certUrl);
+            const iframe = document.getElementById('certificadoIframe');
+            iframe.removeAttribute('srcdoc');
+            iframe.removeAttribute('src');
+            $('#certOpenNewTab').attr('href', certUrlNewTab);
+
+            // Cargar certificado via AJAX y usar srcdoc (evita X-Frame-Options)
+            fetch(certUrl, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'text/html' }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.text();
+            })
+            .then(html => {
+                iframe.srcdoc = html;
+            })
+            .catch(error => {
+                console.error('Error cargando certificado:', error);
+                iframe.src = certUrl;
+            });
 
             $('#certPrintBtn').off('click').on('click', function() {
-                const iframe = document.getElementById('certificadoIframe');
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.print();
+                const iframeEl = document.getElementById('certificadoIframe');
+                if (iframeEl && iframeEl.contentWindow) {
+                    iframeEl.contentWindow.print();
                 }
             });
 
@@ -345,7 +366,9 @@
         });
 
         $('#certificadoPreviewModal').on('hidden.bs.modal', function() {
-            $('#certificadoIframe').attr('src', '');
+            const iframe = document.getElementById('certificadoIframe');
+            iframe.removeAttribute('srcdoc');
+            iframe.removeAttribute('src');
             var li2 = document.getElementById('certLoadingIndicator2');
             if (li2) li2.style.display = 'block';
         });

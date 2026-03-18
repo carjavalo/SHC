@@ -144,9 +144,11 @@
 </head>
 <body>
 
+    @if(empty($enIframe))
     <div class="toolbar no-print">
         <button class="btn-print" onclick="window.print()">🖨️ Imprimir Certificado</button>
     </div>
+    @endif
 
     <!-- Container that uses the background and HTML structure from the DB -->
     @php

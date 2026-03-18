@@ -873,7 +873,12 @@ class AcademicoController extends Controller
             $curso->id, $user->id, $resumen['nota_final'], $plantilla->id
         );
 
-        return view('academico.curso.certificado', compact('curso', 'user', 'resumen', 'plantilla', 'notaFinal', 'certificadoEmitido'));
+        // Detectar si se carga en iframe
+        $enIframe = request()->query('iframe', false);
+
+        $response = response()->view('academico.curso.certificado', compact('curso', 'user', 'resumen', 'plantilla', 'notaFinal', 'certificadoEmitido', 'enIframe'));
+        $response->header('X-Frame-Options', 'SAMEORIGIN');
+        return $response;
     }
 }
 
