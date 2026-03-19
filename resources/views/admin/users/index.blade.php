@@ -11,9 +11,11 @@
         <div class="card-header">
             <div class="d-flex justify-content-between">
                 <h3 class="card-title">Listado de usuarios del sistema</h3>
+                @can('users.create')
                 <a href="{{ route('users.create') }}" class="btn btn-primary">
                     <i class="fas fa-user-plus"></i> Nuevo Usuario
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-body">
@@ -96,9 +98,12 @@
                                         <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm" title="Ver">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        @can('users.edit')
                                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm" title="Editar">
                                             <i class="fas fa-pencil-alt"></i>
                                         </a>
+                                        @endcan
+                                        @can('users.delete')
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
@@ -106,6 +111,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -255,6 +261,7 @@
                         text: '<i class="fas fa-columns"></i> Columnas',
                         className: 'btn btn-primary'
                     },
+                    @can('users.import')
                     {
                         text: '<i class="fas fa-file-import"></i> Importar archivo',
                         className: 'btn btn-success',
@@ -268,6 +275,7 @@
                             $('#importarUsuariosModal').modal('show');
                         }
                     },
+                    @endcan
                     {
                         extend: 'excel',
                         text: '<i class="fas fa-file-export"></i> Exportar archivo',

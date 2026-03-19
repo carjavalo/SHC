@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Gate;
 
 class CursoController extends Controller
 {
@@ -24,6 +25,7 @@ class CursoController extends Controller
      */
     public function index()
     {
+        Gate::authorize('cursos.view');
         $areas = Area::with('categoria')->orderBy('descripcion')->get();
         return view('admin.capacitaciones.cursos.index', compact('areas'));
     }
@@ -93,25 +95,35 @@ class CursoController extends Controller
                 return $curso->estado_badge;
             })
             ->addColumn('actions', function ($curso) {
-                return '
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-info btn-sm" onclick="viewCurso(' . $curso->id . ')" title="Ver">
+                $user = Auth::user();
+                $html = '<div class="btn-group" role="group">';
+                
+                $html .= '<button type="button" class="btn btn-info btn-sm" onclick="viewCurso(' . $curso->id . ')" title="Ver">
                             <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" class="btn btn-warning btn-sm" onclick="viewCursoStats(' . $curso->id . ')" title="Estadísticas">
+                        </button>';
+                
+                $html .= '<button type="button" class="btn btn-warning btn-sm" onclick="viewCursoStats(' . $curso->id . ')" title="Estadísticas">
                             <i class="fas fa-chart-bar"></i>
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="editCurso(' . $curso->id . ')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <a href="' . route('capacitaciones.cursos.classroom', $curso->id) . '" class="btn btn-success btn-sm" title="Classroom">
+                        </button>';
+                
+                if (Gate::allows('cursos.edit')) {
+                    $html .= '<button type="button" class="btn btn-primary btn-sm" onclick="editCurso(' . $curso->id . ')" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>';
+                }
+                
+                $html .= '<a href="' . route('capacitaciones.cursos.classroom', $curso->id) . '" class="btn btn-success btn-sm" title="Classroom">
                             <i class="fas fa-chalkboard-teacher"></i>
-                        </a>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteCurso(' . $curso->id . ')" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                ';
+                        </a>';
+                
+                if (Gate::allows('cursos.delete')) {
+                    $html .= '<button type="button" class="btn btn-danger btn-sm" onclick="deleteCurso(' . $curso->id . ')" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>';
+                }
+                
+                $html .= '</div>';
+                return $html;
             })
             ->rawColumns(['area_info', 'instructor_info', 'estudiantes_info', 'fechas_info', 'estado_badge', 'actions'])
             ->make(true);
@@ -240,6 +252,7 @@ class CursoController extends Controller
      */
     public function create()
     {
+        Gate::authorize('cursos.create');
         $areas = Area::with('categoria')->orderBy('descripcion')->get();
         // Creadores del curso: usuarios con roles administrativos
         $creadores = User::whereIn('role', ['Super Admin', 'Administrador', 'Admin', 'Operador'])
@@ -256,6 +269,7 @@ class CursoController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        Gate::authorize('cursos.create');
         // Aumentar límites de tiempo y memoria para cursos grandes
         set_time_limit(600);
         ini_set('memory_limit', '1024M');
@@ -476,6 +490,7 @@ class CursoController extends Controller
      */
     public function edit(Curso $curso): View
     {
+        Gate::authorize('cursos.edit');
         // Cargar relaciones necesarias
         $curso->load(['area.categoria', 'instructor']);
 
@@ -496,6 +511,7 @@ class CursoController extends Controller
      */
     public function update(Request $request, Curso $curso): JsonResponse
     {
+        Gate::authorize('cursos.edit');
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
@@ -554,6 +570,7 @@ class CursoController extends Controller
      */
     public function destroy(Curso $curso): JsonResponse
     {
+        Gate::authorize('cursos.delete');
         try {
             // Eliminar imagen de portada si existe
             if ($curso->imagen_portada) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class RoleController extends Controller
@@ -52,7 +53,17 @@ class RoleController extends Controller
 
     public function destroy($id)
     {
-        Role::find($id)->delete();
+        $role = Role::find($id);
+        if ($role) {
+            $roleName = $role->name;
+
+            // Limpiar permisos asociados al rol eliminado
+            DB::table('role_permissions')->where('role_name', $roleName)->delete();
+            DB::table('role_assignable_roles')->where('role_name', $roleName)->delete();
+            DB::table('role_assignable_roles')->where('assignable_role_name', $roleName)->delete();
+
+            $role->delete();
+        }
         return response()->json(["success" => "Rol eliminado exitosamente."]);
     }
 }

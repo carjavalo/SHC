@@ -76,9 +76,11 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-table"></i> Lista de Cursos</h3>
             <div class="card-tools">
+                @can('cursos.create')
                 <button type="button" class="btn btn-success" id="btn-nuevo-curso">
                     <i class="fas fa-plus"></i> Nuevo Curso
                 </button>
+                @endcan
             </div>
         </div>
         <div class="card-body">

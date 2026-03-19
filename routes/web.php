@@ -49,12 +49,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rutas de usuarios
-    Route::post('users/import', [UserController::class, 'import'])->name('users.import');
-    Route::resource('users', UserController::class);
+    // Rutas de usuarios - protegidas por permisos
+    Route::post('users/import', [UserController::class, 'import'])->name('users.import')->middleware('check.permission:users.import');
+    Route::get('users', [UserController::class, 'index'])->name('users.index')->middleware('check.permission:users.view');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create')->middleware('check.permission:users.create');
+    Route::post('users', [UserController::class, 'store'])->name('users.store')->middleware('check.permission:users.create');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show')->middleware('check.permission:users.view');
+    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('check.permission:users.edit');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update')->middleware('check.permission:users.edit');
+    Route::patch('users/{user}', [UserController::class, 'update'])->middleware('check.permission:users.edit');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('check.permission:users.delete');
     
     // Roles solo accesible por Super Admin
     Route::resource('roles', \App\Http\Controllers\RoleController::class)->middleware(\App\Http\Middleware\CheckSuperAdminRole::class);
+
+    // Permisos solo accesible por Super Admin
+    Route::prefix('permisos')->name('permisos.')->middleware(\App\Http\Middleware\CheckSuperAdminRole::class)->group(function () {
+        Route::get('/', [\App\Http\Controllers\PermissionController::class, 'index'])->name('index');
+        Route::post('/update-permissions', [\App\Http\Controllers\PermissionController::class, 'updatePermissions'])->name('update-permissions');
+        Route::post('/update-assignable', [\App\Http\Controllers\PermissionController::class, 'updateAssignableRoles'])->name('update-assignable');
+    });
 
     // Rutas de seguimiento de accesos
     Route::prefix('tracking')->name('tracking.')->group(function () {
@@ -81,10 +95,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('areas/data', [AreaController::class, 'getData'])->name('areas.data');
         Route::resource('areas', AreaController::class);
 
-        // Rutas de cursos
-        Route::get('cursos/data', [CursoController::class, 'getData'])->name('cursos.data');
-        Route::get('cursos/{curso}/stats', [CursoController::class, 'getStats'])->name('cursos.stats');
-        Route::resource('cursos', CursoController::class);
+        // Rutas de cursos (con permisos individuales)
+        Route::get('cursos/data', [CursoController::class, 'getData'])->name('cursos.data')->middleware('check.permission:cursos.view');
+        Route::get('cursos/{curso}/stats', [CursoController::class, 'getStats'])->name('cursos.stats')->middleware('check.permission:cursos.view');
+        Route::get('cursos', [CursoController::class, 'index'])->name('cursos.index')->middleware('check.permission:cursos.view');
+        Route::get('cursos/create', [CursoController::class, 'create'])->name('cursos.create')->middleware('check.permission:cursos.create');
+        Route::post('cursos', [CursoController::class, 'store'])->name('cursos.store')->middleware('check.permission:cursos.create');
+        Route::get('cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show')->middleware('check.permission:cursos.view');
+        Route::get('cursos/{curso}/edit', [CursoController::class, 'edit'])->name('cursos.edit')->middleware('check.permission:cursos.edit');
+        Route::put('cursos/{curso}', [CursoController::class, 'update'])->name('cursos.update')->middleware('check.permission:cursos.edit');
+        Route::patch('cursos/{curso}', [CursoController::class, 'update'])->name('cursos.update.patch')->middleware('check.permission:cursos.edit');
+        Route::delete('cursos/{curso}', [CursoController::class, 'destroy'])->name('cursos.destroy')->middleware('check.permission:cursos.delete');
 
         // Rutas del classroom
         Route::prefix('cursos/{curso}/classroom')->name('cursos.classroom.')->group(function () {

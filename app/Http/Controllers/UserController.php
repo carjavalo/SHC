@@ -11,6 +11,7 @@ use App\Models\VinculacionContrato;
 use App\Models\Sede;
 use App\Mail\AsignacionCurso;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -25,6 +26,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        Gate::authorize('users.view');
+
         $currentUser = auth()->user();
         
         // Si el usuario autenticado es Operador, excluir Super Admins
@@ -44,6 +47,8 @@ class UserController extends Controller
      */
     public function create()
     {
+        Gate::authorize('users.create');
+
         $availableRoles = User::getAvailableRoles();
         
         // Si el usuario autenticado es Operador, solo puede asignar Estudiante, Registrado, Docente u Operador
@@ -72,6 +77,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('users.create');
+
         $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'apellido1' => ['required', 'string', 'max:100'],
@@ -116,6 +123,8 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
+        Gate::authorize('users.view');
+
         $user = User::with(['servicioArea', 'vinculacionContrato', 'sede'])->findOrFail($id);
         return view('admin.users.show', compact('user'));
     }
@@ -125,6 +134,8 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
+        Gate::authorize('users.edit');
+
         $user = User::findOrFail($id);
         $availableRoles = User::getAvailableRoles();
         
@@ -155,6 +166,8 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        Gate::authorize('users.edit');
+
         $user = User::findOrFail($id);
 
         $request->validate([
@@ -209,6 +222,8 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        Gate::authorize('users.delete');
+
         $user = User::findOrFail($id);
         $user->delete();
 
@@ -225,6 +240,8 @@ class UserController extends Controller
      */
     public function import(Request $request)
     {
+        Gate::authorize('users.import');
+
         $request->validate([
             'archivo_excel' => 'required|file|mimes:xlsx,xls|max:10240'
         ], [
