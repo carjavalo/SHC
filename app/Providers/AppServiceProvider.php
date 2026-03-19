@@ -25,6 +25,26 @@ class AppServiceProvider extends ServiceProvider
         // ══════════════════════════════════════════════════════════
         // Registrar Gates dinámicos basados en la tabla permissions
         // ══════════════════════════════════════════════════════════
+
+        // Lista maestra de todos los gates que usa el menú y el sistema.
+        // Sirve como fallback cuando las tablas de permisos no existen en producción.
+        $allKnownGates = [
+            'tracking.logins', 'tracking.operations',
+            'academic.courses', 'academic.control',
+            'menu.configuracion', 'asignar-cursos',
+            'users.view', 'users.create', 'users.edit', 'users.delete', 'users.import',
+            'roles.manage', 'permissions.manage',
+            'config.categorias', 'config.areas', 'config.cursos',
+            'config.servicios', 'config.vinculacion', 'config.sedes',
+            'config.asignacion', 'config.certificados', 'config.publicidad',
+            'chat.access',
+            'cursos.view', 'cursos.create', 'cursos.edit', 'cursos.delete',
+            'cursos.inscribir', 'cursos.materiales', 'cursos.actividades', 'cursos.calificar',
+            'categorias.view', 'categorias.create', 'categorias.edit', 'categorias.delete',
+            'areas.view', 'areas.create', 'areas.edit', 'areas.delete',
+            'publicidad.view', 'publicidad.create', 'publicidad.edit', 'publicidad.delete', 'publicidad.banner',
+        ];
+
         try {
             if (Schema::hasTable('permissions') && Schema::hasTable('role_permissions')) {
                 // Cargar todos los permisos y sus roles asignados una sola vez
@@ -68,17 +88,36 @@ class AppServiceProvider extends ServiceProvider
                     }
                     return false;
                 });
+
+                // Asegurar que todos los gates conocidos estén definidos (por si faltan en BD)
+                foreach ($allKnownGates as $gateName) {
+                    if (!Gate::has($gateName)) {
+                        Gate::define($gateName, function ($user) {
+                            return $user->role === 'Super Admin';
+                        });
+                    }
+                }
             } else {
-                // Fallback si las tablas no existen aún
-                Gate::define('asignar-cursos', function ($user) {
-                    return in_array($user->role, ['Super Admin', 'Administrador', 'Operador']);
-                });
+                // Fallback si las tablas no existen aún:
+                // Definir todos los gates conocidos para que Super Admin vea todo el menú
+                foreach ($allKnownGates as $gateName) {
+                    Gate::define($gateName, function ($user) {
+                        return $user->role === 'Super Admin'
+                            || in_array($user->role, ['Administrador']);
+                    });
+                }
             }
         } catch (\Throwable $e) {
-            // Fallback en caso de error de BD
-            Gate::define('asignar-cursos', function ($user) {
-                return in_array($user->role, ['Super Admin', 'Administrador', 'Operador']);
-            });
+            // Fallback en caso de error de BD:
+            // Definir todos los gates conocidos para que Super Admin vea todo el menú
+            foreach ($allKnownGates as $gateName) {
+                if (!Gate::has($gateName)) {
+                    Gate::define($gateName, function ($user) {
+                        return $user->role === 'Super Admin'
+                            || in_array($user->role, ['Administrador']);
+                    });
+                }
+            }
         }
         
         // Asegurar que la zona horaria de PHP y Carbon coincidan con la configuración de la app
