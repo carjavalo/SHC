@@ -16,7 +16,7 @@ class CheckAdminRole
     public function handle(Request $request, Closure $next): Response
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
-            abort(403, "No tienes permiso para acceder a esta sección.");
+            abort(403, "No tienes permiso para acceder a esta secci\u{00F3}n.");
         }
 
         return $next($request);

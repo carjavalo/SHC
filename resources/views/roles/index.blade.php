@@ -1,6 +1,6 @@
 @extends('admin.layouts.master')
 
-@section('title', 'Gestión de Roles')
+@section('title', 'GestiÃ³n de Roles')
 
 @section('content_header')
     <h1>Roles</h1>
@@ -21,9 +21,9 @@
                 <table id="roles-table" class="table table-striped table-hover table-bordered responsive nowrap" width="100%">
                     <thead class="bg-primary text-white">
                         <tr>
-                            <th>Nº</th>
+                            <th>NÂ°</th>
                             <th>Nombre</th>
-                            <th>Descripción</th>
+                            <th>DescripciÃ³n</th>
                             <th width="150px">Acciones</th>
                         </tr>
                     </thead>
@@ -54,9 +54,9 @@
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="col-sm-12 control-label">Descripción</label>
+                            <label class="col-sm-12 control-label">DescripciÃ³n</label>
                             <div class="col-sm-12">
-                                <textarea id="description" name="description" required placeholder="Descripción del rol" class="form-control"></textarea>
+                                <textarea id="description" name="description" required placeholder="DescripciÃ³n del rol" class="form-control"></textarea>
                             </div>
                         </div>
                         <div class="col-sm-offset-2 col-sm-10 mt-4">
@@ -147,7 +147,7 @@
                     table.draw();
                     Swal.fire({
                         icon: 'success',
-                        title: '¡Éxito!',
+                        title: '\u00a1\u00c9xito!',
                         text: data.success,
                         timer: 2000,
                         showConfirmButton: false
@@ -168,7 +168,7 @@
                         });
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error de validación',
+                            title: 'Error de validaci\u00f3n',
                             html: errorString
                         });
                     }
@@ -180,13 +180,13 @@
             var role_id = $(this).data("id");
             
             Swal.fire({
-                title: '¿Estás seguro?',
-                text: "¡No podrás revertir esto!",
+                title: '\u00bfEst\u00e1s seguro?',
+                text: '\u00a1No podr\u00e1s revertir esto!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminarlo',
+                confirmButtonText: 'S\u00ed, eliminarlo',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -197,7 +197,7 @@
                             table.draw();
                             Swal.fire({
                                 icon: 'success',
-                                title: '¡Eliminado!',
+                                title: '\u00a1Eliminado!',
                                 text: data.success,
                                 timer: 2000,
                                 showConfirmButton: false
@@ -208,7 +208,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'Ocurrió un error al eliminar el rol'
+                                text: 'Ocurri\u00f3 un error al eliminar el rol'
                             });
                         }
                     });

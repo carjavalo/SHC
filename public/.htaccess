@@ -1,3 +1,6 @@
+# Forzar codificación UTF-8 en todas las respuestas
+AddDefaultCharset UTF-8
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

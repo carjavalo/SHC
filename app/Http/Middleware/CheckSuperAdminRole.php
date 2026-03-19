@@ -16,7 +16,7 @@ class CheckSuperAdminRole
     public function handle(Request $request, Closure $next): Response
     {
         if (!auth()->check() || !auth()->user()->isSuperAdmin()) {
-            abort(403, "No tienes permiso para acceder a esta sección. Se requiere rol de Super Admin.");
+            abort(403, "No tienes permiso para acceder a esta secci\u{00F3}n. Se requiere rol de Super Admin.");
         }
 
         return $next($request);

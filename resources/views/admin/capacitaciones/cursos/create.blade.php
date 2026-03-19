@@ -637,14 +637,14 @@
                                                                           <div class="form-group mt-3">
                                           <label for="plantilla_certificado_id"><i class="fas fa-certificate text-warning"></i> Plantilla de Certificado</label>
                                           <select class="form-control" id="plantilla_certificado_id" name="plantilla_certificado_id">
-                                              <option value="">Por defecto (Plantilla b·sica)</option>
+                                              <option value="">Por defecto (Plantilla b√°sica)</option>
                                               @if(isset($plantillas))
                                                   @foreach($plantillas as $plantilla)
                                                       <option value="{{ $plantilla->id }}">{{ $plantilla->nombre }}</option>
                                                   @endforeach
                                               @endif
                                           </select>
-                                          <small class="form-text text-muted">Elige la plantilla que se usar· para generar el certificado de este curso.</small>
+                                          <small class="form-text text-muted">Elige la plantilla que se usar√° para generar el certificado de este curso.</small>
                                       </div>
 
                                       <div class="alert alert-info">

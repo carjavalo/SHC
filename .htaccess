@@ -1,6 +1,9 @@
 # .htaccess para la raíz del proyecto en cPanel
 # Este archivo redirige todo el tráfico a la carpeta public/
 
+# Forzar codificación UTF-8 en todas las respuestas
+AddDefaultCharset UTF-8
+
 # Redireccionar al directorio public
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -39,7 +42,7 @@ LimitRequestBody 629145600
 
 <Files "composer.lock">
     Order allow,deny
-    Deny from allÑ
+    Deny from all
 </Files>
 
 # Bloquear acceso a directorios sensibles (NO vendor/ ni storage/ que son públicos)
