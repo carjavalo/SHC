@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class PublicidadProductoController extends Controller
@@ -14,6 +15,7 @@ class PublicidadProductoController extends Controller
      */
     public function index()
     {
+        Gate::authorize('publicidad.view');
         $productos = $this->getProductos();
         $categorias = $this->getCategorias();
         $configuracion = $this->getConfiguracion();
@@ -44,14 +46,18 @@ class PublicidadProductoController extends Controller
                 return $badges[$producto['estado']] ?? '<span class="badge badge-secondary">-</span>';
             })
             ->addColumn('acciones', function($producto) {
-                return '
-                    <button class="btn btn-sm btn-info btn-editar" data-id="' . $producto['id'] . '">
+                $html = '';
+                if (Gate::allows('publicidad.edit')) {
+                    $html .= '<button class="btn btn-sm btn-info btn-editar" data-id="' . $producto['id'] . '">
                         <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-eliminar" data-id="' . $producto['id'] . '">
+                    </button> ';
+                }
+                if (Gate::allows('publicidad.delete')) {
+                    $html .= '<button class="btn btn-sm btn-danger btn-eliminar" data-id="' . $producto['id'] . '">
                         <i class="fas fa-trash"></i>
-                    </button>
-                ';
+                    </button>';
+                }
+                return $html;
             })
             ->rawColumns(['imagen_html', 'estado_badge', 'acciones'])
             ->make(true);
@@ -62,6 +68,7 @@ class PublicidadProductoController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('publicidad.create');
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
@@ -125,6 +132,7 @@ class PublicidadProductoController extends Controller
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('publicidad.edit');
         $validator = Validator::make($request->all(), [
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
@@ -196,6 +204,7 @@ class PublicidadProductoController extends Controller
      */
     public function destroy($id)
     {
+        Gate::authorize('publicidad.delete');
         try {
             $productos = $this->getProductos();
             $index = array_search($id, array_column($productos, 'id'));
@@ -232,6 +241,7 @@ class PublicidadProductoController extends Controller
      */
     public function guardarConfiguracion(Request $request)
     {
+        Gate::authorize('publicidad.banner');
         $validator = Validator::make($request->all(), [
             'banner_titulo' => 'nullable|string|max:200',
             'banner_subtitulo' => 'nullable|string|max:500',

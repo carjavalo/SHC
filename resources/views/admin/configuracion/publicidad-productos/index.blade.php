@@ -9,6 +9,7 @@
 @section('content')
 <div class="row">
     <!-- Configuración del Banner -->
+    @can('publicidad.banner')
     <div class="col-md-12">
         <div class="card card-primary card-outline">
             <div class="card-header">
@@ -79,6 +80,7 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Gestión de Categorías -->
     <div class="col-md-12">
@@ -136,9 +138,11 @@
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-box"></i> Productos / Cursos Promocionados</h3>
                 <div class="card-tools">
+                    @can('publicidad.create')
                     <button type="button" class="btn btn-primary btn-sm" id="btn-nuevo-producto">
                         <i class="fas fa-plus"></i> Agregar Producto
                     </button>
+                    @endcan
                 </div>
             </div>
             <div class="card-body">
@@ -183,12 +187,16 @@
                             </td>
                             <td>{{ $producto['orden'] }}</td>
                             <td>
+                                @can('publicidad.edit')
                                 <button class="btn btn-sm btn-info btn-editar" data-producto-id="{{ $producto['id'] ?? '' }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
+                                @endcan
+                                @can('publicidad.delete')
                                 <button class="btn btn-sm btn-danger btn-eliminar" data-id="{{ $producto['id'] }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

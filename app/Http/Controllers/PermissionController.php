@@ -54,6 +54,7 @@ class PermissionController extends Controller
             'Gestión de Cursos',
             'Gestión de Categorías',
             'Gestión de Áreas',
+            'Publicidad y Productos',
             'Componentes',
             'Configuración',
             'Comunicación',

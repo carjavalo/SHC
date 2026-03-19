@@ -228,15 +228,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{plantilla}/json', [\App\Http\Controllers\CertificadoPlantillaController::class, 'showJson'])->name('showJson');
         });
 
-        // Rutas de Publicidad y Productos
+        // Rutas de Publicidad y Productos (con permisos individuales)
         Route::prefix('publicidad-productos')->name('publicidad-productos.')->group(function () {
-            Route::get('/', [PublicidadProductoController::class, 'index'])->name('index');
-            Route::get('/data', [PublicidadProductoController::class, 'getData'])->name('data');
-            Route::post('/', [PublicidadProductoController::class, 'store'])->name('store');
-            Route::put('/{id}', [PublicidadProductoController::class, 'update'])->name('update');
-            Route::delete('/{id}', [PublicidadProductoController::class, 'destroy'])->name('destroy');
-            Route::post('/guardar-config', [PublicidadProductoController::class, 'guardarConfiguracion'])->name('guardar-config');
-            Route::post('/guardar-categorias', [PublicidadProductoController::class, 'guardarCategorias'])->name('guardar-categorias');
+            Route::get('/', [PublicidadProductoController::class, 'index'])->name('index')->middleware('check.permission:publicidad.view');
+            Route::get('/data', [PublicidadProductoController::class, 'getData'])->name('data')->middleware('check.permission:publicidad.view');
+            Route::post('/', [PublicidadProductoController::class, 'store'])->name('store')->middleware('check.permission:publicidad.create');
+            Route::put('/{id}', [PublicidadProductoController::class, 'update'])->name('update')->middleware('check.permission:publicidad.edit');
+            Route::delete('/{id}', [PublicidadProductoController::class, 'destroy'])->name('destroy')->middleware('check.permission:publicidad.delete');
+            Route::post('/guardar-config', [PublicidadProductoController::class, 'guardarConfiguracion'])->name('guardar-config')->middleware('check.permission:publicidad.banner');
+            Route::post('/guardar-categorias', [PublicidadProductoController::class, 'guardarCategorias'])->name('guardar-categorias')->middleware('check.permission:publicidad.edit');
         });
     });
 });
