@@ -475,6 +475,11 @@ return [
                 ],
             ],
         ],
+        [
+            'text'    => 'Consultas',
+            'icon'    => 'fas fa-fw fa-search',
+            'url'     => '#',
+        ],
     ],
 
     /*
