@@ -54,7 +54,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaÃ±a de materiales
+     * Mostrar la pestaña de materiales
      */
     public function materiales(Curso $curso)
     {
@@ -78,7 +78,7 @@ class CursoClassroomController extends Controller
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
         } catch (\Exception $e) {
-            // Si es una peticiÃ³n AJAX, retornar JSON
+            // Si es una petición AJAX, retornar JSON
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -113,7 +113,7 @@ class CursoClassroomController extends Controller
             ], 403);
         }
 
-        // Limpiar url_externa si estÃ¡ vacÃ­a para evitar problemas de validaciÃ³n
+        // Limpiar url_externa si está vacía para evitar problemas de validación
         $datosValidacion = $request->all();
         if (empty($datosValidacion['url_externa'])) {
             unset($datosValidacion['url_externa']);
@@ -182,15 +182,15 @@ class CursoClassroomController extends Controller
                 $extension = strtolower($file->getClientOriginalExtension());
                 $mimeType = $file->getMimeType();
                 
-                // Verificar que la extensiÃ³n coincida con el MIME type
+                // Verificar que la extensión coincida con el MIME type
                 if (!isset($allowedMimes[$extension]) || $allowedMimes[$extension] !== $mimeType) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Tipo de archivo no vÃ¡lido o sospechoso'
+                        'message' => 'Tipo de archivo no válido o sospechoso'
                     ], 422);
                 }
                 
-                // Generar nombre Ãºnico para evitar conflictos
+                // Generar nombre único para evitar conflictos
                 $fileName = time() . '_' . Str::random(10) . '.' . $extension;
                 $path = $file->storeAs('cursos/' . $curso->id . '/materiales', $fileName, 'public');
                 
@@ -200,12 +200,12 @@ class CursoClassroomController extends Controller
                 $data['archivo_size'] = $file->getSize();
             }
 
-            // Establecer orden automÃ¡tico si no se especifica
+            // Establecer orden automático si no se especifica
             if (!isset($data['orden'])) {
                 $data['orden'] = CursoMaterial::where('curso_id', $curso->id)->max('orden') + 1;
             }
 
-            // Establecer como pÃºblico por defecto
+            // Establecer como público por defecto
             $data['es_publico'] = true;
 
             $material = CursoMaterial::create($data);
@@ -225,11 +225,11 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener material para ediciÃ³n
+     * Obtener material para edición
      */
     public function obtenerMaterial(Curso $curso, CursoMaterial $material): JsonResponse
     {
-        // Solo el instructor, admin u operador pueden obtener materiales para ediciÃ³n
+        // Solo el instructor, admin u operador pueden obtener materiales para edición
         $user = Auth::user();
         if (!$curso->esGestorODocente($user)) {
             return response()->json([
@@ -286,7 +286,7 @@ class CursoClassroomController extends Controller
         }
 
         try {
-            // Eliminar archivo fÃ­sico si existe
+            // Eliminar archivo físico si existe
             if ($material->archivo_path && file_exists(public_path('storage/' . $material->archivo_path))) {
                 unlink(public_path('storage/' . $material->archivo_path));
             }
@@ -346,7 +346,7 @@ class CursoClassroomController extends Controller
         }
 
         try {
-            // Actualizar datos bÃ¡sicos
+            // Actualizar datos básicos
             $material->titulo = $request->titulo;
             $material->descripcion = $request->descripcion;
             $material->tipo = $request->tipo;
@@ -363,7 +363,7 @@ class CursoClassroomController extends Controller
             // Actualizar prerrequisito
             if ($request->has('prerequisite_id')) {
                 $prerequisiteId = $request->prerequisite_id;
-                // Verificar que no se vincule a sÃ­ mismo
+                // Verificar que no se vincule a sí mismo
                 if ($prerequisiteId && $prerequisiteId != $material->id) {
                     $material->prerequisite_id = $prerequisiteId;
                 } else {
@@ -371,12 +371,12 @@ class CursoClassroomController extends Controller
                 }
             }
             
-            // Actualizar URL externa si se proporcionÃ³
+            // Actualizar URL externa si se proporcionó
             if ($request->has('url_externa') && !empty($request->url_externa)) {
                 $material->url_externa = $request->url_externa;
             }
 
-            // Manejar nuevo archivo si se subiÃ³
+            // Manejar nuevo archivo si se subió
             if ($request->hasFile('archivo')) {
                 $file = $request->file('archivo');
                 
@@ -404,11 +404,11 @@ class CursoClassroomController extends Controller
                 $extension = strtolower($file->getClientOriginalExtension());
                 $mimeType = $file->getMimeType();
                 
-                // Verificar que la extensiÃ³n coincida con el MIME type
+                // Verificar que la extensión coincida con el MIME type
                 if (!isset($allowedMimes[$extension]) || $allowedMimes[$extension] !== $mimeType) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Tipo de archivo no vÃ¡lido o sospechoso'
+                        'message' => 'Tipo de archivo no válido o sospechoso'
                     ], 422);
                 }
                 
@@ -417,7 +417,7 @@ class CursoClassroomController extends Controller
                     Storage::disk('public')->delete($material->archivo_path);
                 }
                 
-                // Generar nombre Ãºnico para evitar conflictos
+                // Generar nombre único para evitar conflictos
                 $fileName = time() . '_' . Str::random(10) . '.' . $extension;
                 $path = $file->storeAs('cursos/' . $curso->id . '/materiales', $fileName, 'public');
                 
@@ -444,7 +444,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaÃ±a de foros
+     * Mostrar la pestaña de foros
      */
     public function foros(Curso $curso)
     {
@@ -507,7 +507,7 @@ class CursoClassroomController extends Controller
             $post = CursoForo::create($data);
             $post->load('usuario');
 
-            // Registrar operaciÃ³n de publicaciÃ³n en foro
+            // Registrar operación de publicación en foro
             OperationLogger::logForumPost($post->id, $curso->titulo, 'post');
 
             return response()->json([
@@ -553,7 +553,7 @@ class CursoClassroomController extends Controller
 
             $respuesta->load('usuario');
 
-            // Registrar operaciÃ³n de respuesta en foro
+            // Registrar operación de respuesta en foro
             OperationLogger::logForumPost($respuesta->id, $curso->titulo, 'reply');
 
             return response()->json([
@@ -571,7 +571,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaÃ±a de actividades
+     * Mostrar la pestaña de actividades
      */
     public function actividades(Curso $curso)
     {
@@ -595,7 +595,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Mostrar la pestaÃ±a de participantes
+     * Mostrar la pestaña de participantes
      */
     public function participantes(Curso $curso)
     {
@@ -701,7 +701,7 @@ class CursoClassroomController extends Controller
                 if ($totalPuntos > 5.0) {
                     return response()->json([
                         'success' => false,
-                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede la nota mÃ¡xima de 5.0"
+                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede la nota máxima de 5.0"
                     ], 422);
                 }
             }
@@ -757,11 +757,11 @@ class CursoClassroomController extends Controller
             ], 400);
         }
 
-        // Verificar que la actividad estÃ© abierta
+        // Verificar que la actividad esté abierta
         if ($actividad->estado !== 'abierta') {
             return response()->json([
                 'success' => false,
-                'message' => 'La actividad no estÃ¡ disponible para entrega'
+                'message' => 'La actividad no está disponible para entrega'
             ], 400);
         }
 
@@ -836,27 +836,27 @@ class CursoClassroomController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar si el curso estÃ¡ activo
+        // Verificar si el curso está activo
         if ($curso->estado !== 'activo') {
             return response()->json([
                 'success' => false,
-                'message' => 'El curso no estÃ¡ disponible para inscripciones'
+                'message' => 'El curso no está disponible para inscripciones'
             ], 400);
         }
 
-        // Verificar lÃ­mite de estudiantes
+        // Verificar límite de estudiantes
         if ($curso->max_estudiantes && $curso->estudiantes_count >= $curso->max_estudiantes) {
             return response()->json([
                 'success' => false,
-                'message' => 'El curso ha alcanzado el lÃ­mite mÃ¡ximo de estudiantes'
+                'message' => 'El curso ha alcanzado el límite máximo de estudiantes'
             ], 400);
         }
 
-        // Verificar si ya estÃ¡ inscrito
+        // Verificar si ya está inscrito
         if ($curso->tieneEstudiante($user->id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ya estÃ¡s inscrito en este curso'
+                'message' => 'Ya estás inscrito en este curso'
             ], 400);
         }
 
@@ -928,36 +928,36 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Resolver quiz o evaluaciÃ³n
+     * Resolver quiz o evaluación
      */
     public function resolverQuiz(Request $request, Curso $curso, CursoActividad $actividad): JsonResponse
     {
         $this->verificarAccesoCurso($curso);
         $user = Auth::user();
 
-        // Verificar que sea un quiz o evaluaciÃ³n
+        // Verificar que sea un quiz o evaluación
         if (!in_array($actividad->tipo, ['quiz', 'evaluacion'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Esta actividad no es un quiz ni una evaluaciÃ³n'
+                'message' => 'Esta actividad no es un quiz ni una evaluación'
             ], 400);
         }
 
-        $tipoLabel = $actividad->tipo === 'quiz' ? 'quiz' : 'evaluaciÃ³n';
+        $tipoLabel = $actividad->tipo === 'quiz' ? 'quiz' : 'evaluación';
 
-        // Verificar que el quiz/evaluaciÃ³n estÃ© habilitado
+        // Verificar que el quiz/evaluación esté habilitado
         if (!$actividad->habilitado) {
             return response()->json([
                 'success' => false,
-                'message' => "Esta $tipoLabel no estÃ¡ habilitada"
+                'message' => "Esta $tipoLabel no está habilitada"
             ], 400);
         }
 
-        // Verificar que el quiz/evaluaciÃ³n estÃ© abierto
+        // Verificar que el quiz/evaluación esté abierto
         if ($actividad->estado !== 'abierta') {
             return response()->json([
                 'success' => false,
-                'message' => "Esta $tipoLabel no estÃ¡ disponible"
+                'message' => "Esta $tipoLabel no está disponible"
             ], 400);
         }
 
@@ -1143,7 +1143,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener datos de una actividad para ediciÃ³n (solo instructor)
+     * Obtener datos de una actividad para edición (solo instructor)
      */
     public function obtenerActividad(Curso $curso, CursoActividad $actividad): JsonResponse
     {
@@ -1169,7 +1169,7 @@ class CursoClassroomController extends Controller
             // Cargar relaciones necesarias
             $actividad->load('material');
             
-            // Preparar datos seguros para JSON (sin accessors problemÃ¡ticos)
+            // Preparar datos seguros para JSON (sin accessors problemáticos)
             $actividadData = [
                 'id' => $actividad->id,
                 'curso_id' => $actividad->curso_id,
@@ -1212,7 +1212,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener datos de quiz/evaluaciÃ³n para iniciar (sin accessors problemÃ¡ticos)
+     * Obtener datos de quiz/evaluación para iniciar (sin accessors problemáticos)
      */
     public function obtenerDatosQuiz(Curso $curso, CursoActividad $actividad): JsonResponse
     {
@@ -1246,7 +1246,7 @@ class CursoClassroomController extends Controller
     }
 
     /**
-     * Obtener materiales y actividades disponibles (para modales de ediciÃ³n)
+     * Obtener materiales y actividades disponibles (para modales de edición)
      */
     public function obtenerDatosDisponibles(Curso $curso): JsonResponse
     {
@@ -1299,7 +1299,7 @@ class CursoClassroomController extends Controller
         
         // Solo instructor, admin u operador pueden actualizar actividades
         if (!$curso->esGestorODocente($user)) {
-            \Log::warning('Usuario sin permisos intentÃ³ actualizar actividad');
+            \Log::warning('Usuario sin permisos intentó actualizar actividad');
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permisos para modificar actividades'
@@ -1326,7 +1326,7 @@ class CursoClassroomController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::warning('ValidaciÃ³n fallÃ³', ['errors' => $validator->errors()]);
+            \Log::warning('Validación falló', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -1352,7 +1352,7 @@ class CursoClassroomController extends Controller
                 $updateData['fecha_cierre'] = $request->fecha_cierre;
             }
 
-            // Solo agregar puntos y duraciÃ³n si fueron enviados
+            // Solo agregar puntos y duración si fueron enviados
             if ($request->has('puntos_maximos') && !empty($request->puntos_maximos)) {
                 $updateData['puntos_maximos'] = (int)$request->puntos_maximos;
             }
@@ -1366,7 +1366,7 @@ class CursoClassroomController extends Controller
                 $updateData['intentos_permitidos'] = (int)$request->intentos_permitidos;
             }
             
-            // Actualizar contenido_json para quiz/evaluaciÃ³n
+            // Actualizar contenido_json para quiz/evaluación
             if ($request->has('contenido_json') && $request->contenido_json) {
                 $contenidoJson = $request->contenido_json;
                 // Si viene como string JSON, decodificarlo
@@ -1383,7 +1383,7 @@ class CursoClassroomController extends Controller
                 if (is_string($prereqActivities)) {
                     $prereqActivities = json_decode($prereqActivities, true);
                 }
-                // Guardar como array (el modelo lo convertirÃ¡ a JSON automÃ¡ticamente por el cast)
+                // Guardar como array (el modelo lo convertirá a JSON automáticamente por el cast)
                 if (is_array($prereqActivities)) {
                     $updateData['prerequisite_activity_ids'] = $prereqActivities;
                 } else {
@@ -1401,7 +1401,7 @@ class CursoClassroomController extends Controller
                 $updateData['porcentaje_curso'] = (float)$request->porcentaje_curso;
             }
             
-            // Actualizar nota mÃ­nima de aprobaciÃ³n
+            // Actualizar nota mínima de aprobación
             if ($request->has('nota_minima_aprobacion')) {
                 $updateData['nota_minima_aprobacion'] = (float)$request->nota_minima_aprobacion;
             }
@@ -1542,7 +1542,7 @@ class CursoClassroomController extends Controller
             }
         });
 
-        // Calcular estadÃ­sticas
+        // Calcular estadísticas
         $entregasRealizadas = $entregasCompletas->where('estado', '!=', 'pendiente')->count();
         $entregasPendientes = $entregasCompletas->where('estado', 'pendiente')->count();
         $entregasATiempo = $entregasCompletas->where('estado', 'entregado')->count();
@@ -1551,7 +1551,7 @@ class CursoClassroomController extends Controller
         $calificaciones = $entregasCompletas->whereNotNull('calificacion')->pluck('calificacion');
         $promedioCalificacion = $calificaciones->count() > 0 ? $calificaciones->average() : 0;
 
-        // DistribuciÃ³n de calificaciones
+        // Distribución de calificaciones
         $distribucionCalificaciones = [
             $calificaciones->filter(fn($c) => $c >= 0 && $c < 61)->count(),
             $calificaciones->filter(fn($c) => $c >= 61 && $c <= 70)->count(),
@@ -1765,12 +1765,12 @@ class CursoClassroomController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'CalificaciÃ³n guardada exitosamente'
+                'message' => 'Calificación guardada exitosamente'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al guardar calificaciÃ³n: ' . $e->getMessage()
+                'message' => 'Error al guardar calificación: ' . $e->getMessage()
             ], 500);
         }
     }

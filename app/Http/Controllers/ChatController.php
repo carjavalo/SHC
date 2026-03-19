@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class ChatController extends Controller
 {
     /**
-     * Buscar usuarios segÃºn permisos del rol
+     * Buscar usuarios según permisos del rol
      */
     public function buscarUsuarios(Request $request): JsonResponse
     {
@@ -37,7 +37,7 @@ class ChatController extends Controller
             })
             ->where('id', '!=', $user->id) // Excluir al usuario actual
             ->where(function($q) use ($user) {
-                // Aplicar filtros segÃºn rol
+                // Aplicar filtros según rol
                 if ($user->role === 'Docente') {
                     // Docentes pueden ver: estudiantes de sus cursos + operadores
                     $cursosIds = Curso::where('instructor_id', $user->id)->pluck('id');
@@ -118,11 +118,11 @@ class ChatController extends Controller
 
         $user = Auth::user();
         
-        // Verificar si el estudiante estÃ¡ en Quiz/EvaluaciÃ³n activa
+        // Verificar si el estudiante está en Quiz/Evaluación activa
         if ($user->role === 'Estudiante' && $this->estudianteEnEvaluacion($user->id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'No puedes enviar mensajes mientras estÃ¡s en una evaluaciÃ³n activa'
+                'message' => 'No puedes enviar mensajes mientras estás en una evaluación activa'
             ], 403);
         }
 
@@ -237,7 +237,7 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
-        // Contar no leÃ­dos
+        // Contar no leídos
         $noLeidos = MensajeChat::where('destinatario_id', $user->id)
             ->where('leido', false)
             ->count();
@@ -246,7 +246,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Marcar mensaje como leÃ­do
+     * Marcar mensaje como leído
      */
     public function marcarLeido(Request $request, $mensajeId): JsonResponse
     {
@@ -269,7 +269,7 @@ class ChatController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Mensaje marcado como leÃ­do'
+                'message' => 'Mensaje marcado como leído'
             ]);
             
         } catch (\Exception $e) {
@@ -281,7 +281,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Verificar si un estudiante estÃ¡ en evaluaciÃ³n activa
+     * Verificar si un estudiante está en evaluación activa
      */
     private function estudianteEnEvaluacion(int $estudianteId): bool
     {
@@ -364,20 +364,20 @@ class ChatController extends Controller
             }
             
             // Verificar si es estudiante del mismo curso
-            $esCompaÃ±ero = DB::table('curso_estudiantes')
+            $esCompañero = DB::table('curso_estudiantes')
                 ->whereIn('curso_id', $cursosIds)
                 ->where('estudiante_id', $destinatarioId)
                 ->where('estado', 'activo')
                 ->exists();
                 
-            return $esCompaÃ±ero;
+            return $esCompañero;
         }
 
         return false;
     }
 
     /**
-     * Obtener destinatarios segÃºn el grupo seleccionado
+     * Obtener destinatarios según el grupo seleccionado
      */
     private function obtenerDestinatariosGrupo(User $remitente, string $grupo)
     {

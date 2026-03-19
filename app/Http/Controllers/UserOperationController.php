@@ -47,13 +47,13 @@ class UserOperationController extends Controller
             $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
                 $estudiantesIds = DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
-            // Incluir tambiÃ©n las propias operaciones del docente
+            // Incluir también las propias operaciones del docente
             $estudiantesIds[] = $currentUser->id;
             $query->whereIn('user_operations.user_id', $estudiantesIds);
         }
         // Admin y Super Admin ven todo (sin filtro adicional)
 
-        // Aplicar filtros de bÃºsqueda
+        // Aplicar filtros de búsqueda
         if ($request->filled('operation_type')) {
             $query->where('operation_type', $request->operation_type);
         }
@@ -95,7 +95,7 @@ class UserOperationController extends Controller
                     'view' => '<span class="badge badge-secondary"><i class="fas fa-eye"></i> Ver</span>',
                     'login' => '<span class="badge badge-primary"><i class="fas fa-sign-in-alt"></i> Login</span>',
                     'logout' => '<span class="badge badge-warning"><i class="fas fa-sign-out-alt"></i> Logout</span>',
-                    'enroll' => '<span class="badge badge-success"><i class="fas fa-user-plus"></i> InscripciÃ³n</span>',
+                    'enroll' => '<span class="badge badge-success"><i class="fas fa-user-plus"></i> Inscripción</span>',
                     'submit' => '<span class="badge badge-info"><i class="fas fa-upload"></i> Entrega</span>',
                     'grade' => '<span class="badge badge-primary"><i class="fas fa-star"></i> Calificar</span>',
                     'access' => '<span class="badge badge-info"><i class="fas fa-door-open"></i> Acceso</span>',
@@ -167,21 +167,21 @@ class UserOperationController extends Controller
         $currentUser = auth()->user();
         $userRole = $currentUser->role ?? null;
         
-        // Crear query base segÃºn rol
+        // Crear query base según rol
         $baseQuery = UserOperation::query();
         
         if ($userRole === 'Estudiante') {
-            // Estudiantes solo ven sus propias estadÃ­sticas
+            // Estudiantes solo ven sus propias estadísticas
             $baseQuery->where('user_id', $currentUser->id);
         } elseif ($userRole === 'Docente') {
-            // Docentes ven estadÃ­sticas de estudiantes en sus cursos
+            // Docentes ven estadísticas de estudiantes en sus cursos
             $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
                 $estudiantesIds = DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
             $estudiantesIds[] = $currentUser->id;
             $baseQuery->whereIn('user_id', $estudiantesIds);
         }
-        // Admin y Super Admin ven todas las estadÃ­sticas
+        // Admin y Super Admin ven todas las estadísticas
 
         $stats = [
             'total_operations' => (clone $baseQuery)->count(),

@@ -46,7 +46,7 @@ class UserLoginController extends Controller
             $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
                 $estudiantesIds = \DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
-            // Incluir tambiÃ©n los propios ingresos del docente
+            // Incluir también los propios ingresos del docente
             $estudiantesIds[] = $currentUser->id;
             $query->whereIn('user_logins.user_id', $estudiantesIds);
         }
@@ -99,14 +99,14 @@ class UserLoginController extends Controller
             ->addColumn('actions', function ($login) {
                 $actions = '<div class="btn-group" role="group">';
                 
-                // BotÃ³n de detalles
+                // Botón de detalles
                 $actions .= '<button type="button" class="btn btn-sm btn-info" onclick="showDetails(' . $login->id . ')" title="Ver detalles">
                     <i class="fas fa-eye"></i>
                 </button>';
                 
-                // BotÃ³n de reenviar verificaciÃ³n si es necesario
+                // Botón de reenviar verificación si es necesario
                 if ($login->email_verified === 'unverified' && $login->user) {
-                    $actions .= '<button type="button" class="btn btn-sm btn-warning ml-1" onclick="resendVerification(' . $login->user->id . ')" title="Reenviar verificaciÃ³n">
+                    $actions .= '<button type="button" class="btn btn-sm btn-warning ml-1" onclick="resendVerification(' . $login->user->id . ')" title="Reenviar verificación">
                         <i class="fas fa-envelope"></i>
                     </button>';
                 }
@@ -160,12 +160,12 @@ class UserLoginController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Email de verificaciÃ³n reenviado correctamente.'
+                'message' => 'Email de verificación reenviado correctamente.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al reenviar el email de verificaciÃ³n: ' . $e->getMessage()
+                'message' => 'Error al reenviar el email de verificación: ' . $e->getMessage()
             ]);
         }
     }
@@ -182,21 +182,21 @@ class UserLoginController extends Controller
         $currentUser = auth()->user();
         $userRole = $currentUser->role ?? null;
         
-        // Crear query base segÃºn rol
+        // Crear query base según rol
         $baseQuery = UserLogin::query();
         
         if ($userRole === 'Estudiante') {
-            // Estudiantes solo ven sus propias estadÃ­sticas
+            // Estudiantes solo ven sus propias estadísticas
             $baseQuery->where('user_id', $currentUser->id);
         } elseif ($userRole === 'Docente') {
-            // Docentes ven estadÃ­sticas de estudiantes en sus cursos
+            // Docentes ven estadísticas de estudiantes en sus cursos
             $cursosDocente = \App\Models\CursoAsignacion::where('docente_id', $currentUser->id)->where('estado', 'activo')->pluck('curso_id');
                 $estudiantesIds = \DB::table('curso_estudiantes')->whereIn('curso_id', $cursosDocente)->where('estado', 'activo')->pluck('estudiante_id')->toArray();
             
             $estudiantesIds[] = $currentUser->id;
             $baseQuery->whereIn('user_id', $estudiantesIds);
         }
-        // Admin y Super Admin ven todas las estadÃ­sticas
+        // Admin y Super Admin ven todas las estadísticas
 
         $stats = [
             'total_logins' => (clone $baseQuery)->count(),
