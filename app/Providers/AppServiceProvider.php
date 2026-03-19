@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
             'categorias.view', 'categorias.create', 'categorias.edit', 'categorias.delete',
             'areas.view', 'areas.create', 'areas.edit', 'areas.delete',
             'publicidad.view', 'publicidad.create', 'publicidad.edit', 'publicidad.delete', 'publicidad.banner',
+            'reportes.view', 'reportes.edit', 'reportes.delete', 'reportes.print', 'reportes.export',
         ];
 
         try {

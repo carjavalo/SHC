@@ -478,7 +478,16 @@ return [
         [
             'text'    => 'Consultas',
             'icon'    => 'fas fa-fw fa-search',
-            'url'     => '#',
+            'can'     => 'reportes.view',
+            'submenu' => [
+                [
+                    'text' => 'Reportes',
+                    'url'  => 'consultas/reportes',
+                    'icon' => 'fas fa-fw fa-file-alt',
+                    'active' => ['consultas/reportes', 'consultas/reportes/*'],
+                    'can' => 'reportes.view',
+                ],
+            ],
         ],
     ],
 

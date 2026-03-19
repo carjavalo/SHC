@@ -239,6 +239,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/guardar-categorias', [PublicidadProductoController::class, 'guardarCategorias'])->name('guardar-categorias')->middleware('check.permission:publicidad.edit');
         });
     });
+
+    // Rutas de Consultas
+    Route::prefix('consultas')->name('consultas.')->group(function () {
+        Route::prefix('reportes')->name('reportes.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ReporteEstudiantesController::class, 'index'])->middleware('check.permission:reportes.view')->name('index');
+            Route::get('/data', [\App\Http\Controllers\ReporteEstudiantesController::class, 'getData'])->middleware('check.permission:reportes.view')->name('data');
+            Route::get('/{id}', [\App\Http\Controllers\ReporteEstudiantesController::class, 'show'])->middleware('check.permission:reportes.view')->name('show');
+            Route::get('/{id}/edit', [\App\Http\Controllers\ReporteEstudiantesController::class, 'edit'])->middleware('check.permission:reportes.edit')->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\ReporteEstudiantesController::class, 'update'])->middleware('check.permission:reportes.edit')->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\ReporteEstudiantesController::class, 'destroy'])->middleware('check.permission:reportes.delete')->name('destroy');
+        });
+    });
+
 });
 
 require __DIR__.'/auth.php';
