@@ -87,13 +87,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas de capacitaciones
     Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
-        // Rutas de categorías
-        Route::get('categorias/data', [CategoriaController::class, 'getData'])->name('categorias.data');
-        Route::resource('categorias', CategoriaController::class);
+        // Rutas de categorías (con permisos individuales)
+        Route::get('categorias/data', [CategoriaController::class, 'getData'])->name('categorias.data')->middleware('check.permission:categorias.view');
+        Route::get('categorias', [CategoriaController::class, 'index'])->name('categorias.index')->middleware('check.permission:categorias.view');
+        Route::get('categorias/create', [CategoriaController::class, 'create'])->name('categorias.create')->middleware('check.permission:categorias.create');
+        Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store')->middleware('check.permission:categorias.create');
+        Route::get('categorias/{categoria}', [CategoriaController::class, 'show'])->name('categorias.show')->middleware('check.permission:categorias.view');
+        Route::get('categorias/{categoria}/edit', [CategoriaController::class, 'edit'])->name('categorias.edit')->middleware('check.permission:categorias.edit');
+        Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update')->middleware('check.permission:categorias.edit');
+        Route::patch('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update.patch')->middleware('check.permission:categorias.edit');
+        Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy')->middleware('check.permission:categorias.delete');
 
-        // Rutas de áreas
-        Route::get('areas/data', [AreaController::class, 'getData'])->name('areas.data');
-        Route::resource('areas', AreaController::class);
+        // Rutas de áreas (con permisos individuales)
+        Route::get('areas/data', [AreaController::class, 'getData'])->name('areas.data')->middleware('check.permission:areas.view');
+        Route::get('areas', [AreaController::class, 'index'])->name('areas.index')->middleware('check.permission:areas.view');
+        Route::get('areas/create', [AreaController::class, 'create'])->name('areas.create')->middleware('check.permission:areas.create');
+        Route::post('areas', [AreaController::class, 'store'])->name('areas.store')->middleware('check.permission:areas.create');
+        Route::get('areas/{area}', [AreaController::class, 'show'])->name('areas.show')->middleware('check.permission:areas.view');
+        Route::get('areas/{area}/edit', [AreaController::class, 'edit'])->name('areas.edit')->middleware('check.permission:areas.edit');
+        Route::put('areas/{area}', [AreaController::class, 'update'])->name('areas.update')->middleware('check.permission:areas.edit');
+        Route::patch('areas/{area}', [AreaController::class, 'update'])->name('areas.update.patch')->middleware('check.permission:areas.edit');
+        Route::delete('areas/{area}', [AreaController::class, 'destroy'])->name('areas.destroy')->middleware('check.permission:areas.delete');
 
         // Rutas de cursos (con permisos individuales)
         Route::get('cursos/data', [CursoController::class, 'getData'])->name('cursos.data')->middleware('check.permission:cursos.view');

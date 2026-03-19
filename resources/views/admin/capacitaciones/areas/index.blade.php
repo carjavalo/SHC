@@ -64,9 +64,11 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-table"></i> Lista de Áreas</h3>
             <div class="card-tools">
+                @can('areas.create')
                 <button type="button" class="btn btn-success" id="btn-nueva-area">
                     <i class="fas fa-plus"></i> Nueva Área
                 </button>
+                @endcan
             </div>
         </div>
         <div class="card-body">

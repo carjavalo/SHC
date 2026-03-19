@@ -50,9 +50,11 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-table"></i> Lista de Categorías</h3>
             <div class="card-tools">
+                @can('categorias.create')
                 <button type="button" class="btn btn-success" id="btn-nueva-categoria">
                     <i class="fas fa-plus"></i> Nueva Categoría
                 </button>
+                @endcan
             </div>
         </div>
         <div class="card-body">

@@ -52,6 +52,8 @@ class PermissionController extends Controller
             'Académico',
             'Capacitaciones',
             'Gestión de Cursos',
+            'Gestión de Categorías',
+            'Gestión de Áreas',
             'Componentes',
             'Configuración',
             'Comunicación',

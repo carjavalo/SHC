@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Gate;
 
 class AreaController extends Controller
 {
@@ -16,6 +17,7 @@ class AreaController extends Controller
      */
     public function index()
     {
+        Gate::authorize('areas.view');
         $categorias = Categoria::orderBy('descripcion')->get();
         return view('admin.capacitaciones.areas.index', compact('categorias'));
     }
@@ -46,19 +48,22 @@ class AreaController extends Controller
                 return $area->created_at->format('d/m/Y H:i');
             })
             ->addColumn('actions', function ($area) {
-                return '
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-info btn-sm" onclick="viewArea(' . $area->id . ')" title="Ver">
+                $html = '<div class="btn-group" role="group">';
+                $html .= '<button type="button" class="btn btn-info btn-sm" onclick="viewArea(' . $area->id . ')" title="Ver">
                             <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" class="btn btn-warning btn-sm" onclick="editArea(' . $area->id . ')" title="Editar">
+                        </button>';
+                if (Gate::allows('areas.edit')) {
+                    $html .= '<button type="button" class="btn btn-warning btn-sm" onclick="editArea(' . $area->id . ')" title="Editar">
                             <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteArea(' . $area->id . ')" title="Eliminar">
+                        </button>';
+                }
+                if (Gate::allows('areas.delete')) {
+                    $html .= '<button type="button" class="btn btn-danger btn-sm" onclick="deleteArea(' . $area->id . ')" title="Eliminar">
                             <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                ';
+                        </button>';
+                }
+                $html .= '</div>';
+                return $html;
             })
             ->rawColumns(['actions'])
             ->make(true);
@@ -69,6 +74,7 @@ class AreaController extends Controller
      */
     public function create()
     {
+        Gate::authorize('areas.create');
         $categorias = Categoria::orderBy('descripcion')->get();
         return response()->json(['categorias' => $categorias]);
     }
@@ -78,6 +84,7 @@ class AreaController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('areas.create');
         $validator = Validator::make($request->all(), [
             'descripcion' => 'required|string|max:100',
             'cod_categoria' => 'required|exists:categorias,id',
@@ -181,6 +188,7 @@ class AreaController extends Controller
      */
     public function edit(Area $area)
     {
+        Gate::authorize('areas.edit');
         $categorias = Categoria::orderBy('descripcion')->get();
         
         return response()->json([
@@ -196,6 +204,7 @@ class AreaController extends Controller
      */
     public function update(Request $request, Area $area)
     {
+        Gate::authorize('areas.edit');
         $validator = Validator::make($request->all(), [
             'descripcion' => 'required|string|max:100',
             'cod_categoria' => 'required|exists:categorias,id',
@@ -276,6 +285,7 @@ class AreaController extends Controller
      */
     public function destroy(Area $area)
     {
+        Gate::authorize('areas.delete');
         try {
             $area->delete();
 

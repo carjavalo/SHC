@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Gate;
 
 class CategoriaController extends Controller
 {
@@ -15,6 +16,7 @@ class CategoriaController extends Controller
      */
     public function index()
     {
+        Gate::authorize('categorias.view');
         return view('admin.capacitaciones.categorias.index');
     }
 
@@ -42,15 +44,19 @@ class CategoriaController extends Controller
                     <i class="fas fa-eye"></i>
                 </button>';
 
-                // Botón de editar
-                $actions .= '<button type="button" class="btn btn-sm btn-warning ml-1" onclick="editCategoria(' . $categoria->id . ')" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>';
+                // Botón de editar (solo si tiene permiso)
+                if (Gate::allows('categorias.edit')) {
+                    $actions .= '<button type="button" class="btn btn-sm btn-warning ml-1" onclick="editCategoria(' . $categoria->id . ')" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>';
+                }
 
-                // Botón de eliminar
-                $actions .= '<button type="button" class="btn btn-sm btn-danger ml-1" onclick="deleteCategoria(' . $categoria->id . ')" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                </button>';
+                // Botón de eliminar (solo si tiene permiso)
+                if (Gate::allows('categorias.delete')) {
+                    $actions .= '<button type="button" class="btn btn-sm btn-danger ml-1" onclick="deleteCategoria(' . $categoria->id . ')" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>';
+                }
 
                 $actions .= '</div>';
                 return $actions;
@@ -64,6 +70,7 @@ class CategoriaController extends Controller
      */
     public function create()
     {
+        Gate::authorize('categorias.create');
         return view('admin.capacitaciones.categorias.create');
     }
 
@@ -72,6 +79,7 @@ class CategoriaController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('categorias.create');
         $validator = Validator::make($request->all(), [
             'descripcion' => 'required|string|max:100|unique:categorias,descripcion',
         ], [
@@ -137,6 +145,7 @@ class CategoriaController extends Controller
      */
     public function edit(Categoria $categoria)
     {
+        Gate::authorize('categorias.edit');
         if (request()->ajax()) {
             return response()->json($categoria);
         }
@@ -148,6 +157,7 @@ class CategoriaController extends Controller
      */
     public function update(Request $request, Categoria $categoria)
     {
+        Gate::authorize('categorias.edit');
         $validator = Validator::make($request->all(), [
             'descripcion' => 'required|string|max:100|unique:categorias,descripcion,' . $categoria->id,
         ], [
@@ -200,6 +210,7 @@ class CategoriaController extends Controller
      */
     public function destroy(Categoria $categoria)
     {
+        Gate::authorize('categorias.delete');
         try {
             $categoria->delete();
 
