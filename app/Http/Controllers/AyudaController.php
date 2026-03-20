@@ -11,6 +11,50 @@ use Illuminate\Database\Schema\Blueprint;
 class AyudaController extends Controller
 {
     /**
+     * Asegura que los permisos de Ayuda existan en BD.
+     * Se ejecuta una sola vez (auto-provisioning para producción/cPanel).
+     */
+    private function ensurePermissionsExist()
+    {
+        try {
+            if (!Schema::hasTable('permissions')) return;
+
+            $required = [
+                ['name' => 'ayuda.view',   'display_name' => 'Ver Banners',      'group' => 'Ayuda'],
+                ['name' => 'ayuda.create', 'display_name' => 'Crear Banner',     'group' => 'Ayuda'],
+                ['name' => 'ayuda.edit',   'display_name' => 'Editar Banner',    'group' => 'Ayuda'],
+                ['name' => 'ayuda.delete', 'display_name' => 'Eliminar Banner',  'group' => 'Ayuda'],
+            ];
+
+            $existing = \DB::table('permissions')->whereIn('name', array_column($required, 'name'))->pluck('name')->toArray();
+
+            $toInsert = [];
+            $now = now();
+            foreach ($required as $p) {
+                if (!in_array($p['name'], $existing)) {
+                    $toInsert[] = array_merge($p, ['created_at' => $now, 'updated_at' => $now]);
+                }
+            }
+
+            if (!empty($toInsert)) {
+                \DB::table('permissions')->insert($toInsert);
+
+                // Asignar automáticamente al Super Admin
+                if (Schema::hasTable('role_permissions')) {
+                    $newIds = \DB::table('permissions')->whereIn('name', array_column($toInsert, 'name'))->pluck('id');
+                    $saInserts = [];
+                    foreach ($newIds as $id) {
+                        $saInserts[] = ['role_name' => 'Super Admin', 'permission_id' => $id, 'created_at' => $now, 'updated_at' => $now];
+                    }
+                    \DB::table('role_permissions')->insert($saInserts);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Silenciar — no bloquear la página si falla
+        }
+    }
+
+    /**
      * Asegura que la tabla welcome_banners exista, creándola si no.
      */
     private function ensureTableExists()
@@ -48,6 +92,7 @@ class AyudaController extends Controller
      */
     public function index()
     {
+        $this->ensurePermissionsExist();
         $this->ensureTableExists();
         $banners = WelcomeBanner::orderBy('orden')->get();
         return view('admin.configuracion.ayuda.index', compact('banners'));

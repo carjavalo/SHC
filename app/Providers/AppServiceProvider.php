@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
             'categorias.view', 'categorias.create', 'categorias.edit', 'categorias.delete',
             'areas.view', 'areas.create', 'areas.edit', 'areas.delete',
             'publicidad.view', 'publicidad.create', 'publicidad.edit', 'publicidad.delete', 'publicidad.banner',
+            'ayuda.view', 'ayuda.create', 'ayuda.edit', 'ayuda.delete',
             'reportes.view', 'reportes.edit', 'reportes.delete', 'reportes.print', 'reportes.export',
         ];
 
@@ -80,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
                 $configPerms = ['users.view', 'config.categorias', 'config.areas', 'config.cursos',
                                 'config.servicios', 'config.vinculacion', 'config.sedes',
                                 'config.asignacion', 'config.certificados', 'config.publicidad',
+                                'ayuda.view', 'ayuda.create', 'ayuda.edit', 'ayuda.delete',
                                 'roles.manage', 'permissions.manage'];
                 Gate::define('menu.configuracion', function ($user) use ($rolePermissions, $configPerms) {
                     if ($user->role === 'Super Admin') return true;

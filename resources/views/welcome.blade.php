@@ -16,44 +16,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* ====== DESIGN TOKENS ====== */
+        :root {
+            --space-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+            --space-sm: clamp(0.5rem, 1vw, 0.75rem);
+            --space-md: clamp(0.75rem, 1.5vw, 1.25rem);
+            --space-lg: clamp(1rem, 2vw, 1.5rem);
+            --space-xl: clamp(1.25rem, 3vw, 2rem);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --color-primary: #2c4370;
+            --color-primary-dark: #1e2f4d;
+        }
+
         body {
             font-family: 'Figtree', sans-serif;
             background: url('{{ asset('images/huv.jpg') }}') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
+            height: 100dvh;
             margin: 0;
             color: #fff;
         }
-        
+
         .overlay {
             background-color: rgba(0, 0, 0, 0.6);
             min-height: 100vh;
+            min-height: 100dvh;
             width: 100%;
             position: fixed;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ====== BANNER SUPERIOR ====== */
         .welcome-banner {
             width: 100%;
-            padding: 18px 30px;
+            padding: clamp(10px, 2vw, 18px) clamp(15px, 3vw, 30px);
             text-align: center;
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
             position: relative;
             z-index: 10;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: background-color 0.6s ease;
+            flex-shrink: 0;
         }
         .welcome-banner h2 {
             margin: 0;
             font-weight: 700;
-            font-size: 1.5rem;
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
             text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
             animation: fadeInDown 1s ease;
         }
         .welcome-banner p {
             margin: 5px 0 0;
-            font-size: 1rem;
+            font-size: clamp(0.8rem, 1.8vw, 1rem);
             opacity: 0.9;
             animation: fadeInDown 1.2s ease;
         }
@@ -63,23 +81,24 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ====== CONTENEDOR PRINCIPAL ====== */
+        /* ====== CONTENEDOR PRINCIPAL (Grid · mobile-first) ====== */
         .main-content {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end; /* formulario pegado a la derecha como estaba */
-            padding: 1.5%;
-            gap: 25px;
-            min-height: calc(100vh - 80px);
-            overflow-y: auto;
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            align-items: start;
+            justify-items: center;
+            gap: var(--space-lg);
+            padding: var(--space-md);
+            min-height: 0;
         }
 
         /* ====== AREA MEDIA (VIDEO/IMAGEN) ====== */
         .media-area {
-            flex: 1;
-            min-height: 75vh;
+            width: 100%;
+            aspect-ratio: 16 / 9;
             background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
+            border-radius: var(--radius-md);
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -92,35 +111,31 @@
         .media-area video {
             width: 100%;
             height: 100%;
-            min-height: 75vh;
             border: none;
-            border-radius: 12px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
         }
         .media-area img {
             width: 100%;
             height: 100%;
-            min-height: 75vh;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: var(--radius-md);
         }
         .media-placeholder {
             color: rgba(255,255,255,0.3);
-            font-size: 1.5rem;
+            font-size: clamp(1rem, 2vw, 1.5rem);
             text-align: center;
         }
         .media-placeholder i {
-            font-size: 4rem;
+            font-size: clamp(2.5rem, 5vw, 4rem);
             display: block;
-            margin-bottom: 15px;
+            margin-bottom: var(--space-sm);
         }
 
         /* ====== CAROUSEL AUTO-ROTACIÓN ====== */
         .carousel-slide {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             opacity: 0;
             transition: opacity 0.8s ease-in-out;
             display: flex;
@@ -135,16 +150,16 @@
         }
         .carousel-indicators-custom {
             position: absolute;
-            bottom: 15px;
+            bottom: var(--space-sm);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 8px;
+            gap: clamp(5px, 1vw, 8px);
             z-index: 5;
         }
         .carousel-dot {
-            width: 12px;
-            height: 12px;
+            width: clamp(8px, 1.2vw, 12px);
+            height: clamp(8px, 1.2vw, 12px);
             border-radius: 50%;
             background: rgba(255,255,255,0.4);
             cursor: pointer;
@@ -160,241 +175,241 @@
             background: rgba(255,255,255,0.7);
         }
 
+        /* ====== AUTH CARD ====== */
         .auth-card {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
             overflow: hidden;
             width: 100%;
-            max-width: 480px;
-            flex-shrink: 0;
+            max-width: 520px;
         }
 
-        /* Estilos legacy (ocultos) */
-        .carousel-wrapper { display: none !important; }
-        
         .card-left {
-            background: linear-gradient(135deg, #2c4370 0%, #1e2f4d 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
             color: white;
-            padding: 18px;
+            padding: var(--space-lg);
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .card-right {
-            padding: 15px 18px;
+            padding: var(--space-md) var(--space-lg);
             color: #333;
         }
-        
+
         .logo {
             max-width: 120px;
-            margin-bottom: 20px;
+            margin-bottom: var(--space-lg);
         }
-        
+
         .nav-tabs {
             border-bottom: 2px solid #dee2e6;
             display: flex;
             flex-wrap: nowrap;
         }
-        
+
         .nav-tabs .nav-link {
             border: none;
             color: #6c757d;
             font-weight: 500;
-            padding: 8px 14px;
-            font-size: 0.95rem;
+            padding: var(--space-xs) var(--space-md);
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
             white-space: nowrap;
         }
-        
+
         .nav-tabs .nav-link.active {
-            color: #2c4370;
+            color: var(--color-primary);
             background-color: transparent;
-            border-bottom: 3px solid #2c4370;
+            border-bottom: 3px solid var(--color-primary);
         }
-        
+
         .tab-content {
-            padding-top: 10px;
+            padding-top: var(--space-sm);
         }
-        
+
         .form-control {
             border-radius: 5px;
             padding: 6px 10px;
             margin-bottom: 8px;
             font-size: 0.9rem;
         }
-        
+
         .form-label {
             font-size: 0.9rem;
             margin-bottom: 3px;
         }
-        
+
         .btn-primary {
             border-radius: 5px;
             padding: 8px 12px;
             font-weight: 500;
             font-size: 0.95rem;
-            background-color: #2c4370 !important;
-            border-color: #2c4370 !important;
+            background-color: var(--color-primary) !important;
+            border-color: var(--color-primary) !important;
         }
-        
+
         .btn-primary:hover {
-            background-color: #1e2f4d !important;
-            border-color: #1e2f4d !important;
+            background-color: var(--color-primary-dark) !important;
+            border-color: var(--color-primary-dark) !important;
         }
-        
+
         .form-control:focus {
-            border-color: #2c4370;
+            border-color: var(--color-primary);
             box-shadow: 0 0 0 0.2rem rgba(44, 67, 112, 0.25);
         }
-        
-        a {
-            color: #2c4370;
-        }
-        
-        a:hover {
-            color: #1e2f4d;
-        }
-        
+
+        a { color: var(--color-primary); }
+        a:hover { color: var(--color-primary-dark); }
+
         .hospital-info h1 {
-            font-size: 1.4rem;
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: var(--space-sm);
         }
-        
+
         .hospital-info p {
             font-size: 0.9rem;
-            margin-bottom: 12px;
+            margin-bottom: var(--space-sm);
         }
-        
+
         .features {
-            margin-top: 12px;
+            margin-top: var(--space-sm);
         }
-        
+
         .feature-item {
-            margin-bottom: 8px;
+            margin-bottom: var(--space-xs);
             font-size: 0.85rem;
         }
-        
+
         .feature-item i {
             margin-right: 8px;
             color: #fff;
         }
-        
+
         .card-right h3 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+            margin-bottom: var(--space-sm);
         }
-        
-        .mb-3 {
-            margin-bottom: 8px !important;
-        }
-        
-        .form-check {
-            margin-bottom: 8px !important;
-        }
-        
-        .row {
-            margin-bottom: 0 !important;
-        }
-        
-        .row .col-md-6 .mb-3 {
-            margin-bottom: 8px !important;
-        }
-        
-        /* Hacer el formulario de registro más compacto */
-        #register .form-control {
-            padding: 5px 10px;
-            margin-bottom: 6px;
-        }
-        
-        #register .form-label {
-            margin-bottom: 2px;
-        }
-        
-        #register .mb-3 {
-            margin-bottom: 6px !important;
-        }
-        
-        #register h3 {
-            margin-bottom: 8px !important;
-        }
-        
-        #register .row {
-            margin-bottom: 0 !important;
-        }
-        
-        #register .d-grid {
-            margin-top: 8px;
-        }
-        
-        /* Alinear correctamente los campos en filas */
-        #register .row.g-2 {
-            margin-left: -4px;
-            margin-right: -4px;
-        }
-        
-        #register .row.g-2 .col-6 {
-            padding-left: 4px;
-            padding-right: 4px;
-        }
-        
-        @media (max-width: 992px) {
+
+        .mb-3 { margin-bottom: 8px !important; }
+        .form-check { margin-bottom: 8px !important; }
+        .row { margin-bottom: 0 !important; }
+        .row .col-md-6 .mb-3 { margin-bottom: 8px !important; }
+
+        /* Formulario de registro compacto */
+        #register .form-control { padding: 5px 10px; margin-bottom: 6px; }
+        #register .form-label { margin-bottom: 2px; }
+        #register .mb-3 { margin-bottom: 6px !important; }
+        #register h3 { margin-bottom: 8px !important; }
+        #register .row { margin-bottom: 0 !important; }
+        #register .d-grid { margin-top: 8px; }
+        #register .row.g-2 { margin-left: -4px; margin-right: -4px; }
+        #register .row.g-2 .col-6 { padding-left: 4px; padding-right: 4px; }
+
+        /* ====================================================
+           RESPONSIVE — mobile-first base ➜ progressive
+           Principle 2: rearrange with purpose at each tier
+           ==================================================== */
+
+        /* ---- ≥ 768px  Tablet landscape ---- */
+        @media (min-width: 768px) {
             .main-content {
-                flex-direction: column;
                 align-items: center;
-                justify-content: flex-start;
-                padding: 15px;
+                padding: var(--space-lg);
             }
-
             .media-area {
-                width: 100%;
-                min-height: 280px;
-            }
-
-            .auth-card {
-                max-width: 90%;
+                max-height: 50vh;
             }
         }
 
-        @media (max-width: 768px) {
-            .welcome-banner h2 {
-                font-size: 1.2rem;
-            }
-            .welcome-banner p {
-                font-size: 0.85rem;
+        /* ---- ≥ 993px  Laptop — two-column side-by-side ---- */
+        @media (min-width: 993px) {
+            .main-content {
+                grid-template-columns: 1fr clamp(380px, 35vw, 480px);
+                align-items: stretch;
+                padding: var(--space-lg);
             }
             .media-area {
-                min-height: 220px;
+                aspect-ratio: auto;
+                max-height: none;
+                align-self: stretch;
             }
-            .media-area iframe,
-            .media-area video,
-            .media-area img {
-                min-height: 220px;
+            .auth-card {
+                max-width: none;
+                align-self: center;
             }
+        }
+
+        /* ---- ≥ 1200px Desktop — spacious ---- */
+        @media (min-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 480px;
+                gap: var(--space-xl);
+                padding: var(--space-xl);
+            }
+        }
+
+        /* ---- ≤ 767px  Phone / small tablet — stack + reflow ---- */
+        @media (max-width: 767px) {
             .auth-card {
                 max-width: 100%;
+                border-radius: var(--radius-sm);
+            }
+            .card-left {
+                padding: var(--space-md);
+            }
+            .hospital-info h1 {
+                font-size: 1.1rem;
+            }
+            .features {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--space-xs) var(--space-md);
+            }
+            .feature-item {
+                margin-bottom: 0;
             }
         }
 
-        @media (max-width: 480px) {
+        /* ---- ≤ 575px  Phone portrait — auth form is king ---- */
+        @media (max-width: 575px) {
+            .main-content {
+                gap: var(--space-sm);
+                padding: var(--space-sm);
+            }
             .media-area {
-                min-height: 180px;
+                aspect-ratio: 2 / 1;
+                border-radius: var(--radius-sm);
             }
             .media-area iframe,
             .media-area video,
             .media-area img {
-                min-height: 180px;
+                border-radius: var(--radius-sm);
             }
-            .welcome-banner {
-                padding: 12px 15px;
+            .card-left {
+                padding: var(--space-sm) var(--space-md);
             }
-            .welcome-banner h2 {
+            .hospital-info h1 {
                 font-size: 1rem;
+                margin-bottom: 4px;
             }
-            .main-content {
-                gap: 12px;
-                padding: 10px;
+            .hospital-info p {
+                margin-bottom: 4px;
+                font-size: 0.85rem;
+            }
+            .features {
+                margin-top: 4px;
+            }
+            .feature-item {
+                font-size: 0.8rem;
+            }
+            .card-right {
+                padding: var(--space-sm) var(--space-md);
+            }
+            .card-right h3 {
+                font-size: 1.05rem;
             }
         }
     </style>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-03-2026 a las 16:38:34
+-- Tiempo de generación: 20-03-2026 a las 17:46:42
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -1081,10 +1081,10 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('2KmpfKZNHWQX0cdcqLjvpn0UVEDFUuKGApinws4w', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZWpRbTZCT2RpT1J3clNZeU9sNGc1Y2t1ZzZvR2JlUWc1MXJpa1hHbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODg6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMS9tZWRpYS93ZWxjb21lX2Jhbm5lcnMvZlVqa2xTM0FjMEU4V01HNXlDbTdsS2dmbENzTnBhZnR5SVliZVFxUC5tcDQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774017743),
-('6xlugvPPIDRXt3k36BUjJvULs6py2X5NQOl20m2g', NULL, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiMUFqT1BWNzlVZElTSjl4ajh4Z0tJend4WVNBSngwZEZ4VkhUYTc3YiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEiO319', 1774013253),
-('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774021095),
-('UlCSVB4PdIlYVHmzzNzKBbzD8n0gqFTQOxHwgBPE', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiQXBtcGxlcU9qRXNuZGNYWFhINndKSzlzY2pYUVpVaXdjTVFlUGNGNCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvY29uZmlndXJhY2lvbi9heXVkYSI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1774015018);
+('0jAhMeUK0iZz2mndTEWiaQN76nOmaoQV8lMKiRKC', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicHlWNjJ0djZTV3VLcjNrOEdYWWg0TzNsYVFYZWZrQnN5SEMxTnFCbiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6OTI6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvbWVkaWEvd2VsY29tZV9iYW5uZXJzL01RTDFVbjgzcjQ0ME5xQU1qdzVLeUZUZmsxd2FMZ2R3Y3BQR1dmejAubXA0Ijt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1774022750),
+('2KmpfKZNHWQX0cdcqLjvpn0UVEDFUuKGApinws4w', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZWpRbTZCT2RpT1J3clNZeU9sNGc1Y2t1ZzZvR2JlUWc1MXJpa1hHbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODg6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMS9tZWRpYS93ZWxjb21lX2Jhbm5lcnMvZlVqa2xTM0FjMEU4V01HNXlDbTdsS2dmbENzTnBhZnR5SVliZVFxUC5tcDQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774023538),
+('qFNwYoV0tQ3jqKXMazoWqvuxZbS3e6mgacBkx9QV', NULL, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoieUdyYzNjUWtyaFdNR1Y3a212VGlHcmZ3bzNqbDBWT0gxeWNKY2xLNyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6OTI6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvbWVkaWEvd2VsY29tZV9iYW5uZXJzL2tPQ2ZVaWlhQ0hpNDJjV0VESHNjVXhvMHRWclJzNGt1d0RieFBBM2cubXA0Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1774022731),
+('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774025175);
 
 -- --------------------------------------------------------
 
@@ -1424,7 +1424,8 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (451, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 12:16:28', '2026-03-20 12:16:28', '2026-03-20 12:16:28'),
 (452, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:20:26', '2026-03-20 13:20:26', '2026-03-20 13:20:26'),
 (453, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:23:46', '2026-03-20 13:23:46', '2026-03-20 13:23:46'),
-(454, 1, 'carjavalosistem@gmail.com', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:57:58', '2026-03-20 13:57:58', '2026-03-20 13:57:58');
+(454, 1, 'carjavalosistem@gmail.com', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:57:58', '2026-03-20 13:57:58', '2026-03-20 13:57:58'),
+(455, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 15:45:03', '2026-03-20 15:45:03', '2026-03-20 15:45:03');
 
 -- --------------------------------------------------------
 
@@ -1907,7 +1908,9 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (452, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:20:26\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:20:26', '2026-03-20 13:20:26'),
 (453, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 08:22:31\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:22:31', '2026-03-20 13:22:31'),
 (454, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:23:46\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:23:46', '2026-03-20 13:23:46'),
-(455, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:57:58\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:57:58', '2026-03-20 13:57:58');
+(455, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:57:58\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:57:58', '2026-03-20 13:57:58'),
+(456, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 10:44:03\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 15:44:03', '2026-03-20 15:44:03'),
+(457, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 10:45:03\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 15:45:03', '2026-03-20 15:45:03');
 
 -- --------------------------------------------------------
 
@@ -1953,6 +1956,8 @@ CREATE TABLE `welcome_banners` (
   `media_titulo` varchar(255) DEFAULT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT 1,
   `orden` int(11) NOT NULL DEFAULT 0,
+  `fecha_inicio` date DEFAULT NULL,
+  `fecha_fin` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1961,9 +1966,9 @@ CREATE TABLE `welcome_banners` (
 -- Volcado de datos para la tabla `welcome_banners`
 --
 
-INSERT INTO `welcome_banners` (`id`, `banner_titulo`, `banner_subtitulo`, `banner_color_fondo`, `banner_color_texto`, `media_tipo`, `media_archivo`, `media_url`, `media_titulo`, `activo`, `orden`, `created_at`, `updated_at`) VALUES
-(1, 'Hospital Universitario del Valle', 'Plataforma de Gestion Educativa', '#2c4370', '#ffffff', 'video', 'welcome_banners/MQL1Un83r440NqAMjw5KyFTfk1waLgdwcpPGWfz0.mp4', NULL, 'Inicios', 1, 1, '2026-03-20 13:21:43', '2026-03-20 13:25:28'),
-(3, 'm1', 'm2', '#2c4370', '#ffffff', 'video', 'welcome_banners/fUjklS3Ac0E8WMG5yCm7lKgflCsNpaftyIYbeQqP.mp4', NULL, 'm3', 1, 3, '2026-03-20 14:26:42', '2026-03-20 14:26:42');
+INSERT INTO `welcome_banners` (`id`, `banner_titulo`, `banner_subtitulo`, `banner_color_fondo`, `banner_color_texto`, `media_tipo`, `media_archivo`, `media_url`, `media_titulo`, `activo`, `orden`, `fecha_inicio`, `fecha_fin`, `created_at`, `updated_at`) VALUES
+(1, 'Hospital Universitario del Valle', 'Plataforma de Gestion Educativa', '#2c4370', '#ffffff', 'video', 'welcome_banners/MQL1Un83r440NqAMjw5KyFTfk1waLgdwcpPGWfz0.mp4', NULL, 'Inicios', 1, 1, '2026-03-01', '2026-03-31', '2026-03-20 13:21:43', '2026-03-20 15:59:31'),
+(5, 'Hospital', 'mensaje', '#2c4370', '#ffffff', 'video', 'welcome_banners/kOCfUiiaCHi42cWEDHscUxo0tVrRs4kuwDbxPA3g.mp4', NULL, 'prueba', 1, 2, '2026-03-01', '2026-03-31', '2026-03-20 16:05:15', '2026-03-20 16:05:15');
 
 --
 -- Índices para tablas volcadas
@@ -2420,13 +2425,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=455;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=456;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=456;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=458;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`
@@ -2438,7 +2443,7 @@ ALTER TABLE `vinculacion_contrato`
 -- AUTO_INCREMENT de la tabla `welcome_banners`
 --
 ALTER TABLE `welcome_banners`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

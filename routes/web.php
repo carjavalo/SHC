@@ -245,13 +245,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas de Configuración - Asignación de Cursos
     Route::prefix('configuracion')->name('configuracion.')->group(function () {
         
-        // Ayuda - Administrador de Banner y Media de Inicio
-        Route::get('/ayuda', [\App\Http\Controllers\AyudaController::class, 'index'])->name('ayuda');
-        Route::post('/ayuda', [\App\Http\Controllers\AyudaController::class, 'store'])->name('ayuda.store');
-        Route::put('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'update'])->name('ayuda.update');
-        Route::delete('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'destroy'])->name('ayuda.destroy');
-        Route::post('/ayuda/{id}/toggle', [\App\Http\Controllers\AyudaController::class, 'toggleActivo'])->name('ayuda.toggle');
-        Route::post('/ayuda/orden', [\App\Http\Controllers\AyudaController::class, 'updateOrden'])->name('ayuda.orden');
+        // Ayuda - Administrador de Banner y Media de Inicio (protegido por permisos)
+        Route::get('/ayuda', [\App\Http\Controllers\AyudaController::class, 'index'])->name('ayuda')->middleware('check.permission:ayuda.view');
+        Route::post('/ayuda', [\App\Http\Controllers\AyudaController::class, 'store'])->name('ayuda.store')->middleware('check.permission:ayuda.create');
+        Route::put('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'update'])->name('ayuda.update')->middleware('check.permission:ayuda.edit');
+        Route::delete('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'destroy'])->name('ayuda.destroy')->middleware('check.permission:ayuda.delete');
+        Route::post('/ayuda/{id}/toggle', [\App\Http\Controllers\AyudaController::class, 'toggleActivo'])->name('ayuda.toggle')->middleware('check.permission:ayuda.edit');
+        Route::post('/ayuda/orden', [\App\Http\Controllers\AyudaController::class, 'updateOrden'])->name('ayuda.orden')->middleware('check.permission:ayuda.edit');
 
         Route::prefix('asignacion-cursos')->name('asignacion-cursos.')->group(function () {
             Route::get('/', [AsignacionCursoController::class, 'index'])->name('index');

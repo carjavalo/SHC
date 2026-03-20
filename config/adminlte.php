@@ -478,6 +478,7 @@ return [
                     'url' => 'configuracion/ayuda',
                     'icon' => 'fas fa-fw fa-question-circle',
                     'active' => ['configuracion/ayuda', 'configuracion/ayuda/*'],
+                    'can' => 'ayuda.view',
                 ],
             ],
         ],

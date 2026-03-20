@@ -5,9 +5,11 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="m-0 text-dark"><i class="fas fa-tv mr-2"></i>Administrar Contenido de Pantalla de Inicio</h1>
+        @can('ayuda.create')
         <button class="btn btn-primary" data-toggle="modal" data-target="#modalCrear">
             <i class="fas fa-plus mr-1"></i> Nuevo Banner / Media
         </button>
+        @endcan
     </div>
 @stop
 
@@ -115,9 +117,11 @@
             <div class="text-center py-5">
                 <i class="fas fa-photo-video text-muted" style="font-size: 4rem;"></i>
                 <p class="text-muted mt-3">No hay contenido configurado aún.</p>
+                @can('ayuda.create')
                 <button class="btn btn-primary" data-toggle="modal" data-target="#modalCrear">
                     <i class="fas fa-plus mr-1"></i> Crear Primer Banner
                 </button>
+                @endcan
             </div>
         @else
             <div class="table-responsive">
@@ -178,22 +182,32 @@
                                 @endif
                             </td>
                             <td>
+                                @can('ayuda.edit')
                                 <button class="btn btn-sm toggle-activo {{ $banner->activo ? 'btn-success' : 'btn-secondary' }}" data-id="{{ $banner->id }}">
                                     <i class="fas {{ $banner->activo ? 'fa-eye' : 'fa-eye-slash' }}"></i>
                                     {{ $banner->activo ? 'Activo' : 'Inactivo' }}
                                 </button>
+                                @else
+                                <span class="badge {{ $banner->activo ? 'badge-success' : 'badge-secondary' }}">
+                                    <i class="fas {{ $banner->activo ? 'fa-eye' : 'fa-eye-slash' }}"></i>
+                                    {{ $banner->activo ? 'Activo' : 'Inactivo' }}
+                                </span>
+                                @endcan
                             </td>
                             <td>
                                 <span style="display: inline-block; width: 22px; height: 22px; border-radius: 4px; background-color: {{ $banner->banner_color_fondo }}; border: 1px solid #ddd;" title="Fondo: {{ $banner->banner_color_fondo }}"></span>
                                 <span style="display: inline-block; width: 22px; height: 22px; border-radius: 4px; background-color: {{ $banner->banner_color_texto }}; border: 1px solid #ddd;" title="Texto: {{ $banner->banner_color_texto }}"></span>
                             </td>
                             <td>
+                                @can('ayuda.edit')
                                 <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#modalEditar{{ $banner->id }}" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
+                                @endcan
                                 <button class="btn btn-sm btn-info btn-preview-media" data-id="{{ $banner->id }}" title="Vista previa">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                @can('ayuda.delete')
                                 <form action="/configuracion/ayuda/{{ $banner->id }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este banner?');">
                                     @csrf
                                     @method('DELETE')
@@ -201,6 +215,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach
@@ -212,6 +227,7 @@
 </div>
 
 {{-- MODAL: Crear nuevo banner --}}
+@can('ayuda.create')
 <div class="modal fade" id="modalCrear" tabindex="-1" role="dialog" aria-labelledby="modalCrearLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -345,8 +361,10 @@
         </div>
     </div>
 </div>
+@endcan
 
 {{-- MODALES: Editar cada banner --}}
+@can('ayuda.edit')
 @foreach($banners as $banner)
 <div class="modal fade" id="modalEditar{{ $banner->id }}" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -492,6 +510,7 @@
     </div>
 </div>
 @endforeach
+@endcan
 
 {{-- MODAL: Vista previa de media --}}
 <div class="modal fade" id="modalPreviewMedia" tabindex="-1" role="dialog" aria-hidden="true">
