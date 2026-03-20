@@ -27,19 +27,89 @@
         
         .overlay {
             background-color: rgba(0, 0, 0, 0.6);
-            height: 100%;
+            min-height: 100vh;
             width: 100%;
             position: fixed;
+            overflow-y: auto;
         }
-        
-        .auth-container {
-            min-height: 100vh;
+
+        /* ====== BANNER SUPERIOR ====== */
+        .welcome-banner {
+            width: 100%;
+            padding: 18px 30px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .welcome-banner h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease;
+        }
+        .welcome-banner p {
+            margin: 5px 0 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            animation: fadeInDown 1.2s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ====== CONTENEDOR PRINCIPAL ====== */
+        .main-content {
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* mover el formulario al extremo derecho */
-            padding: 1.5% 1.5%;
+            justify-content: flex-end; /* formulario pegado a la derecha como estaba */
+            padding: 1.5%;
             gap: 25px;
+            min-height: calc(100vh - 80px);
             overflow-y: auto;
+        }
+
+        /* ====== AREA MEDIA (VIDEO/IMAGEN) ====== */
+        .media-area {
+            flex: 1;
+            min-height: 75vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .media-area iframe,
+        .media-area video {
+            width: 100%;
+            height: 100%;
+            min-height: 75vh;
+            border: none;
+            border-radius: 12px;
+        }
+        .media-area img {
+            width: 100%;
+            height: 100%;
+            min-height: 75vh;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .media-placeholder {
+            color: rgba(255,255,255,0.3);
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .media-placeholder i {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
         }
         
         .auth-card {
@@ -50,13 +120,10 @@
             width: 100%;
             max-width: 480px;
             flex-shrink: 0;
-            margin-left: 0; /* sin desplazamiento cuando se quita el banner */
         }
 
-        /* Ocultar el banner/carrusel cuando se quiere quitarlo */
-        .carousel-wrapper {
-            display: none !important;
-        }
+        /* Estilos legacy (ocultos) */
+        .carousel-wrapper { display: none !important; }
         
         .card-left {
             background: linear-gradient(135deg, #2c4370 0%, #1e2f4d 100%);
@@ -67,94 +134,6 @@
             justify-content: center;
         }
 
-        /* Estilos del Carrusel */
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            margin-bottom: 0;
-        }
-
-        .carousel-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-
-        .carousel-slide.active {
-            opacity: 1;
-        }
-
-        .carousel-slide img {
-            width: 95%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 15px;
-            margin: 0 auto;
-            display: block;
-        }
-
-        .carousel-controls {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .carousel-controls:hover {
-            background-color: rgba(255, 255, 255, 0.95);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .carousel-prev {
-            left: 10px;
-        }
-
-        .carousel-next {
-            right: 10px;
-        }
-
-        .carousel-indicators {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 10;
-        }
-
-        .carousel-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .carousel-indicator.active {
-            background-color: rgba(255, 255, 255, 0.9);
-            transform: scale(1.2);
-        }
-        
         .card-right {
             padding: 15px 18px;
             color: #333;
@@ -313,76 +292,59 @@
         }
         
         @media (max-width: 992px) {
-            .auth-container {
+            .main-content {
                 flex-direction: column;
-                gap: 20px;
-                padding: 20px;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 15px;
+            }
+
+            .media-area {
+                width: 100%;
+                min-height: 280px;
             }
 
             .auth-card {
                 max-width: 90%;
-                margin-left: 0; /* quitar desplazamiento en tablet/ móvil */
-            }
-
-            .carousel-wrapper {
-                width: 100%;
-                max-width: 650px;
-            }
-
-            .carousel-container {
-                height: 280px;
             }
         }
 
         @media (max-width: 768px) {
-            .auth-container {
-                gap: 15px;
-                padding: 15px;
+            .welcome-banner h2 {
+                font-size: 1.2rem;
             }
-
-            .carousel-container {
-                height: 240px;
-                margin-bottom: 0;
+            .welcome-banner p {
+                font-size: 0.85rem;
             }
-
-            .carousel-controls {
-                width: 32px;
-                height: 32px;
+            .media-area {
+                min-height: 220px;
             }
-
-            .carousel-prev {
-                left: 5px;
+            .media-area iframe,
+            .media-area video,
+            .media-area img {
+                min-height: 220px;
             }
-
-            .carousel-next {
-                right: 5px;
-            }
-
-            .carousel-indicators {
-                bottom: 10px;
-            }
-
-            .carousel-indicator {
-                width: 10px;
-                height: 10px;
-            }
-
-            .carousel-wrapper {
-                max-width: 100%;
-            }
-
             .auth-card {
                 max-width: 100%;
-                margin-left: 0; /* asegurar sin desplazamiento en pantallas pequeñas */
             }
         }
 
         @media (max-width: 480px) {
-            .carousel-container {
-                height: 200px;
+            .media-area {
+                min-height: 180px;
             }
-
-            .auth-container {
+            .media-area iframe,
+            .media-area video,
+            .media-area img {
+                min-height: 180px;
+            }
+            .welcome-banner {
+                padding: 12px 15px;
+            }
+            .welcome-banner h2 {
+                font-size: 1rem;
+            }
+            .main-content {
                 gap: 12px;
                 padding: 10px;
             }
@@ -391,42 +353,59 @@
 </head>
 <body>
     <div class="overlay">
-        <div class="auth-container">
-            <!-- Carrusel Independiente a la Izquierda -->
-            <div class="carousel-wrapper">
-                <div class="carousel-container" id="imageCarousel">
-                    <div class="carousel-slide active">
-                        <img src="{{ asset('images/inicio/img1.jpg') }}" alt="Imagen 1 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img2.jpg') }}" alt="Imagen 2 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img3.jpg') }}" alt="Imagen 3 - Hospital Universitario del Valle">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('images/inicio/img4.jpg') }}" alt="Imagen 4 - Hospital Universitario del Valle">
-                    </div>
+        {{-- ====== BANNER SUPERIOR DINÁMICO ====== --}}
+        @if(isset($banner) && $banner)
+        <div class="welcome-banner" style="background-color: {{ $banner->banner_color_fondo }};">
+            <h2 style="color: {{ $banner->banner_color_texto }};">{{ $banner->banner_titulo }}</h2>
+            @if($banner->banner_subtitulo)
+                <p style="color: {{ $banner->banner_color_texto }};">{{ $banner->banner_subtitulo }}</p>
+            @endif
+        </div>
+        @else
+        <div class="welcome-banner" style="background-color: #2c4370;">
+            <h2 style="color: #fff;">Plataforma de Gestión Educativa</h2>
+            <p style="color: #fff;">Hospital Universitario del Valle</p>
+        </div>
+        @endif
 
-                    <!-- Controles de navegación -->
-                    <button class="carousel-controls carousel-prev" onclick="changeSlide(-1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-controls carousel-next" onclick="changeSlide(1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-
-                    <!-- Indicadores -->
-                    <div class="carousel-indicators">
-                        <div class="carousel-indicator active" onclick="currentSlide(1)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(2)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(3)"></div>
-                        <div class="carousel-indicator" onclick="currentSlide(4)"></div>
+        {{-- ====== CONTENIDO PRINCIPAL: MEDIA + AUTH CARD ====== --}}
+        <div class="main-content">
+            {{-- Área de Video / Imagen --}}
+            <div class="media-area">
+                @if(isset($banner) && $banner)
+                    @if($banner->media_tipo === 'video')
+                        @if($banner->esYoutube())
+                            <iframe src="{{ $banner->getYoutubeEmbedUrl() }}?autoplay=1&mute=1&rel=0&loop=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                        @elseif($banner->media_archivo)
+                            <video controls autoplay muted loop>
+                                <source src="{{ asset('storage/' . $banner->media_archivo) }}" type="video/mp4">
+                                Tu navegador no soporta la reproducción de video.
+                            </video>
+                        @else
+                            <div class="media-placeholder">
+                                <i class="fas fa-video"></i>
+                                VIDEO ILUSTRATIVO
+                            </div>
+                        @endif
+                    @else
+                        @if($banner->media_archivo)
+                            <img src="{{ asset('storage/' . $banner->media_archivo) }}" alt="{{ $banner->media_titulo ?? 'Imagen ilustrativa' }}">
+                        @else
+                            <div class="media-placeholder">
+                                <i class="fas fa-image"></i>
+                                IMAGEN ILUSTRATIVA
+                            </div>
+                        @endif
+                    @endif
+                @else
+                    <div class="media-placeholder">
+                        <i class="fas fa-photo-video"></i>
+                        VIDEO ILUSTRATIVO
                     </div>
-                </div>
+                @endif
             </div>
 
-            <!-- Card de Autenticación a la Derecha -->
+            {{-- Card de Autenticación (NO TOCAR EL FORMULARIO) --}}
             <div class="auth-card">
                 <div class="row g-0">
                     <!-- Lado izquierdo - Información del Hospital -->
@@ -671,84 +650,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </div> {{-- /auth-card --}}
+        </div> {{-- /main-content --}}
+    </div> {{-- /overlay --}}
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Carrusel JavaScript -->
-    <script>
-        let currentSlideIndex = 0;
-        const slides = document.querySelectorAll('.carousel-slide');
-        const indicators = document.querySelectorAll('.carousel-indicator');
-        const totalSlides = slides.length;
-        let autoSlideInterval;
-
-        // Función para mostrar una diapositiva específica
-        function showSlide(index) {
-            // Ocultar todas las diapositivas
-            slides.forEach(slide => slide.classList.remove('active'));
-            indicators.forEach(indicator => indicator.classList.remove('active'));
-
-            // Mostrar la diapositiva actual
-            slides[index].classList.add('active');
-            indicators[index].classList.add('active');
-        }
-
-        // Función para cambiar diapositiva (anterior/siguiente)
-        function changeSlide(direction) {
-            currentSlideIndex += direction;
-
-            if (currentSlideIndex >= totalSlides) {
-                currentSlideIndex = 0;
-            } else if (currentSlideIndex < 0) {
-                currentSlideIndex = totalSlides - 1;
-            }
-
-            showSlide(currentSlideIndex);
-            resetAutoSlide();
-        }
-
-        // Función para ir a una diapositiva específica
-        function currentSlide(index) {
-            currentSlideIndex = index - 1;
-            showSlide(currentSlideIndex);
-            resetAutoSlide();
-        }
-
-        // Función para avanzar automáticamente
-        function autoSlide() {
-            currentSlideIndex++;
-            if (currentSlideIndex >= totalSlides) {
-                currentSlideIndex = 0;
-            }
-            showSlide(currentSlideIndex);
-        }
-
-        // Función para reiniciar el auto-slide
-        function resetAutoSlide() {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(autoSlide, 5000);
-        }
-
-        // Inicializar el carrusel
-        document.addEventListener('DOMContentLoaded', function() {
-            // Iniciar auto-slide cada 5 segundos
-            autoSlideInterval = setInterval(autoSlide, 5000);
-
-            // Pausar auto-slide cuando el mouse está sobre el carrusel
-            const carousel = document.getElementById('imageCarousel');
-            carousel.addEventListener('mouseenter', function() {
-                clearInterval(autoSlideInterval);
-            });
-
-            // Reanudar auto-slide cuando el mouse sale del carrusel
-            carousel.addEventListener('mouseleave', function() {
-                autoSlideInterval = setInterval(autoSlide, 5000);
-            });
-        });
-    </script>
 </body>
 </html>

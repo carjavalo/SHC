@@ -29,7 +29,8 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
-    return view('welcome');
+    $banner = \App\Models\WelcomeBanner::where('activo', true)->orderBy('orden')->first();
+    return view('welcome', compact('banner'));
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -190,8 +191,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas de Configuración - Asignación de Cursos
     Route::prefix('configuracion')->name('configuracion.')->group(function () {
         
-        // Ayuda
+        // Ayuda - Administrador de Banner y Media de Inicio
         Route::get('/ayuda', [\App\Http\Controllers\AyudaController::class, 'index'])->name('ayuda');
+        Route::post('/ayuda', [\App\Http\Controllers\AyudaController::class, 'store'])->name('ayuda.store');
+        Route::put('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'update'])->name('ayuda.update');
+        Route::delete('/ayuda/{id}', [\App\Http\Controllers\AyudaController::class, 'destroy'])->name('ayuda.destroy');
+        Route::post('/ayuda/{id}/toggle', [\App\Http\Controllers\AyudaController::class, 'toggleActivo'])->name('ayuda.toggle');
+        Route::post('/ayuda/orden', [\App\Http\Controllers\AyudaController::class, 'updateOrden'])->name('ayuda.orden');
 
         Route::prefix('asignacion-cursos')->name('asignacion-cursos.')->group(function () {
             Route::get('/', [AsignacionCursoController::class, 'index'])->name('index');
