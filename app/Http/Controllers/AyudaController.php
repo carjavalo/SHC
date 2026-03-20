@@ -13,7 +13,12 @@ class AyudaController extends Controller
      */
     public function index()
     {
-        $banners = WelcomeBanner::orderBy('orden')->get();
+        $banners = collect();
+        try {
+            $banners = WelcomeBanner::orderBy('orden')->get();
+        } catch (\Exception $e) {
+            // La tabla aún no existe en este entorno
+        }
         return view('admin.configuracion.ayuda.index', compact('banners'));
     }
 
