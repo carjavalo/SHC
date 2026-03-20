@@ -78,13 +78,13 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
-    $banner = null;
+    $banners = collect();
     try {
-        $banner = \App\Models\WelcomeBanner::where('activo', true)->orderBy('orden')->first();
+        $banners = \App\Models\WelcomeBanner::vigentes()->get();
     } catch (\Exception $e) {
         // La tabla aún no existe en este entorno
     }
-    return view('welcome', compact('banner'));
+    return view('welcome', compact('banners'));
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])

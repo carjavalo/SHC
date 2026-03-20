@@ -42,6 +42,7 @@
             position: relative;
             z-index: 10;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: background-color 0.6s ease;
         }
         .welcome-banner h2 {
             margin: 0;
@@ -83,6 +84,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
             border: 2px solid rgba(255,255,255,0.08);
             box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
@@ -111,7 +113,53 @@
             display: block;
             margin-bottom: 15px;
         }
-        
+
+        /* ====== CAROUSEL AUTO-ROTACIÓN ====== */
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .carousel-slide.active {
+            opacity: 1;
+            z-index: 2;
+            pointer-events: auto;
+        }
+        .carousel-indicators-custom {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+        }
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.6);
+            padding: 0;
+        }
+        .carousel-dot.active {
+            background: rgba(255,255,255,0.95);
+            transform: scale(1.2);
+        }
+        .carousel-dot:hover {
+            background: rgba(255,255,255,0.7);
+        }
+
         .auth-card {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
@@ -353,49 +401,72 @@
 </head>
 <body>
     <div class="overlay">
-        {{-- ====== BANNER SUPERIOR DINÁMICO ====== --}}
-        @if(isset($banner) && $banner)
-        <div class="welcome-banner" style="background-color: {{ $banner->banner_color_fondo }};">
-            <h2 style="color: {{ $banner->banner_color_texto }};">{{ $banner->banner_titulo }}</h2>
-            @if($banner->banner_subtitulo)
-                <p style="color: {{ $banner->banner_color_texto }};">{{ $banner->banner_subtitulo }}</p>
-            @endif
-        </div>
+        {{-- ====== BANNER SUPERIOR DINÁMICO (CAROUSEL) ====== --}}
+        @if(isset($banners) && $banners->count() > 0)
+            @php $primerBanner = $banners->first(); @endphp
+            <div class="welcome-banner" id="welcomeBannerStrip" style="background-color: {{ $primerBanner->banner_color_fondo }};">
+                <h2 id="bannerTitulo" style="color: {{ $primerBanner->banner_color_texto }};">{{ $primerBanner->banner_titulo }}</h2>
+                <p id="bannerSubtitulo" style="color: {{ $primerBanner->banner_color_texto }};{{ $primerBanner->banner_subtitulo ? '' : ' display:none;' }}">{{ $primerBanner->banner_subtitulo ?? '' }}</p>
+            </div>
         @else
-        <div class="welcome-banner" style="background-color: #2c4370;">
-            <h2 style="color: #fff;">Plataforma de Gestión Educativa</h2>
-            <p style="color: #fff;">Hospital Universitario del Valle</p>
-        </div>
+            <div class="welcome-banner" style="background-color: #2c4370;">
+                <h2 style="color: #fff;">Plataforma de Gestión Educativa</h2>
+                <p style="color: #fff;">Hospital Universitario del Valle</p>
+            </div>
         @endif
 
         {{-- ====== CONTENIDO PRINCIPAL: MEDIA + AUTH CARD ====== --}}
         <div class="main-content">
             {{-- Área de Video / Imagen --}}
-            <div class="media-area">
-                @if(isset($banner) && $banner)
-                    @if($banner->media_tipo === 'video')
-                        @if($banner->esYoutube())
-                            <iframe src="{{ $banner->getYoutubeEmbedUrl() }}?autoplay=1&mute=1&rel=0&loop=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                        @elseif($banner->media_archivo)
-                            <video controls autoplay muted loop>
-                                <source src="/media/{{ $banner->media_archivo }}" type="video/mp4">
-                                Tu navegador no soporta la reproducción de video.
-                            </video>
-                        @else
-                            <div class="media-placeholder">
-                                <i class="fas fa-video"></i>
-                                VIDEO ILUSTRATIVO
-                            </div>
-                        @endif
-                    @else
-                        @if($banner->media_archivo)
-                            <img src="/media/{{ $banner->media_archivo }}" alt="{{ $banner->media_titulo ?? 'Imagen ilustrativa' }}">
-                        @else
-                            <div class="media-placeholder">
-                                <i class="fas fa-image"></i>
-                                IMAGEN ILUSTRATIVA
-                            </div>
-                        @endif
+            <div class="media-area" id="mediaCarousel">
+                @if(isset($banners) && $banners->count() > 0)
+                    @foreach($banners as $idx => $b)
+                        <div class="carousel-slide {{ $idx === 0 ? 'active' : '' }}"
+                             data-index="{{ $idx }}"
+                             data-banner="{{ json_encode([
+                                 'banner_titulo' => $b->banner_titulo,
+                                 'banner_subtitulo' => $b->banner_subtitulo,
+                                 'banner_color_fondo' => $b->banner_color_fondo,
+                                 'banner_color_texto' => $b->banner_color_texto,
+                                 'media_tipo' => $b->media_tipo,
+                                 'es_youtube' => $b->esYoutube(),
+                             ]) }}">
+                            @if($b->media_tipo === 'video')
+                                @if($b->esYoutube())
+                                    <iframe src="{{ $b->getYoutubeEmbedUrl() }}?autoplay={{ $idx === 0 ? '1' : '0' }}&mute=1&rel=0&enablejsapi=1"
+                                            allow="autoplay; encrypted-media" allowfullscreen
+                                            id="ytframe_{{ $idx }}"></iframe>
+                                @elseif($b->media_archivo)
+                                    <video {{ $idx === 0 ? 'autoplay' : '' }} muted playsinline controls>
+                                        <source src="/media/{{ $b->media_archivo }}" type="video/mp4">
+                                    </video>
+                                @else
+                                    <div class="media-placeholder">
+                                        <i class="fas fa-video"></i>
+                                        VIDEO ILUSTRATIVO
+                                    </div>
+                                @endif
+                            @else
+                                @if($b->media_archivo)
+                                    <img src="/media/{{ $b->media_archivo }}" alt="{{ $b->media_titulo ?? 'Imagen ilustrativa' }}">
+                                @else
+                                    <div class="media-placeholder">
+                                        <i class="fas fa-image"></i>
+                                        IMAGEN ILUSTRATIVA
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
+                    @endforeach
+
+                    {{-- Indicadores del carousel --}}
+                    @if($banners->count() > 1)
+                        <div class="carousel-indicators-custom">
+                            @foreach($banners as $idx => $b)
+                                <button class="carousel-dot {{ $idx === 0 ? 'active' : '' }}"
+                                        data-slide="{{ $idx }}" title="{{ $b->banner_titulo }}"></button>
+                            @endforeach
+                        </div>
                     @endif
                 @else
                     <div class="media-placeholder">
@@ -656,5 +727,136 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {{-- ====== CAROUSEL AUTO-ROTACIÓN ====== --}}
+    @if(isset($banners) && $banners->count() > 1)
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var slides = document.querySelectorAll('.carousel-slide');
+        var dots = document.querySelectorAll('.carousel-dot');
+        var bannerStrip = document.getElementById('welcomeBannerStrip');
+        var bannerTitulo = document.getElementById('bannerTitulo');
+        var bannerSubtitulo = document.getElementById('bannerSubtitulo');
+        
+        if (slides.length <= 1) return;
+        
+        var currentIndex = 0;
+        var autoTimer = null;
+        var IMAGE_DURATION = 8000;    // 8 seg para imágenes
+        var YOUTUBE_DURATION = 20000; // 20 seg para YouTube
+        
+        function getSlideData(slide) {
+            try { return JSON.parse(slide.getAttribute('data-banner')); }
+            catch(e) { return {}; }
+        }
+        
+        function goToSlide(newIndex) {
+            if (newIndex === currentIndex) return;
+            
+            var oldSlide = slides[currentIndex];
+            var newSlide = slides[newIndex];
+            var data = getSlideData(newSlide);
+            
+            // Pausar video anterior
+            var oldVideo = oldSlide.querySelector('video');
+            if (oldVideo) { oldVideo.pause(); }
+            
+            // Transición de slides
+            oldSlide.classList.remove('active');
+            newSlide.classList.add('active');
+            
+            // Actualizar indicadores
+            if (dots.length) {
+                dots[currentIndex].classList.remove('active');
+                dots[newIndex].classList.add('active');
+            }
+            
+            // Actualizar franja superior con transición
+            if (bannerStrip) {
+                bannerStrip.style.backgroundColor = data.banner_color_fondo || '#2c4370';
+            }
+            if (bannerTitulo) {
+                bannerTitulo.textContent = data.banner_titulo || '';
+                bannerTitulo.style.color = data.banner_color_texto || '#fff';
+            }
+            if (bannerSubtitulo) {
+                if (data.banner_subtitulo) {
+                    bannerSubtitulo.textContent = data.banner_subtitulo;
+                    bannerSubtitulo.style.display = '';
+                } else {
+                    bannerSubtitulo.textContent = '';
+                    bannerSubtitulo.style.display = 'none';
+                }
+                bannerSubtitulo.style.color = data.banner_color_texto || '#fff';
+            }
+            
+            currentIndex = newIndex;
+            
+            // Reproducir nuevo video si aplica
+            var newVideo = newSlide.querySelector('video');
+            if (newVideo) {
+                newVideo.currentTime = 0;
+                newVideo.play().catch(function(){});
+            }
+            
+            // Programar siguiente avance
+            scheduleNext();
+        }
+        
+        function nextSlide() {
+            var next = (currentIndex + 1) % slides.length;
+            goToSlide(next);
+        }
+        
+        function scheduleNext() {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            
+            var slide = slides[currentIndex];
+            var data = getSlideData(slide);
+            var video = slide.querySelector('video');
+            
+            if (video) {
+                // Para videos locales: avanzar cuando termine
+                video.onended = function() { nextSlide(); };
+                // Fallback por si el video es muy largo (5 min max)
+                autoTimer = setTimeout(nextSlide, 300000);
+            } else if (data.es_youtube) {
+                autoTimer = setTimeout(nextSlide, YOUTUBE_DURATION);
+            } else {
+                // Imagen
+                autoTimer = setTimeout(nextSlide, IMAGE_DURATION);
+            }
+        }
+        
+        // Click en indicadores (puntos)
+        dots.forEach(function(dot) {
+            dot.addEventListener('click', function() {
+                var target = parseInt(this.getAttribute('data-slide'));
+                if (target !== currentIndex) {
+                    goToSlide(target);
+                }
+            });
+        });
+        
+        // Iniciar: reproducir primer video si existe
+        var firstVideo = slides[0].querySelector('video');
+        if (firstVideo) {
+            firstVideo.play().catch(function(){});
+        }
+        scheduleNext();
+    });
+    </script>
+    @elseif(isset($banners) && $banners->count() === 1)
+    <script>
+    // Un solo banner: si es video local, loop infinito
+    document.addEventListener('DOMContentLoaded', function() {
+        var video = document.querySelector('.carousel-slide.active video');
+        if (video) {
+            video.loop = true;
+            video.play().catch(function(){});
+        }
+    });
+    </script>
+    @endif
 </body>
 </html>

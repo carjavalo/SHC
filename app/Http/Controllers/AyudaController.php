@@ -28,8 +28,18 @@ class AyudaController extends Controller
                 $table->string('media_titulo')->nullable();
                 $table->boolean('activo')->default(true);
                 $table->integer('orden')->default(0);
+                $table->date('fecha_inicio')->nullable();
+                $table->date('fecha_fin')->nullable();
                 $table->timestamps();
             });
+        } else {
+            // Agregar columnas nuevas si faltan (producción)
+            if (!Schema::hasColumn('welcome_banners', 'fecha_inicio')) {
+                Schema::table('welcome_banners', function (Blueprint $table) {
+                    $table->date('fecha_inicio')->nullable()->after('orden');
+                    $table->date('fecha_fin')->nullable()->after('fecha_inicio');
+                });
+            }
         }
     }
 
@@ -59,12 +69,16 @@ class AyudaController extends Controller
             'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:51200',
             'media_url'          => 'nullable|url|max:500',
             'media_titulo'       => 'nullable|string|max:255',
+            'fecha_inicio'       => 'nullable|date',
+            'fecha_fin'          => 'nullable|date|after_or_equal:fecha_inicio',
         ]);
 
         try {
             $data = $request->except('media_archivo');
             $data['activo'] = $request->has('activo') ? 1 : 0;
             $data['orden'] = WelcomeBanner::max('orden') + 1;
+            $data['fecha_inicio'] = $request->input('fecha_inicio') ?: null;
+            $data['fecha_fin'] = $request->input('fecha_fin') ?: null;
 
             // Subir archivo si se proporciona
             if ($request->hasFile('media_archivo')) {
@@ -107,11 +121,15 @@ class AyudaController extends Controller
             'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:51200',
             'media_url'          => 'nullable|url|max:500',
             'media_titulo'       => 'nullable|string|max:255',
+            'fecha_inicio'       => 'nullable|date',
+            'fecha_fin'          => 'nullable|date|after_or_equal:fecha_inicio',
         ]);
 
         try {
             $data = $request->except(['media_archivo', '_method', '_token']);
             $data['activo'] = $request->has('activo') ? 1 : 0;
+            $data['fecha_inicio'] = $request->input('fecha_inicio') ?: null;
+            $data['fecha_fin'] = $request->input('fecha_fin') ?: null;
 
             // Subir nuevo archivo si se proporciona
             if ($request->hasFile('media_archivo')) {

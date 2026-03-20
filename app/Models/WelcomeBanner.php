@@ -22,11 +22,15 @@ class WelcomeBanner extends Model
         'media_titulo',
         'activo',
         'orden',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
         'orden' => 'integer',
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
     ];
 
     /**
@@ -35,6 +39,33 @@ class WelcomeBanner extends Model
     public function scopeActivos($query)
     {
         return $query->where('activo', true)->orderBy('orden');
+    }
+
+    /**
+     * Obtener banners activos y vigentes por fecha.
+     */
+    public function scopeVigentes($query)
+    {
+        $hoy = now()->toDateString();
+        return $query->where('activo', true)
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $hoy);
+            })
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $hoy);
+            })
+            ->orderBy('orden');
+    }
+
+    /**
+     * Verificar si el banner está vigente por fechas.
+     */
+    public function estaVigente()
+    {
+        $hoy = now()->toDateString();
+        if ($this->fecha_inicio && $this->fecha_inicio->toDateString() > $hoy) return false;
+        if ($this->fecha_fin && $this->fecha_fin->toDateString() < $hoy) return false;
+        return true;
     }
 
     /**

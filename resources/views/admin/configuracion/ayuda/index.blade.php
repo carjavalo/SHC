@@ -128,6 +128,7 @@
                             <th>Título del Banner</th>
                             <th>Tipo Media</th>
                             <th>Título del Media</th>
+                            <th style="width: 120px;">Vigencia</th>
                             <th style="width: 100px;">Estado</th>
                             <th style="width: 80px;">Colores</th>
                             <th style="width: 200px;">Acciones</th>
@@ -154,6 +155,28 @@
                                 @endif
                             </td>
                             <td>{{ $banner->media_titulo ?? '-' }}</td>
+                            <td>
+                                @if($banner->fecha_inicio || $banner->fecha_fin)
+                                    <small>
+                                        @if($banner->fecha_inicio)
+                                            <i class="fas fa-play-circle text-success"></i> {{ $banner->fecha_inicio->format('d/m/Y') }}
+                                        @else
+                                            <i class="fas fa-play-circle text-muted"></i> Siempre
+                                        @endif
+                                        <br>
+                                        @if($banner->fecha_fin)
+                                            <i class="fas fa-stop-circle text-danger"></i> {{ $banner->fecha_fin->format('d/m/Y') }}
+                                        @else
+                                            <i class="fas fa-stop-circle text-muted"></i> Sin fin
+                                        @endif
+                                    </small>
+                                    @if(!$banner->estaVigente())
+                                        <br><span class="badge badge-warning"><i class="fas fa-clock"></i> No vigente</span>
+                                    @endif
+                                @else
+                                    <small class="text-muted">Permanente</small>
+                                @endif
+                            </td>
                             <td>
                                 <button class="btn btn-sm toggle-activo {{ $banner->activo ? 'btn-success' : 'btn-secondary' }}" data-id="{{ $banner->id }}">
                                     <i class="fas {{ $banner->activo ? 'fa-eye' : 'fa-eye-slash' }}"></i>
@@ -240,6 +263,27 @@
                                     <input type="checkbox" class="custom-control-input" id="activo_crear" name="activo" checked>
                                     <label class="custom-control-label" for="activo_crear">Activo (visible en la pantalla de inicio)</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        {{-- Programación por fechas --}}
+                        <div class="col-md-12 mt-3">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-calendar-alt mr-1"></i> Programación de Vigencia
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fecha_inicio_crear"><strong>Fecha de Inicio</strong></label>
+                                <input type="date" name="fecha_inicio" id="fecha_inicio_crear" class="form-control">
+                                <small class="form-text text-muted">Dejar vacío = visible inmediatamente.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fecha_fin_crear"><strong>Fecha de Finalización</strong></label>
+                                <input type="date" name="fecha_fin" id="fecha_fin_crear" class="form-control">
+                                <small class="form-text text-muted">Dejar vacío = sin fecha de expiración.</small>
                             </div>
                         </div>
 
@@ -353,6 +397,27 @@
                                     <input type="checkbox" class="custom-control-input" id="activo_editar_{{ $banner->id }}" name="activo" {{ $banner->activo ? 'checked' : '' }}>
                                     <label class="custom-control-label" for="activo_editar_{{ $banner->id }}">Activo</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        {{-- Programación por fechas --}}
+                        <div class="col-md-12 mt-3">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-calendar-alt mr-1"></i> Programación de Vigencia
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><strong>Fecha de Inicio</strong></label>
+                                <input type="date" name="fecha_inicio" class="form-control" value="{{ $banner->fecha_inicio ? $banner->fecha_inicio->format('Y-m-d') : '' }}">
+                                <small class="form-text text-muted">Dejar vacío = visible inmediatamente.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><strong>Fecha de Finalización</strong></label>
+                                <input type="date" name="fecha_fin" class="form-control" value="{{ $banner->fecha_fin ? $banner->fecha_fin->format('Y-m-d') : '' }}">
+                                <small class="form-text text-muted">Dejar vacío = sin fecha de expiración.</small>
                             </div>
                         </div>
 
