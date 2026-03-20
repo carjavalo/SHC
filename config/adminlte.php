@@ -473,6 +473,12 @@ return [
                     'active' => ['configuracion/publicidad-productos', 'configuracion/publicidad-productos/*'],
                     'can' => 'config.publicidad',
                 ],
+                [
+                    'text' => 'Ayuda',
+                    'url' => 'configuracion/ayuda',
+                    'icon' => 'fas fa-fw fa-question-circle',
+                    'active' => ['configuracion/ayuda', 'configuracion/ayuda/*'],
+                ],
             ],
         ],
         [

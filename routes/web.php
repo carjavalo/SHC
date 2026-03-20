@@ -189,6 +189,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas de Configuración - Asignación de Cursos
     Route::prefix('configuracion')->name('configuracion.')->group(function () {
+        
+        // Ayuda
+        Route::get('/ayuda', [\App\Http\Controllers\AyudaController::class, 'index'])->name('ayuda');
+
         Route::prefix('asignacion-cursos')->name('asignacion-cursos.')->group(function () {
             Route::get('/', [AsignacionCursoController::class, 'index'])->name('index');
             Route::get('/buscar-estudiantes', [AsignacionCursoController::class, 'buscarEstudiantes'])->name('buscar-estudiantes');
