@@ -29,7 +29,12 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
-    $banner = \App\Models\WelcomeBanner::where('activo', true)->orderBy('orden')->first();
+    $banner = null;
+    try {
+        $banner = \App\Models\WelcomeBanner::where('activo', true)->orderBy('orden')->first();
+    } catch (\Exception $e) {
+        // La tabla aún no existe en este entorno
+    }
     return view('welcome', compact('banner'));
 });
 
