@@ -22,7 +22,7 @@ class RoleManagementController extends Controller
     {
         $users = User::with(["servicioArea", "vinculacionContrato", "sede"])->get();
         // Roles disponibles
-        $availableRoles = ["Super Admin", "Administrador", "Docente", "Estudiante", "Registrado", "Operador"];
+        $availableRoles = User::getAvailableRoles();
         
         return view("admin.roles.index", compact("users", "availableRoles"));
     }

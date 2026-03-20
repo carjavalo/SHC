@@ -54,7 +54,7 @@ class UserController extends Controller
         // Si el usuario autenticado es Operador, solo puede asignar Estudiante, Registrado, Docente u Operador
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador']);
+                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador', 'Consultor Agesoc', 'Consultor Asstracud']);
             }));
         }
         
@@ -94,9 +94,9 @@ class UserController extends Controller
         ]);
         
         // Validación adicional: Operadores solo pueden asignar Estudiante, Registrado, Docente u Operador
-        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador'])) {
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador', 'Consultor Agesoc', 'Consultor Asstracud'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente y Operador.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente, Operador, Consultor Agesoc y Consultor Asstracud.'])
                 ->withInput();
         }
 
@@ -142,7 +142,7 @@ class UserController extends Controller
         // Si el usuario autenticado es Operador, solo puede asignar Estudiante, Registrado, Docente u Operador
         if (auth()->user()->role === 'Operador') {
             $availableRoles = array_values(array_filter($availableRoles, function($role) {
-                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador']);
+                return in_array($role, ['Estudiante', 'Registrado', 'Docente', 'Operador', 'Consultor Agesoc', 'Consultor Asstracud']);
             }));
         }
         
@@ -184,9 +184,9 @@ class UserController extends Controller
         ]);
         
         // Validación adicional: Operadores solo pueden asignar Estudiante, Registrado, Docente u Operador
-        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador'])) {
+        if (auth()->user()->role === 'Operador' && !in_array($request->role, ['Estudiante', 'Registrado', 'Docente', 'Operador', 'Consultor Agesoc', 'Consultor Asstracud'])) {
             return redirect()->back()
-                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente y Operador.'])
+                ->withErrors(['role' => 'No tienes permisos para asignar ese rol. Solo se permiten Estudiante, Registrado, Docente, Operador, Consultor Agesoc y Consultor Asstracud.'])
                 ->withInput();
         }
 

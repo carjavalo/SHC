@@ -68,9 +68,17 @@ class User extends Authenticatable implements MustVerifyEmail
         
         // Si por alguna razón la tabla está vacía, devuelve el listado base para evitar errores
         if (empty($roles)) {
-            return ['Super Admin', 'Administrador', 'Docente', 'Estudiante', 'Registrado', 'Operador'];
+            return ['Super Admin', 'Administrador', 'Docente', 'Estudiante', 'Registrado', 'Operador', 'Consultor Agesoc', 'Consultor Asstracud'];
         }
         
+        // Add specific custom roles if they are not in the DB yet, just to be safe
+        if (!in_array('Consultor Agesoc', $roles)) {
+            $roles[] = 'Consultor Agesoc';
+        }
+        if (!in_array('Consultor Asstracud', $roles)) {
+            $roles[] = 'Consultor Asstracud';
+        }
+
         return $roles;
     }
 
