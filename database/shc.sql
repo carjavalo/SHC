@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-03-2026 a las 17:46:42
+-- Tiempo de generación: 20-03-2026 a las 21:44:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -658,7 +658,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (53, '2026_03_19_120000_add_publicidad_productos_permissions', 26),
 (54, '2026_03_19_130000_seed_default_roles', 27),
 (55, '2026_03_19_163847_add_reportes_permissions', 28),
-(56, '2026_03_20_074947_create_welcome_banners_table', 29);
+(56, '2026_03_20_074947_create_welcome_banners_table', 29),
+(57, '2026_03_20_100000_add_ayuda_permissions', 30);
 
 -- --------------------------------------------------------
 
@@ -739,7 +740,11 @@ INSERT INTO `permissions` (`id`, `name`, `display_name`, `group`, `description`,
 (44, 'reportes.edit', 'Editar Reportes', 'Reportes', NULL, '2026-03-19 21:39:17', '2026-03-19 21:39:17'),
 (45, 'reportes.delete', 'Eliminar Reportes', 'Reportes', NULL, '2026-03-19 21:39:17', '2026-03-19 21:39:17'),
 (46, 'reportes.print', 'Imprimir Reportes', 'Reportes', NULL, '2026-03-19 21:39:17', '2026-03-19 21:39:17'),
-(47, 'reportes.export', 'Exportar Reportes a Excel', 'Reportes', NULL, '2026-03-19 21:39:17', '2026-03-19 21:39:17');
+(47, 'reportes.export', 'Exportar Reportes a Excel', 'Reportes', NULL, '2026-03-19 21:39:17', '2026-03-19 21:39:17'),
+(48, 'ayuda.view', 'Ver Banners', 'Ayuda', NULL, '2026-03-20 19:17:46', '2026-03-20 19:17:46'),
+(49, 'ayuda.create', 'Crear Banner', 'Ayuda', NULL, '2026-03-20 19:17:46', '2026-03-20 19:17:46'),
+(50, 'ayuda.edit', 'Editar Banner', 'Ayuda', NULL, '2026-03-20 19:17:46', '2026-03-20 19:17:46'),
+(51, 'ayuda.delete', 'Eliminar Banner', 'Ayuda', NULL, '2026-03-20 19:17:46', '2026-03-20 19:17:46');
 
 -- --------------------------------------------------------
 
@@ -826,7 +831,9 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`, `updated_at`) VA
 (3, 'Estudiante', 'Usuario Basico del Sistema', '2026-03-17 19:49:15', '2026-03-17 19:49:15'),
 (4, 'Operador', 'Administra la opperatividad de la plataforma', '2026-03-17 19:51:37', '2026-03-17 19:51:37'),
 (5, 'Docente', 'Dirige los cursos del Sistemas', '2026-03-17 19:53:46', '2026-03-17 19:54:54'),
-(6, 'Registrado', 'Solo se le admite ver la publicidad de la plataforma', '2026-03-17 19:57:24', '2026-03-17 19:57:24');
+(6, 'Registrado', 'Solo se le admite ver la publicidad de la plataforma', '2026-03-17 19:57:24', '2026-03-17 19:57:24'),
+(8, 'Consultor Agesoc', 'Verifica Estudiantes o Colaboradores Agesoc', '2026-03-20 19:19:29', '2026-03-20 19:21:18'),
+(9, 'Consultor Asstracud', 'Verifica Estudiantes o Colaboradores Asstracud', '2026-03-20 19:20:08', '2026-03-20 19:21:37');
 
 -- --------------------------------------------------------
 
@@ -877,140 +884,163 @@ CREATE TABLE `role_permissions` (
 --
 
 INSERT INTO `role_permissions` (`id`, `role_name`, `permission_id`, `created_at`, `updated_at`) VALUES
-(4016, 'Administrador', 2, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4017, 'Administrador', 3, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4018, 'Administrador', 4, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4019, 'Administrador', 5, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4020, 'Administrador', 1, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4021, 'Administrador', 8, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4022, 'Administrador', 9, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4023, 'Administrador', 11, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4024, 'Administrador', 10, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4025, 'Administrador', 13, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4026, 'Administrador', 12, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4027, 'Administrador', 14, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4028, 'Administrador', 29, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4029, 'Administrador', 23, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4030, 'Administrador', 24, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4031, 'Administrador', 25, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4032, 'Administrador', 28, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4033, 'Administrador', 27, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4034, 'Administrador', 26, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4035, 'Administrador', 22, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4036, 'Administrador', 31, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4037, 'Administrador', 32, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4038, 'Administrador', 33, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4039, 'Administrador', 30, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4040, 'Administrador', 35, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4041, 'Administrador', 36, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4042, 'Administrador', 37, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4043, 'Administrador', 34, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4044, 'Administrador', 42, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4045, 'Administrador', 39, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4046, 'Administrador', 40, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4047, 'Administrador', 41, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4048, 'Administrador', 38, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4049, 'Administrador', 44, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4050, 'Administrador', 45, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4051, 'Administrador', 47, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4052, 'Administrador', 46, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4053, 'Administrador', 43, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4054, 'Administrador', 17, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4055, 'Administrador', 15, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4056, 'Administrador', 16, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4057, 'Administrador', 18, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4058, 'Administrador', 19, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4059, 'Administrador', 20, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4060, 'Administrador', 21, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4061, 'Docente', 11, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4062, 'Docente', 10, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4063, 'Docente', 29, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4064, 'Docente', 28, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4065, 'Docente', 27, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4066, 'Docente', 22, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4067, 'Docente', 21, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4068, 'Estudiante', 10, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4069, 'Estudiante', 21, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4070, 'Operador', 1, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4071, 'Operador', 8, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4072, 'Operador', 9, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4073, 'Operador', 11, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4074, 'Operador', 10, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4075, 'Operador', 13, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4076, 'Operador', 12, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4077, 'Operador', 14, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4078, 'Operador', 28, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4079, 'Operador', 27, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4080, 'Operador', 26, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4081, 'Operador', 22, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4082, 'Operador', 31, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4083, 'Operador', 32, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4084, 'Operador', 30, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4085, 'Operador', 35, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4086, 'Operador', 36, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4087, 'Operador', 34, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4088, 'Operador', 42, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4089, 'Operador', 39, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4090, 'Operador', 40, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4091, 'Operador', 41, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4092, 'Operador', 38, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4093, 'Operador', 47, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4094, 'Operador', 46, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4095, 'Operador', 43, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4096, 'Operador', 17, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4097, 'Operador', 15, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4098, 'Operador', 16, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4099, 'Operador', 18, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4100, 'Operador', 19, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4101, 'Operador', 20, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4102, 'Operador', 21, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4103, 'Super Admin', 7, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4104, 'Super Admin', 2, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4105, 'Super Admin', 3, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4106, 'Super Admin', 4, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4107, 'Super Admin', 6, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4108, 'Super Admin', 5, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4109, 'Super Admin', 1, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4110, 'Super Admin', 8, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4111, 'Super Admin', 9, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4112, 'Super Admin', 11, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4113, 'Super Admin', 10, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4114, 'Super Admin', 13, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4115, 'Super Admin', 12, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4116, 'Super Admin', 14, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4117, 'Super Admin', 29, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4118, 'Super Admin', 23, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4119, 'Super Admin', 24, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4120, 'Super Admin', 25, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4121, 'Super Admin', 28, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4122, 'Super Admin', 27, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4123, 'Super Admin', 26, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4124, 'Super Admin', 22, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4125, 'Super Admin', 31, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4126, 'Super Admin', 32, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4127, 'Super Admin', 33, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4128, 'Super Admin', 30, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4129, 'Super Admin', 35, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4130, 'Super Admin', 36, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4131, 'Super Admin', 37, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4132, 'Super Admin', 34, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4133, 'Super Admin', 42, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4134, 'Super Admin', 39, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4135, 'Super Admin', 40, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4136, 'Super Admin', 41, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4137, 'Super Admin', 38, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4138, 'Super Admin', 44, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4139, 'Super Admin', 45, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4140, 'Super Admin', 47, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4141, 'Super Admin', 46, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4142, 'Super Admin', 43, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4143, 'Super Admin', 17, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4144, 'Super Admin', 15, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4145, 'Super Admin', 16, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4146, 'Super Admin', 18, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4147, 'Super Admin', 19, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4148, 'Super Admin', 20, '2026-03-19 22:13:29', '2026-03-19 22:13:29'),
-(4149, 'Super Admin', 21, '2026-03-19 22:13:29', '2026-03-19 22:13:29');
+(6042, 'Administrador', 2, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6043, 'Administrador', 3, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6044, 'Administrador', 4, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6045, 'Administrador', 5, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6046, 'Administrador', 1, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6047, 'Administrador', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6048, 'Administrador', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6049, 'Administrador', 11, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6050, 'Administrador', 10, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6051, 'Administrador', 13, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6052, 'Administrador', 12, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6053, 'Administrador', 14, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6054, 'Administrador', 29, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6055, 'Administrador', 23, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6056, 'Administrador', 24, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6057, 'Administrador', 25, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6058, 'Administrador', 28, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6059, 'Administrador', 27, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6060, 'Administrador', 26, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6061, 'Administrador', 22, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6062, 'Administrador', 31, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6063, 'Administrador', 32, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6064, 'Administrador', 33, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6065, 'Administrador', 30, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6066, 'Administrador', 35, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6067, 'Administrador', 36, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6068, 'Administrador', 37, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6069, 'Administrador', 34, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6070, 'Administrador', 42, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6071, 'Administrador', 39, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6072, 'Administrador', 40, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6073, 'Administrador', 41, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6074, 'Administrador', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6075, 'Administrador', 49, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6076, 'Administrador', 50, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6077, 'Administrador', 48, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6078, 'Administrador', 44, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6079, 'Administrador', 45, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6080, 'Administrador', 47, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6081, 'Administrador', 46, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6082, 'Administrador', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6083, 'Administrador', 17, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6084, 'Administrador', 15, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6085, 'Administrador', 16, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6086, 'Administrador', 18, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6087, 'Administrador', 19, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6088, 'Administrador', 20, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6089, 'Administrador', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6090, 'Consultor Agesoc', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6091, 'Consultor Agesoc', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6092, 'Consultor Agesoc', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6093, 'Consultor Agesoc', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6094, 'Consultor Agesoc', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6095, 'Consultor Asstracud', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6096, 'Consultor Asstracud', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6097, 'Consultor Asstracud', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6098, 'Consultor Asstracud', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6099, 'Consultor Asstracud', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6100, 'Docente', 11, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6101, 'Docente', 10, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6102, 'Docente', 29, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6103, 'Docente', 28, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6104, 'Docente', 27, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6105, 'Docente', 22, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6106, 'Docente', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6107, 'Estudiante', 10, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6108, 'Estudiante', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6109, 'Operador', 2, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6110, 'Operador', 3, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6111, 'Operador', 4, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6112, 'Operador', 1, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6113, 'Operador', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6114, 'Operador', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6115, 'Operador', 11, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6116, 'Operador', 10, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6117, 'Operador', 13, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6118, 'Operador', 12, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6119, 'Operador', 14, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6120, 'Operador', 23, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6121, 'Operador', 24, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6122, 'Operador', 25, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6123, 'Operador', 28, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6124, 'Operador', 27, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6125, 'Operador', 26, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6126, 'Operador', 22, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6127, 'Operador', 31, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6128, 'Operador', 32, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6129, 'Operador', 30, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6130, 'Operador', 35, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6131, 'Operador', 36, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6132, 'Operador', 34, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6133, 'Operador', 42, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6134, 'Operador', 39, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6135, 'Operador', 40, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6136, 'Operador', 41, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6137, 'Operador', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6138, 'Operador', 47, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6139, 'Operador', 46, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6140, 'Operador', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6141, 'Operador', 17, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6142, 'Operador', 15, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6143, 'Operador', 16, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6144, 'Operador', 18, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6145, 'Operador', 19, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6146, 'Operador', 20, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6147, 'Operador', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6148, 'Super Admin', 7, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6149, 'Super Admin', 2, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6150, 'Super Admin', 3, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6151, 'Super Admin', 4, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6152, 'Super Admin', 6, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6153, 'Super Admin', 5, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6154, 'Super Admin', 1, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6155, 'Super Admin', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6156, 'Super Admin', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6157, 'Super Admin', 11, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6158, 'Super Admin', 10, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6159, 'Super Admin', 13, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6160, 'Super Admin', 12, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6161, 'Super Admin', 14, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6162, 'Super Admin', 29, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6163, 'Super Admin', 23, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6164, 'Super Admin', 24, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6165, 'Super Admin', 25, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6166, 'Super Admin', 28, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6167, 'Super Admin', 27, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6168, 'Super Admin', 26, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6169, 'Super Admin', 22, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6170, 'Super Admin', 31, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6171, 'Super Admin', 32, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6172, 'Super Admin', 33, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6173, 'Super Admin', 30, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6174, 'Super Admin', 35, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6175, 'Super Admin', 36, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6176, 'Super Admin', 37, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6177, 'Super Admin', 34, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6178, 'Super Admin', 42, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6179, 'Super Admin', 39, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6180, 'Super Admin', 40, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6181, 'Super Admin', 41, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6182, 'Super Admin', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6183, 'Super Admin', 49, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6184, 'Super Admin', 50, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6185, 'Super Admin', 51, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6186, 'Super Admin', 48, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6187, 'Super Admin', 44, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6188, 'Super Admin', 45, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6189, 'Super Admin', 47, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6190, 'Super Admin', 46, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6191, 'Super Admin', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6192, 'Super Admin', 17, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6193, 'Super Admin', 15, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6194, 'Super Admin', 16, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6195, 'Super Admin', 18, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6196, 'Super Admin', 19, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6197, 'Super Admin', 20, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
+(6198, 'Super Admin', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46');
 
 -- --------------------------------------------------------
 
@@ -1081,10 +1111,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('0jAhMeUK0iZz2mndTEWiaQN76nOmaoQV8lMKiRKC', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicHlWNjJ0djZTV3VLcjNrOEdYWWg0TzNsYVFYZWZrQnN5SEMxTnFCbiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6OTI6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvbWVkaWEvd2VsY29tZV9iYW5uZXJzL01RTDFVbjgzcjQ0ME5xQU1qdzVLeUZUZmsxd2FMZ2R3Y3BQR1dmejAubXA0Ijt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1774022750),
-('2KmpfKZNHWQX0cdcqLjvpn0UVEDFUuKGApinws4w', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZWpRbTZCT2RpT1J3clNZeU9sNGc1Y2t1ZzZvR2JlUWc1MXJpa1hHbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODg6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMS9tZWRpYS93ZWxjb21lX2Jhbm5lcnMvZlVqa2xTM0FjMEU4V01HNXlDbTdsS2dmbENzTnBhZnR5SVliZVFxUC5tcDQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774023538),
-('qFNwYoV0tQ3jqKXMazoWqvuxZbS3e6mgacBkx9QV', NULL, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoieUdyYzNjUWtyaFdNR1Y3a212VGlHcmZ3bzNqbDBWT0gxeWNKY2xLNyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6OTI6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvbWVkaWEvd2VsY29tZV9iYW5uZXJzL2tPQ2ZVaWlhQ0hpNDJjV0VESHNjVXhvMHRWclJzNGt1d0RieFBBM2cubXA0Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1774022731),
-('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774025175);
+('Ioxfk0VmfGA7kf58wg6SFw9yeQkpIotPE5Ri2VHL', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiRDRla01sSjdEenRUbENTUzFGRFBaOER4eXU0SDVXaEI0cGtYMEI2eSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774039496),
+('jax2W3fTJjwibD2mLhpZKfrc88Yvvx5QyDFgJOYV', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVGFOVVAyQzJGc2pwUThNVG52M2JVRElqanBXbFNYYll2WXd3VU9sQiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvcm9sZXMiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774039310),
+('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774039455);
 
 -- --------------------------------------------------------
 
@@ -1118,12 +1147,12 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `apellido1`, `apellido2`, `email`, `phone`, `role`, `tipo_documento`, `numero_documento`, `servicio_area_id`, `vinculacion_contrato_id`, `sede_id`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'Carlos Jairton', 'Valderrama', 'Orobio', 'carjavalosistem@gmail.com', '302 5269287', 'Super Admin', 'DNI', '121424443', NULL, NULL, NULL, '2025-06-17 02:36:45', '$2y$12$EnOfSKid6Q0GxBR0ncZjde2okJWsrZIr999R7/gzJAEcAZJ2IIvPq', NULL, '2025-06-16 18:26:54', '2026-01-21 20:42:23'),
-(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Estudiante', 'Pasaporte', '6427785448', NULL, NULL, NULL, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'j0dduZyoADl5ZhNwc15KRF4o3JfB88ZYWDF8ShBaGyFI32krFPJpJqkN1mz5', '2025-06-17 02:17:36', '2026-03-13 21:29:28'),
-(37, 'Dos Estudiante', 'dos', 'dos', 'dos@estudiante.com', '+51987654323', 'Estudiante', 'Cédula', '1233321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$y1RMMw0/bqy4KgVa.L4DRetmOPVCm0ceI38zTioB0tbjlCRjjicYa', NULL, '2025-06-17 02:48:13', '2026-01-23 01:36:49'),
+(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Consultor Asstracud', 'Pasaporte', '6427785448', NULL, 3, 1, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'GUdU17tZdXNH2n8Ugdp9oNm78JrFMlRsUSTYUoWwazvdcKU9dVOq1IcfcUt9', '2025-06-17 02:17:36', '2026-03-20 19:39:50'),
+(37, 'Dos Estudiante', 'dos', 'dos', 'dos@estudiante.com', '+51987654323', 'Consultor Agesoc', 'Cédula', '1233321', NULL, 2, 1, '2025-06-17 05:04:04', '$2y$12$y1RMMw0/bqy4KgVa.L4DRetmOPVCm0ceI38zTioB0tbjlCRjjicYa', NULL, '2025-06-17 02:48:13', '2026-03-20 19:39:59'),
 (38, 'Usuario', 'Prueba', 'Verificado', 'test@example.com', '+51987654324', 'Estudiante', 'DNI', '87654321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$8RjSJS9V/WqEVYGKw8HQAuTI7G73FXCIcfbbCpK4sXUopD1dwyLCi', NULL, '2025-06-17 03:03:26', '2026-01-23 01:37:27'),
 (44, 'Jhon Andres', 'Carrillo', 'Bolaños', 'touma11913@gmail.com', '311 6306106', 'Operador', 'Cédula', '1143995780', NULL, NULL, NULL, '2025-12-12 18:00:34', '$2y$12$a8e/Y0JRjQieHsX2QgkUDertB9rhX/hSRx1m7XVpW8Xu6NGA.DdXy', 'QLPyS1gPoibKzWluPR9pge5TrlaGCqlENxxcOayq9iriFUIGGC265udoTN8Z', '2025-12-12 18:00:32', '2026-01-21 20:42:23'),
 (45, 'DocenteCurso', 'Prueba', 'Prueba', 'uno@docente.com', '+51987654326', 'Docente', 'Cédula', '987654321123', NULL, NULL, NULL, '2026-01-05 23:19:48', '$2y$12$MXkIdaF70ayAirlxuhBJie.8UqI.fo5gm0tXPW8b.KSOkY.m9iaWi', NULL, '2026-01-05 23:19:46', '2026-01-21 20:42:23'),
-(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Operador', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'HMGLvOtMJ0M8v61qLYAjEBAPW7WCv05YTsgRFzhA2AbsYm7LaGu3B0pMnn9n', '2026-01-06 17:36:28', '2026-03-17 20:18:19'),
+(46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Operador', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'r7YfsBR6vUOpCEc834ljnaI6NsbnCUgpE4pmALKANQR4jnwdExMCujsXMu2C', '2026-01-06 17:36:28', '2026-03-17 20:18:19'),
 (63, 'Julanin', 'pacual', 'Prueba', 'carjavalo1@hotmail.com', '3002588545', 'Estudiante', 'Cédula', '36985214147', NULL, 1, 1, '2026-01-24 02:12:10', '$2y$12$GZd5Ndjp/jiIPSia67J.le7qhOU/QvF3BtXRJxjmSTur0MHwIHKBi', NULL, '2026-01-24 02:11:04', '2026-02-05 01:56:04'),
 (74, 'Cinco', 'estudiante', 'Cinco', 'cinco@estudiante.com', '30003252232', 'Estudiante', 'Cédula', '123123123', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$UzocY2Q84yz39A0b6nSK1OfliXrtev1nQ95zXIcwjCATkvVncfMYq', NULL, '2026-02-05 23:48:14', '2026-02-05 23:48:14'),
 (75, 'seis', 'estudiante', 'seis', 'seis@estudiante.com', '3152555363', 'Estudiante', 'Cédula', '555555555', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$YLMxY6I0DPt2ZF0KG8iMl.qi1AeEcpJhj3UwJ7Di0Lcxl1CmMKHOK', NULL, '2026-02-05 23:48:17', '2026-02-05 23:48:17'),
@@ -1425,7 +1454,13 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (452, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:20:26', '2026-03-20 13:20:26', '2026-03-20 13:20:26'),
 (453, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:23:46', '2026-03-20 13:23:46', '2026-03-20 13:23:46'),
 (454, 1, 'carjavalosistem@gmail.com', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 13:57:58', '2026-03-20 13:57:58', '2026-03-20 13:57:58'),
-(455, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 15:45:03', '2026-03-20 15:45:03', '2026-03-20 15:45:03');
+(455, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 15:45:03', '2026-03-20 15:45:03', '2026-03-20 15:45:03'),
+(456, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 18:33:36', '2026-03-20 18:33:36', '2026-03-20 18:33:36'),
+(457, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 19:27:40', '2026-03-20 19:27:40', '2026-03-20 19:27:40'),
+(458, NULL, 'uno@estudiantes.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'failed', 'unverified', 'Credenciales inválidas', '2026-03-20 19:38:31', '2026-03-20 19:38:31', '2026-03-20 19:38:31'),
+(459, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 19:38:47', '2026-03-20 19:38:47', '2026-03-20 19:38:47'),
+(460, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 19:40:09', '2026-03-20 19:40:09', '2026-03-20 19:40:09'),
+(461, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 20:33:14', '2026-03-20 20:33:14', '2026-03-20 20:33:14');
 
 -- --------------------------------------------------------
 
@@ -1910,7 +1945,17 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (454, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:23:46\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:23:46', '2026-03-20 13:23:46'),
 (455, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 08:57:58\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 13:57:58', '2026-03-20 13:57:58'),
 (456, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 10:44:03\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 15:44:03', '2026-03-20 15:44:03'),
-(457, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 10:45:03\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 15:45:03', '2026-03-20 15:45:03');
+(457, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 10:45:03\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 15:45:03', '2026-03-20 15:45:03'),
+(458, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 12:42:42\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 17:42:42', '2026-03-20 17:42:42');
+INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`, `entity_id`, `description`, `details`, `ip_address`, `user_agent`, `created_at`, `updated_at`) VALUES
+(459, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 13:33:36\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 18:33:36', '2026-03-20 18:33:36'),
+(460, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-20 14:27:40\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:27:40', '2026-03-20 19:27:40'),
+(461, 46, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 14:38:13\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:38:13', '2026-03-20 19:38:13'),
+(462, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-20 14:38:47\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:38:47', '2026-03-20 19:38:47'),
+(463, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 14:40:05\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:40:05', '2026-03-20 19:40:05'),
+(464, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-20 14:40:09\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:40:09', '2026-03-20 19:40:09'),
+(465, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 15:33:11\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 20:33:11', '2026-03-20 20:33:11'),
+(466, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-20 15:33:14\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 20:33:14', '2026-03-20 20:33:14');
 
 -- --------------------------------------------------------
 
@@ -2365,13 +2410,13 @@ ALTER TABLE `mensajes_chat`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de la tabla `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT de la tabla `plantilla_certificados`
@@ -2389,7 +2434,7 @@ ALTER TABLE `procedimientos`
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `role_assignable_roles`
@@ -2401,7 +2446,7 @@ ALTER TABLE `role_assignable_roles`
 -- AUTO_INCREMENT de la tabla `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4150;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6199;
 
 --
 -- AUTO_INCREMENT de la tabla `sedes`
@@ -2425,13 +2470,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=456;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=462;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=458;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=467;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`
