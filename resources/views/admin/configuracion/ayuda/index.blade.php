@@ -67,14 +67,14 @@
                                         <iframe src="{{ $bannerActivo->getYoutubeEmbedUrl() }}" style="width: 100%; height: 280px; border: none; border-radius: 8px;" allowfullscreen></iframe>
                                     @elseif($bannerActivo->media_archivo)
                                         <video controls style="width: 100%; height: 280px; object-fit: contain; border-radius: 8px;">
-                                            <source src="{{ asset('storage/' . $bannerActivo->media_archivo) }}" type="video/mp4">
+                                            <source src="/media/{{ $bannerActivo->media_archivo }}" type="video/mp4">
                                         </video>
                                     @else
                                         <span style="color: rgba(255,255,255,0.5); font-size: 1.2rem;">VIDEO ILUSTRATIVO</span>
                                     @endif
                                 @else
                                     @if($bannerActivo->media_archivo)
-                                        <img src="{{ asset('storage/' . $bannerActivo->media_archivo) }}" style="width: 100%; height: 280px; object-fit: contain; border-radius: 8px;" alt="{{ $bannerActivo->media_titulo }}">
+                                        <img src="/media/{{ $bannerActivo->media_archivo }}" style="width: 100%; height: 280px; object-fit: contain; border-radius: 8px;" alt="{{ $bannerActivo->media_titulo }}">
                                     @else
                                         <span style="color: rgba(255,255,255,0.5); font-size: 1.2rem;">IMAGEN ILUSTRATIVA</span>
                                     @endif
@@ -171,7 +171,7 @@
                                 <button class="btn btn-sm btn-info btn-preview-media" data-id="{{ $banner->id }}" title="Vista previa">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <form action="{{ route('configuracion.ayuda.destroy', $banner->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este banner?');">
+                                <form action="/configuracion/ayuda/{{ $banner->id }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este banner?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
@@ -192,13 +192,15 @@
 <div class="modal fade" id="modalCrear" tabindex="-1" role="dialog" aria-labelledby="modalCrearLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="{{ route('configuracion.ayuda.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="formCrearBanner" action="/configuracion/ayuda" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="modalCrearLabel"><i class="fas fa-plus-circle mr-2"></i>Nuevo Banner / Contenido Multimedia</h5>
                     <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    {{-- Contenedor de errores del formulario --}}
+                    <div id="crear-form-errors" class="alert alert-danger" style="display:none;"></div>
                     <div class="row">
                         {{-- Configuración del Banner Superior --}}
                         <div class="col-md-12">
@@ -208,27 +210,27 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="banner_titulo"><strong>Título del Banner</strong> <span class="text-danger">*</span></label>
-                                <input type="text" name="banner_titulo" class="form-control" placeholder="Ej: Bienvenidos al Hospital Universitario" required>
+                                <label for="banner_titulo_crear"><strong>Título del Banner</strong> <span class="text-danger">*</span></label>
+                                <input type="text" name="banner_titulo" id="banner_titulo_crear" class="form-control" placeholder="Ej: Bienvenidos al Hospital Universitario" required>
                                 <small class="form-text text-muted">Este texto se muestra en la franja superior de la pantalla de inicio.</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="banner_subtitulo"><strong>Subtítulo</strong></label>
-                                <input type="text" name="banner_subtitulo" class="form-control" placeholder="Ej: Plataforma de Gestión Educativa">
+                                <label for="banner_subtitulo_crear"><strong>Subtítulo</strong></label>
+                                <input type="text" name="banner_subtitulo" id="banner_subtitulo_crear" class="form-control" placeholder="Ej: Plataforma de Gestión Educativa">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label><strong>Color de Fondo</strong></label>
-                                <input type="color" name="banner_color_fondo" class="form-control" value="#2c4370" style="height: 40px;">
+                                <label for="banner_color_fondo_crear"><strong>Color de Fondo</strong></label>
+                                <input type="color" name="banner_color_fondo" id="banner_color_fondo_crear" class="form-control" value="#2c4370" style="height: 40px;">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label><strong>Color del Texto</strong></label>
-                                <input type="color" name="banner_color_texto" class="form-control" value="#ffffff" style="height: 40px;">
+                                <label for="banner_color_texto_crear"><strong>Color del Texto</strong></label>
+                                <input type="color" name="banner_color_texto" id="banner_color_texto_crear" class="form-control" value="#ffffff" style="height: 40px;">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -249,8 +251,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label><strong>Tipo de Media</strong> <span class="text-danger">*</span></label>
-                                <select name="media_tipo" class="form-control select-media-tipo" required>
+                                <label for="media_tipo_crear"><strong>Tipo de Media</strong> <span class="text-danger">*</span></label>
+                                <select name="media_tipo" id="media_tipo_crear" class="form-control select-media-tipo" required>
                                     <option value="video">Video</option>
                                     <option value="imagen">Imagen</option>
                                 </select>
@@ -258,32 +260,42 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label><strong>Título del Media</strong></label>
-                                <input type="text" name="media_titulo" class="form-control" placeholder="Ej: Video institucional 2026">
+                                <label for="media_titulo_crear"><strong>Título del Media</strong></label>
+                                <input type="text" name="media_titulo" id="media_titulo_crear" class="form-control" placeholder="Ej: Video institucional 2026">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label><strong>Subir Archivo</strong></label>
+                                <label for="media_archivo_crear"><strong>Subir Archivo</strong></label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="media_archivo" id="media_archivo_crear" accept="video/mp4,video/webm,video/ogg,image/jpeg,image/png,image/gif,image/webp">
                                     <label class="custom-file-label" for="media_archivo_crear" data-browse="Explorar">Seleccionar archivo...</label>
                                 </div>
-                                <small class="form-text text-muted">Formatos: MP4, WebM, OGG, JPG, PNG, GIF, WebP. Máx: 100MB</small>
+                                <small class="form-text text-muted">Formatos: MP4, WebM, OGG, JPG, PNG, GIF, WebP. Máx: 50MB</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label><strong>O URL externa (YouTube, etc.)</strong></label>
-                                <input type="url" name="media_url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                                <label for="media_url_crear"><strong>O URL externa (YouTube, etc.)</strong></label>
+                                <input type="url" name="media_url" id="media_url_crear" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
                                 <small class="form-text text-muted">Si se especifica URL, tiene prioridad sobre el archivo subido.</small>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Guardar Banner</button>
+                <div class="modal-footer d-block">
+                    <div class="upload-progress mb-2">
+                        <small class="text-muted"><i class="fas fa-cloud-upload-alt mr-1"></i> Subiendo archivo...</small>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-submit-banner" id="btnGuardarBanner">
+                            <i class="fas fa-save mr-1"></i> Guardar Banner
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -295,7 +307,7 @@
 <div class="modal fade" id="modalEditar{{ $banner->id }}" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="{{ route('configuracion.ayuda.update', $banner->id) }}" method="POST" enctype="multipart/form-data">
+            <form class="form-banner-submit" action="/configuracion/ayuda/{{ $banner->id }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
                 @method('PUT')
                 <div class="modal-header bg-warning">
@@ -303,6 +315,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-danger form-errors-container" style="display:none;"></div>
                     <div class="row">
                         <div class="col-md-12">
                             <h6 class="text-primary border-bottom pb-2 mb-3">
@@ -397,9 +410,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning"><i class="fas fa-save mr-1"></i> Actualizar</button>
+                <div class="modal-footer d-block">
+                    <div class="upload-progress mb-2">
+                        <small class="text-muted"><i class="fas fa-cloud-upload-alt mr-1"></i> Subiendo archivo...</small>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning btn-submit-banner"><i class="fas fa-save mr-1"></i> Actualizar</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -439,16 +460,194 @@
     #sortable-banners tr:hover {
         background-color: rgba(0,123,255,0.05);
     }
+    .btn-submit-banner.loading {
+        pointer-events: none;
+        opacity: 0.75;
+    }
+    .upload-progress {
+        display: none;
+        margin-top: 10px;
+    }
+    .upload-progress .progress {
+        height: 25px;
+    }
+    .upload-progress .progress-bar {
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 25px;
+    }
 </style>
 @stop
 
 @section('js')
 <script>
 $(document).ready(function() {
+
+    // =============================================
+    // MANEJO ROBUSTO DE ENVÍO DE FORMULARIOS
+    // =============================================
+    var MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+    function validarFormulario(form) {
+        var errores = [];
+        var titulo = form.find('input[name="banner_titulo"]').val();
+        if (!titulo || titulo.trim() === '') {
+            errores.push('El título del banner es obligatorio.');
+        }
+        // Validar tamaño de archivo
+        var fileInput = form.find('input[name="media_archivo"]')[0];
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            var file = fileInput.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                var sizeMB = (file.size / 1024 / 1024).toFixed(1);
+                errores.push('El archivo es demasiado grande (' + sizeMB + 'MB). Máximo permitido: 50MB.');
+            }
+        }
+        return errores;
+    }
+
+    function mostrarErrores(form, errores) {
+        var container = form.find('.form-errors-container, #crear-form-errors');
+        if (container.length) {
+            var html = '<ul class="mb-0">';
+            errores.forEach(function(err) { html += '<li>' + err + '</li>'; });
+            html += '</ul>';
+            container.html(html).slideDown(200);
+            container[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            alert(errores.join('\n'));
+        }
+    }
+
+    function enviarFormularioAjax(form) {
+        var errores = validarFormulario(form);
+        if (errores.length > 0) {
+            mostrarErrores(form, errores);
+            return;
+        }
+
+        var btn = form.find('.btn-submit-banner');
+        var btnTextoOriginal = btn.html();
+        var errorContainer = form.find('.form-errors-container, #crear-form-errors');
+
+        // Ocultar errores previos
+        errorContainer.hide();
+
+        // Mostrar estado de carga
+        btn.addClass('loading').html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
+        btn.prop('disabled', true);
+
+        var formData = new FormData(form[0]);
+        var actionUrl = form.attr('action');
+        
+        // Asegurar URL absoluta con el origen actual
+        if (actionUrl.startsWith('/')) {
+            actionUrl = window.location.origin + actionUrl;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open(form.attr('method') || 'POST', actionUrl, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Accept', 'text/html, application/json');
+
+        // Mostrar barra de progreso si hay archivo
+        var fileInput = form.find('input[name="media_archivo"]')[0];
+        var tieneArchivo = fileInput && fileInput.files && fileInput.files.length > 0;
+        var progressBar = form.find('.upload-progress');
+        
+        if (tieneArchivo && progressBar.length) {
+            progressBar.show();
+        }
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable && progressBar.length) {
+                var percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.find('.progress-bar').css('width', percent + '%').text(percent + '%');
+            }
+        });
+
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                // Éxito - recargar página
+                window.location.reload();
+            } else if (xhr.status === 422) {
+                // Error de validación Laravel
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    var errs = [];
+                    if (response.errors) {
+                        Object.keys(response.errors).forEach(function(key) {
+                            response.errors[key].forEach(function(msg) { errs.push(msg); });
+                        });
+                    } else if (response.message) {
+                        errs.push(response.message);
+                    }
+                    mostrarErrores(form, errs);
+                } catch(e) {
+                    mostrarErrores(form, ['Error de validación. Verifica los campos.']);
+                }
+                btn.removeClass('loading').html(btnTextoOriginal).prop('disabled', false);
+                progressBar.hide();
+            } else if (xhr.status === 419) {
+                mostrarErrores(form, ['La sesión ha expirado. Recarga la página e intenta de nuevo.']);
+                btn.removeClass('loading').html(btnTextoOriginal).prop('disabled', false);
+                progressBar.hide();
+            } else {
+                mostrarErrores(form, ['Error del servidor (código ' + xhr.status + '). Intenta de nuevo o contacta al administrador.']);
+                btn.removeClass('loading').html(btnTextoOriginal).prop('disabled', false);
+                progressBar.hide();
+                console.error('Error en envío de banner:', xhr.status, xhr.responseText);
+            }
+        };
+
+        xhr.onerror = function() {
+            mostrarErrores(form, ['Error de conexión. Verifica tu conexión a internet e intenta de nuevo.']);
+            btn.removeClass('loading').html(btnTextoOriginal).prop('disabled', false);
+            progressBar.hide();
+            console.error('Error de red al enviar formulario de banner');
+        };
+
+        xhr.ontimeout = function() {
+            mostrarErrores(form, ['La solicitud tardó demasiado tiempo. Si estás subiendo un archivo grande, intenta con uno más pequeño o usa una URL de YouTube.']);
+            btn.removeClass('loading').html(btnTextoOriginal).prop('disabled', false);
+            progressBar.hide();
+        };
+
+        xhr.timeout = 300000; // 5 minutos
+        xhr.send(formData);
+    }
+
+    // Interceptar envío del formulario de CREAR
+    $('#formCrearBanner').on('submit', function(e) {
+        e.preventDefault();
+        enviarFormularioAjax($(this));
+    });
+
+    // Interceptar envío de formularios de EDITAR
+    $(document).on('submit', '.form-banner-submit', function(e) {
+        e.preventDefault();
+        enviarFormularioAjax($(this));
+    });
+
     // Actualizar label del file input al seleccionar archivo
     $(document).on('change', '.custom-file-input', function() {
         var fileName = $(this).val().split('\\').pop();
         $(this).siblings('.custom-file-label').addClass('selected').html(fileName || 'Seleccionar archivo...');
+        
+        // Validar tamaño inmediatamente
+        if (this.files && this.files.length > 0) {
+            var file = this.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                var sizeMB = (file.size / 1024 / 1024).toFixed(1);
+                var form = $(this).closest('form');
+                mostrarErrores(form, ['El archivo seleccionado es demasiado grande (' + sizeMB + 'MB). Máximo permitido: 50MB. Considera usar una URL de YouTube en lugar de subir el archivo.']);
+                $(this).val('');
+                $(this).siblings('.custom-file-label').html('Seleccionar archivo...');
+            } else {
+                var form = $(this).closest('form');
+                form.find('.form-errors-container, #crear-form-errors').slideUp(200);
+            }
+        }
     });
 
     // Toggle activo/inactivo
@@ -457,7 +656,7 @@ $(document).ready(function() {
         var id = btn.data('id');
 
         $.ajax({
-            url: '{{ url("configuracion/ayuda") }}/' + id + '/toggle',
+            url: '/configuracion/ayuda/' + id + '/toggle',
             type: 'POST',
             data: { _token: '{{ csrf_token() }}' },
             success: function(response) {
@@ -498,9 +697,9 @@ $(document).ready(function() {
                     html = '<iframe src="https://www.youtube.com/embed/' + videoId + '" style="width:100%;height:450px;border:none;" allowfullscreen></iframe>';
                 }
             } else if (banner.media_tipo === 'video' && banner.media_archivo) {
-                html = '<video controls autoplay style="max-width:100%;max-height:450px;"><source src="{{ asset("storage") }}/' + banner.media_archivo + '" type="video/mp4"></video>';
+                html = '<video controls autoplay style="max-width:100%;max-height:450px;"><source src="/media/' + banner.media_archivo + '" type="video/mp4"></video>';
             } else if (banner.media_tipo === 'imagen' && banner.media_archivo) {
-                html = '<img src="{{ asset("storage") }}/' + banner.media_archivo + '" style="max-width:100%;max-height:450px;" alt="Vista previa">';
+                html = '<img src="/media/' + banner.media_archivo + '" style="max-width:100%;max-height:450px;" alt="Vista previa">';
             } else {
                 html = '<p class="text-white mt-5">No hay media configurado para este banner.</p>';
             }
@@ -515,6 +714,11 @@ $(document).ready(function() {
     // Limpiar iframe/video al cerrar modal preview
     $('#modalPreviewMedia').on('hidden.bs.modal', function () {
         $('#preview-media-body').html('<p class="text-muted">Cargando...</p>');
+    });
+
+    // Limpiar errores al abrir modales
+    $('.modal').on('show.bs.modal', function() {
+        $(this).find('.form-errors-container, #crear-form-errors').hide();
     });
 });
 </script>

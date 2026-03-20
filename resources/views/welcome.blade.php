@@ -378,7 +378,7 @@
                             <iframe src="{{ $banner->getYoutubeEmbedUrl() }}?autoplay=1&mute=1&rel=0&loop=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                         @elseif($banner->media_archivo)
                             <video controls autoplay muted loop>
-                                <source src="{{ asset('storage/' . $banner->media_archivo) }}" type="video/mp4">
+                                <source src="/media/{{ $banner->media_archivo }}" type="video/mp4">
                                 Tu navegador no soporta la reproducción de video.
                             </video>
                         @else
@@ -389,7 +389,7 @@
                         @endif
                     @else
                         @if($banner->media_archivo)
-                            <img src="{{ asset('storage/' . $banner->media_archivo) }}" alt="{{ $banner->media_titulo ?? 'Imagen ilustrativa' }}">
+                            <img src="/media/{{ $banner->media_archivo }}" alt="{{ $banner->media_titulo ?? 'Imagen ilustrativa' }}">
                         @else
                             <div class="media-placeholder">
                                 <i class="fas fa-image"></i>

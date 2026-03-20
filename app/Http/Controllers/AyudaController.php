@@ -56,26 +56,38 @@ class AyudaController extends Controller
             'banner_color_fondo' => 'nullable|string|max:20',
             'banner_color_texto' => 'nullable|string|max:20',
             'media_tipo'         => 'required|in:video,imagen',
-            'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:102400',
+            'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:51200',
             'media_url'          => 'nullable|url|max:500',
             'media_titulo'       => 'nullable|string|max:255',
         ]);
 
-        $data = $request->except('media_archivo');
-        $data['activo'] = $request->has('activo') ? 1 : 0;
-        $data['orden'] = WelcomeBanner::max('orden') + 1;
+        try {
+            $data = $request->except('media_archivo');
+            $data['activo'] = $request->has('activo') ? 1 : 0;
+            $data['orden'] = WelcomeBanner::max('orden') + 1;
 
-        // Subir archivo si se proporciona
-        if ($request->hasFile('media_archivo')) {
-            $archivo = $request->file('media_archivo');
-            $path = $archivo->store('welcome_banners', 'public');
-            $data['media_archivo'] = $path;
+            // Subir archivo si se proporciona
+            if ($request->hasFile('media_archivo')) {
+                $archivo = $request->file('media_archivo');
+                $path = $archivo->store('welcome_banners', 'public');
+                $data['media_archivo'] = $path;
+            }
+
+            WelcomeBanner::create($data);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Banner creado exitosamente.']);
+            }
+
+            return redirect()->route('configuracion.ayuda')
+                ->with('success', 'Banner creado exitosamente.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Error al crear el banner: ' . $e->getMessage()], 500);
+            }
+            return redirect()->route('configuracion.ayuda')
+                ->with('error', 'Error al crear el banner: ' . $e->getMessage());
         }
-
-        WelcomeBanner::create($data);
-
-        return redirect()->route('configuracion.ayuda')
-            ->with('success', 'Banner creado exitosamente.');
     }
 
     /**
@@ -92,29 +104,41 @@ class AyudaController extends Controller
             'banner_color_fondo' => 'nullable|string|max:20',
             'banner_color_texto' => 'nullable|string|max:20',
             'media_tipo'         => 'required|in:video,imagen',
-            'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:102400',
+            'media_archivo'      => 'nullable|file|mimes:mp4,webm,ogg,jpg,jpeg,png,gif,webp|max:51200',
             'media_url'          => 'nullable|url|max:500',
             'media_titulo'       => 'nullable|string|max:255',
         ]);
 
-        $data = $request->except(['media_archivo', '_method', '_token']);
-        $data['activo'] = $request->has('activo') ? 1 : 0;
+        try {
+            $data = $request->except(['media_archivo', '_method', '_token']);
+            $data['activo'] = $request->has('activo') ? 1 : 0;
 
-        // Subir nuevo archivo si se proporciona
-        if ($request->hasFile('media_archivo')) {
-            // Eliminar archivo anterior
-            if ($banner->media_archivo) {
-                Storage::disk('public')->delete($banner->media_archivo);
+            // Subir nuevo archivo si se proporciona
+            if ($request->hasFile('media_archivo')) {
+                // Eliminar archivo anterior
+                if ($banner->media_archivo) {
+                    Storage::disk('public')->delete($banner->media_archivo);
+                }
+                $archivo = $request->file('media_archivo');
+                $path = $archivo->store('welcome_banners', 'public');
+                $data['media_archivo'] = $path;
             }
-            $archivo = $request->file('media_archivo');
-            $path = $archivo->store('welcome_banners', 'public');
-            $data['media_archivo'] = $path;
+
+            $banner->update($data);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Banner actualizado exitosamente.']);
+            }
+
+            return redirect()->route('configuracion.ayuda')
+                ->with('success', 'Banner actualizado exitosamente.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Error al actualizar el banner: ' . $e->getMessage()], 500);
+            }
+            return redirect()->route('configuracion.ayuda')
+                ->with('error', 'Error al actualizar el banner: ' . $e->getMessage());
         }
-
-        $banner->update($data);
-
-        return redirect()->route('configuracion.ayuda')
-            ->with('success', 'Banner actualizado exitosamente.');
     }
 
     /**

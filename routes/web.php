@@ -19,6 +19,55 @@ use App\Http\Controllers\PublicidadProductoController;
 use App\Http\Controllers\CertificadoEditorController;
 use App\Http\Controllers\VerificacionCertificadoController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+// ── Ruta para servir archivos de storage público (alternativa al symlink en cPanel) ──
+Route::get('/media/{path}', function ($path) {
+    $disk = Storage::disk('public');
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+    $fullPath = $disk->path($path);
+    $mimeType = mime_content_type($fullPath) ?: 'application/octet-stream';
+    $size = filesize($fullPath);
+
+    // Para videos, soportar Range requests (streaming)
+    if (str_starts_with($mimeType, 'video/')) {
+        $request = request();
+        $headers = [
+            'Content-Type' => $mimeType,
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'public, max-age=86400',
+        ];
+
+        if ($request->hasHeader('Range')) {
+            $range = $request->header('Range');
+            preg_match('/bytes=(\d+)-(\d*)/', $range, $matches);
+            $start = intval($matches[1]);
+            $end = !empty($matches[2]) ? intval($matches[2]) : $size - 1;
+            $length = $end - $start + 1;
+
+            $headers['Content-Range'] = "bytes $start-$end/$size";
+            $headers['Content-Length'] = $length;
+
+            $stream = fopen($fullPath, 'rb');
+            fseek($stream, $start);
+            $data = fread($stream, $length);
+            fclose($stream);
+
+            return response($data, 206, $headers);
+        }
+
+        $headers['Content-Length'] = $size;
+        return response()->file($fullPath, $headers);
+    }
+
+    // Para otros archivos (imágenes, etc.)
+    return response()->file($fullPath, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('path', '.*')->name('media.serve');
 
 // ── Rutas públicas de verificación de certificados (sin autenticación) ──
 Route::get('/verificar-certificado', [VerificacionCertificadoController::class, 'formulario'])->name('verificar.formulario');
