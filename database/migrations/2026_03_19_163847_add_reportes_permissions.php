@@ -22,27 +22,35 @@ return new class extends Migration
             ['name' => 'reportes.export',   'display_name' => 'Exportar Reportes a Excel',  'group' => 'Reportes', 'created_at' => $now, 'updated_at' => $now],
         ];
 
-        DB::table('permissions')->insert($permissions);
+        foreach ($permissions as $perm) {
+            if (!DB::table('permissions')->where('name', $perm['name'])->exists()) {
+                DB::table('permissions')->insert($perm);
+            }
+        }
 
         // Asignar todos los permisos de reportes al Super Admin
         $permIds = DB::table('permissions')->where('group', 'Reportes')->pluck('id');
         foreach ($permIds as $permId) {
-            DB::table('role_permissions')->insert([
-                'role_name'     => 'Super Admin',
-                'permission_id' => $permId,
-                'created_at'    => $now,
-                'updated_at'    => $now,
-            ]);
+            if (!DB::table('role_permissions')->where('role_name', 'Super Admin')->where('permission_id', $permId)->exists()) {
+                DB::table('role_permissions')->insert([
+                    'role_name'     => 'Super Admin',
+                    'permission_id' => $permId,
+                    'created_at'    => $now,
+                    'updated_at'    => $now,
+                ]);
+            }
         }
 
         // Asignar permisos de reportes al Administrador
         foreach ($permIds as $permId) {
-            DB::table('role_permissions')->insert([
-                'role_name'     => 'Administrador',
-                'permission_id' => $permId,
-                'created_at'    => $now,
-                'updated_at'    => $now,
-            ]);
+            if (!DB::table('role_permissions')->where('role_name', 'Administrador')->where('permission_id', $permId)->exists()) {
+                DB::table('role_permissions')->insert([
+                    'role_name'     => 'Administrador',
+                    'permission_id' => $permId,
+                    'created_at'    => $now,
+                    'updated_at'    => $now,
+                ]);
+            }
         }
     }
 
