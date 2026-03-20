@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('welcome_banners')) {
+            return;
+        }
+
         Schema::create('welcome_banners', function (Blueprint $table) {
             $table->id();
             $table->string('banner_titulo')->nullable();
