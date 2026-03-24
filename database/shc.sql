@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-03-2026 a las 21:44:56
+-- Tiempo de generación: 24-03-2026 a las 14:48:46
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -934,7 +934,6 @@ INSERT INTO `role_permissions` (`id`, `role_name`, `permission_id`, `created_at`
 (6089, 'Administrador', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
 (6090, 'Consultor Agesoc', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
 (6091, 'Consultor Agesoc', 9, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
-(6092, 'Consultor Agesoc', 38, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
 (6093, 'Consultor Agesoc', 43, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
 (6094, 'Consultor Agesoc', 21, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
 (6095, 'Consultor Asstracud', 8, '2026-03-20 20:36:46', '2026-03-20 20:36:46'),
@@ -1111,9 +1110,10 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('Ioxfk0VmfGA7kf58wg6SFw9yeQkpIotPE5Ri2VHL', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiRDRla01sSjdEenRUbENTUzFGRFBaOER4eXU0SDVXaEI0cGtYMEI2eSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774039496),
-('jax2W3fTJjwibD2mLhpZKfrc88Yvvx5QyDFgJOYV', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVGFOVVAyQzJGc2pwUThNVG52M2JVRElqanBXbFNYYll2WXd3VU9sQiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvcm9sZXMiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774039310),
-('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774039455);
+('pHkngnVi72ouPY586vAOiSfTWWMLD0ziW7wuq3bl', NULL, NULL, '', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiaGNPcnFFanNYWmFzaDlKSVNsbG9wWU5FR2lBSWQxblB3Vjd4clJzUCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODoiaHR0cDovLzoiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1774356248),
+('RFmNZFjxcYEJKTnBUXjU1YFja8i5himCBzBKMwia', 46, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaXRZOHRId2RaNVlVVjlkWEhKNzZJM2RTbHl3RGxYYkxqZWE1Q05EdyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDY7fQ==', 1774360103),
+('RiRDDpMbfI24NQLNVgE4rycN3VbASsSXKCmcavGG', 1, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoibU9lR0VtNUxxZUFTd3JhbEVQTzB4alllYVNzY3J5ZzNiOEhHM3drcyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvdXNlcnMiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1774357133),
+('ZOwALcTIUu6yNt7UdpUDJ8gkgvzHPhVw20T1R0Mc', 79, '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoieW55Y2F1cVlBWVZsUXVSZzgzTDlmemZHNlRTREdrN3JRZ1FJQ2ozaCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHA6Ly8xOTIuMTY4LjIuMjAwOjgwMDEvdHJhY2tpbmcvb3BlcmF0aW9ucyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc5O30=', 1774357136);
 
 -- --------------------------------------------------------
 
@@ -1147,17 +1147,19 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `apellido1`, `apellido2`, `email`, `phone`, `role`, `tipo_documento`, `numero_documento`, `servicio_area_id`, `vinculacion_contrato_id`, `sede_id`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'Carlos Jairton', 'Valderrama', 'Orobio', 'carjavalosistem@gmail.com', '302 5269287', 'Super Admin', 'DNI', '121424443', NULL, NULL, NULL, '2025-06-17 02:36:45', '$2y$12$EnOfSKid6Q0GxBR0ncZjde2okJWsrZIr999R7/gzJAEcAZJ2IIvPq', NULL, '2025-06-16 18:26:54', '2026-01-21 20:42:23'),
-(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Consultor Asstracud', 'Pasaporte', '6427785448', NULL, 3, 1, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'GUdU17tZdXNH2n8Ugdp9oNm78JrFMlRsUSTYUoWwazvdcKU9dVOq1IcfcUt9', '2025-06-17 02:17:36', '2026-03-20 19:39:50'),
-(37, 'Dos Estudiante', 'dos', 'dos', 'dos@estudiante.com', '+51987654323', 'Consultor Agesoc', 'Cédula', '1233321', NULL, 2, 1, '2025-06-17 05:04:04', '$2y$12$y1RMMw0/bqy4KgVa.L4DRetmOPVCm0ceI38zTioB0tbjlCRjjicYa', NULL, '2025-06-17 02:48:13', '2026-03-20 19:39:59'),
-(38, 'Usuario', 'Prueba', 'Verificado', 'test@example.com', '+51987654324', 'Estudiante', 'DNI', '87654321', NULL, NULL, NULL, '2025-06-17 05:04:04', '$2y$12$8RjSJS9V/WqEVYGKw8HQAuTI7G73FXCIcfbbCpK4sXUopD1dwyLCi', NULL, '2025-06-17 03:03:26', '2026-01-23 01:37:27'),
+(36, 'Uno Estudiante', 'uno', 'uno', 'uno@estudiante.com', '+51987654322', 'Estudiante', 'Pasaporte', '6427785448', NULL, 3, 1, '2025-06-17 02:19:51', '$2y$12$StNFxknxExNgSqNAjmUm7.HS70qnEEojUDTx3nV74SK0ojFU0p3AK', 'qqOUpi6Y329DYfvfpS6kJ2cJWk3Pgk6aaWZ315uMys8QqrigERnq4mocLwBL', '2025-06-17 02:17:36', '2026-03-24 12:17:21'),
+(37, 'Dos Estudiante', 'dos', 'dos', 'dos@estudiante.com', '+51987654323', 'Estudiante', 'Cédula', '1233321', NULL, 2, 1, '2025-06-17 05:04:04', '$2y$12$y1RMMw0/bqy4KgVa.L4DRetmOPVCm0ceI38zTioB0tbjlCRjjicYa', NULL, '2025-06-17 02:48:13', '2026-03-24 12:17:33'),
+(38, 'Usuario', 'Prueba', 'Verificado', 'test@example.com', '+51987654324', 'Estudiante', 'DNI', '87654321', 1, 3, 1, '2025-06-17 05:04:04', '$2y$12$KJ48eKqi78WIH3twnRkjRePso2FU3/wrV5L5tzNo51kWzVCTuGxeO', NULL, '2025-06-17 03:03:26', '2026-03-24 12:58:53'),
 (44, 'Jhon Andres', 'Carrillo', 'Bolaños', 'touma11913@gmail.com', '311 6306106', 'Operador', 'Cédula', '1143995780', NULL, NULL, NULL, '2025-12-12 18:00:34', '$2y$12$a8e/Y0JRjQieHsX2QgkUDertB9rhX/hSRx1m7XVpW8Xu6NGA.DdXy', 'QLPyS1gPoibKzWluPR9pge5TrlaGCqlENxxcOayq9iriFUIGGC265udoTN8Z', '2025-12-12 18:00:32', '2026-01-21 20:42:23'),
 (45, 'DocenteCurso', 'Prueba', 'Prueba', 'uno@docente.com', '+51987654326', 'Docente', 'Cédula', '987654321123', NULL, NULL, NULL, '2026-01-05 23:19:48', '$2y$12$MXkIdaF70ayAirlxuhBJie.8UqI.fo5gm0tXPW8b.KSOkY.m9iaWi', NULL, '2026-01-05 23:19:46', '2026-01-21 20:42:23'),
 (46, 'Tres Estudiante', 'Estudiante', 'Tres', 'tres@estudiante.com', '+51987654327', 'Operador', 'Cédula', '1143995781', NULL, 1, 1, '2026-01-06 17:36:28', '$2y$12$9AwYRyLI0via2rqHKuSOneQCa4C5wTgZuZeOkghXKa5G.EIR8Jd72', 'r7YfsBR6vUOpCEc834ljnaI6NsbnCUgpE4pmALKANQR4jnwdExMCujsXMu2C', '2026-01-06 17:36:28', '2026-03-17 20:18:19'),
-(63, 'Julanin', 'pacual', 'Prueba', 'carjavalo1@hotmail.com', '3002588545', 'Estudiante', 'Cédula', '36985214147', NULL, 1, 1, '2026-01-24 02:12:10', '$2y$12$GZd5Ndjp/jiIPSia67J.le7qhOU/QvF3BtXRJxjmSTur0MHwIHKBi', NULL, '2026-01-24 02:11:04', '2026-02-05 01:56:04'),
+(63, 'Julanin', 'pacual', 'Prueba', 'carjavalo1@hotmail.com', '3002588545', 'Estudiante', 'Cédula', '36985214147', NULL, 2, 1, '2026-01-24 02:12:10', '$2y$12$GZd5Ndjp/jiIPSia67J.le7qhOU/QvF3BtXRJxjmSTur0MHwIHKBi', NULL, '2026-01-24 02:11:04', '2026-03-24 12:14:03'),
 (74, 'Cinco', 'estudiante', 'Cinco', 'cinco@estudiante.com', '30003252232', 'Estudiante', 'Cédula', '123123123', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$UzocY2Q84yz39A0b6nSK1OfliXrtev1nQ95zXIcwjCATkvVncfMYq', NULL, '2026-02-05 23:48:14', '2026-02-05 23:48:14'),
 (75, 'seis', 'estudiante', 'seis', 'seis@estudiante.com', '3152555363', 'Estudiante', 'Cédula', '555555555', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$YLMxY6I0DPt2ZF0KG8iMl.qi1AeEcpJhj3UwJ7Di0Lcxl1CmMKHOK', NULL, '2026-02-05 23:48:17', '2026-02-05 23:48:17'),
 (76, 'cuatro', 'estudiante', 'cuatro', 'cuatro@estudiante.com', '3123223536', 'Estudiante', 'Cédula', '321321321', NULL, NULL, NULL, '2026-02-05 23:48:14', '$2y$12$JesjImtQK9y50B2Li7PRvOWOv6H5eHaJn4f.1aiargX7qWsZvwbse', NULL, '2026-02-05 23:48:19', '2026-02-05 23:48:19'),
-(77, 'docente', 'conocimiento', 'sabiduria', 'dos@docente.com', NULL, 'Docente', 'Cédula', '963852741', 9, 5, 1, '2026-03-13 13:19:27', '$2y$12$nVY67dZeHhZENsHa0b5L1OGfuxlusssU1w8jI3VoQxyjaVjiHmyGS', NULL, '2026-03-13 18:18:43', '2026-03-13 18:18:43');
+(77, 'docente', 'conocimiento', 'sabiduria', 'dos@docente.com', NULL, 'Docente', 'Cédula', '963852741', 9, 5, 1, '2026-03-13 13:19:27', '$2y$12$nVY67dZeHhZENsHa0b5L1OGfuxlusssU1w8jI3VoQxyjaVjiHmyGS', NULL, '2026-03-13 18:18:43', '2026-03-13 18:18:43'),
+(78, 'uno', 'Consultor', 'agesoc', 'uno@consultor.com', NULL, 'Consultor Agesoc', 'Cédula', '999888777444', 1, 2, 1, '2026-03-24 12:17:11', '$2y$12$98mXMzu/WguWcJlUCLiYQuUNXPgyltYmyL5YhBPAZJPfjT8vdIt2G', NULL, '2026-03-24 12:17:09', '2026-03-24 12:17:09'),
+(79, 'consultor Asstracod', 'consultor', 'Asstracud', 'dos@consultor.com', NULL, 'Consultor Asstracud', 'Cédula', '111222333444', 1, 3, 1, '2026-03-24 12:19:31', '$2y$12$9JuPEHDpX8OA2BNN79gdE.SVu27/.qI4rvRhwxSZGDa10F6PekxMS', NULL, '2026-03-24 12:19:29', '2026-03-24 12:19:29');
 
 -- --------------------------------------------------------
 
@@ -1460,7 +1462,16 @@ INSERT INTO `user_logins` (`id`, `user_id`, `email`, `ip_address`, `user_agent`,
 (458, NULL, 'uno@estudiantes.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'failed', 'unverified', 'Credenciales inválidas', '2026-03-20 19:38:31', '2026-03-20 19:38:31', '2026-03-20 19:38:31'),
 (459, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 19:38:47', '2026-03-20 19:38:47', '2026-03-20 19:38:47'),
 (460, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 19:40:09', '2026-03-20 19:40:09', '2026-03-20 19:40:09'),
-(461, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 20:33:14', '2026-03-20 20:33:14', '2026-03-20 20:33:14');
+(461, 46, 'tres@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', 'success', 'verified', NULL, '2026-03-20 20:33:14', '2026-03-20 20:33:14', '2026-03-20 20:33:14'),
+(462, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-20 21:11:41', '2026-03-20 21:11:41', '2026-03-20 21:11:41'),
+(463, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:03:21', '2026-03-24 12:03:21', '2026-03-24 12:03:21'),
+(464, 1, 'carjavalosistem@gmail.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:09:15', '2026-03-24 12:09:15', '2026-03-24 12:09:15'),
+(465, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'failed', 'verified', 'Credenciales inválidas', '2026-03-24 12:10:19', '2026-03-24 12:10:19', '2026-03-24 12:10:19'),
+(466, 36, 'uno@estudiante.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:10:33', '2026-03-24 12:10:33', '2026-03-24 12:10:33'),
+(467, 78, 'uno@consultor.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:28:35', '2026-03-24 12:28:35', '2026-03-24 12:28:35'),
+(468, 38, 'test@example.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:35:29', '2026-03-24 12:35:29', '2026-03-24 12:35:29'),
+(469, 78, 'uno@consultor.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:38:45', '2026-03-24 12:38:45', '2026-03-24 12:38:45'),
+(470, 79, 'dos@consultor.com', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'success', 'verified', NULL, '2026-03-24 12:57:52', '2026-03-24 12:57:52', '2026-03-24 12:57:52');
 
 -- --------------------------------------------------------
 
@@ -1955,7 +1966,20 @@ INSERT INTO `user_operations` (`id`, `user_id`, `operation_type`, `entity_type`,
 (463, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 14:40:05\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:40:05', '2026-03-20 19:40:05'),
 (464, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-20 14:40:09\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 19:40:09', '2026-03-20 19:40:09'),
 (465, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-20 15:33:11\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 20:33:11', '2026-03-20 20:33:11'),
-(466, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-20 15:33:14\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 20:33:14', '2026-03-20 20:33:14');
+(466, 46, 'login', 'Session', NULL, 'Inicio de sesión: tres@estudiante.com', '{\"email\":\"tres@estudiante.com\",\"login_time\":\"2026-03-20 15:33:14\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0', '2026-03-20 20:33:14', '2026-03-20 20:33:14'),
+(467, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-20 16:11:41\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-20 21:11:41', '2026-03-20 21:11:41'),
+(468, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-24 07:03:21\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:03:21', '2026-03-24 12:03:21'),
+(469, 1, 'login', 'Session', NULL, 'Inicio de sesión: carjavalosistem@gmail.com', '{\"email\":\"carjavalosistem@gmail.com\",\"login_time\":\"2026-03-24 07:09:15\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:09:15', '2026-03-24 12:09:15'),
+(470, 1, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-24 07:10:00\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:10:00', '2026-03-24 12:10:00'),
+(471, 36, 'login', 'Session', NULL, 'Inicio de sesión: uno@estudiante.com', '{\"email\":\"uno@estudiante.com\",\"login_time\":\"2026-03-24 07:10:33\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:10:33', '2026-03-24 12:10:33'),
+(472, 36, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-24 07:15:10\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:15:10', '2026-03-24 12:15:10'),
+(473, 78, 'login', 'Session', NULL, 'Inicio de sesión: uno@consultor.com', '{\"email\":\"uno@consultor.com\",\"login_time\":\"2026-03-24 07:28:35\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:28:35', '2026-03-24 12:28:35'),
+(474, 78, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-24 07:34:43\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:34:43', '2026-03-24 12:34:43'),
+(475, 38, 'login', 'Session', NULL, 'Inicio de sesión: test@example.com', '{\"email\":\"test@example.com\",\"login_time\":\"2026-03-24 07:35:29\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:35:29', '2026-03-24 12:35:29'),
+(476, 38, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-24 07:38:34\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:38:34', '2026-03-24 12:38:34'),
+(477, 78, 'login', 'Session', NULL, 'Inicio de sesión: uno@consultor.com', '{\"email\":\"uno@consultor.com\",\"login_time\":\"2026-03-24 07:38:45\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:38:45', '2026-03-24 12:38:45'),
+(478, 78, 'logout', 'Session', NULL, 'Cierre de sesión', '{\"logout_time\":\"2026-03-24 07:57:36\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:57:36', '2026-03-24 12:57:36'),
+(479, 79, 'login', 'Session', NULL, 'Inicio de sesión: dos@consultor.com', '{\"email\":\"dos@consultor.com\",\"login_time\":\"2026-03-24 07:57:52\"}', '192.168.2.200', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '2026-03-24 12:57:52', '2026-03-24 12:57:52');
 
 -- --------------------------------------------------------
 
@@ -2464,19 +2488,19 @@ ALTER TABLE `servicios_areas`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT de la tabla `user_logins`
 --
 ALTER TABLE `user_logins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=462;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=471;
 
 --
 -- AUTO_INCREMENT de la tabla `user_operations`
 --
 ALTER TABLE `user_operations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=467;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=480;
 
 --
 -- AUTO_INCREMENT de la tabla `vinculacion_contrato`

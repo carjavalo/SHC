@@ -1600,6 +1600,45 @@ function showActivityModal(activityType) {
             <input type="number" class="form-control" id="quiz-duration" min="5" max="180" value="30" placeholder="Ej: 30">
             <small class="form-text text-muted">Tiempo máximo para completar la ${tipoLabel.toLowerCase()}</small>
         </div>
+        <div class="card border-success mb-3">
+            <div class="card-header bg-success text-white py-2">
+                <strong><i class="fas fa-shield-alt"></i> Configuración Anti-fraude (Banco de Preguntas)</strong>
+            </div>
+            <div class="card-body py-2">
+                <div class="custom-control custom-switch mb-3">
+                    <input type="checkbox" class="custom-control-input" id="quiz-randomize-order">
+                    <label class="custom-control-label" for="quiz-randomize-order">
+                        <i class="fas fa-random text-info"></i> Aleatorizar orden de preguntas para cada estudiante
+                    </label>
+                    <small class="form-text text-muted">Las preguntas se mostrarán en un orden diferente para cada estudiante.</small>
+                </div>
+                <hr class="my-2">
+                <div class="custom-control custom-switch mb-2">
+                    <input type="checkbox" class="custom-control-input" id="quiz-enable-bank" onchange="toggleBankConfig()">
+                    <label class="custom-control-label" for="quiz-enable-bank">
+                        <i class="fas fa-database text-warning"></i> Habilitar Banco de Preguntas
+                    </label>
+                    <small class="form-text text-muted">Crea más preguntas de las necesarias. Cada estudiante recibirá solo un subconjunto aleatorio.</small>
+                </div>
+                <div id="quiz-bank-details" style="display: none;">
+                    <div class="form-group mt-3">
+                        <label for="quiz-questions-per-attempt"><i class="fas fa-tasks"></i> Preguntas por intento *</label>
+                        <input type="number" class="form-control" id="quiz-questions-per-attempt" min="1" value="5" oninput="updateBankInfo()">
+                        <small class="form-text text-muted" id="quiz-bank-info-text">
+                            Se seleccionarán aleatoriamente de las preguntas del banco para cada estudiante.
+                        </small>
+                    </div>
+                    <div class="alert alert-success py-2 mb-0">
+                        <i class="fas fa-shield-alt"></i> <strong>Anti-fraude activo:</strong>
+                        <ul class="mb-0 mt-1 small">
+                            <li>Cada estudiante recibirá un conjunto diferente de preguntas.</li>
+                            <li>Las valoraciones se redistribuirán automáticamente de forma proporcional.</li>
+                            <li>Minimiza la copia entre estudiantes.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="quiz-questions-container">
             <!-- Las preguntas se agregarán aquí -->
         </div>
@@ -1811,6 +1850,33 @@ function showActivityModal(activityType) {
             // Letras para las opciones
             window.optionLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
             
+            // Funciones para configuración del banco de preguntas anti-fraude
+            window.toggleBankConfig = function() {
+                const enabled = document.getElementById('quiz-enable-bank').checked;
+                document.getElementById('quiz-bank-details').style.display = enabled ? 'block' : 'none';
+                if (enabled) {
+                    document.getElementById('quiz-randomize-order').checked = true;
+                    updateBankInfo();
+                }
+            };
+            
+            window.updateBankInfo = function() {
+                const totalQuestions = window.quizQuestions.length;
+                const perAttempt = parseInt(document.getElementById('quiz-questions-per-attempt').value) || 1;
+                const infoText = document.getElementById('quiz-bank-info-text');
+                if (infoText) {
+                    if (totalQuestions > 0) {
+                        if (perAttempt >= totalQuestions) {
+                            infoText.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Debe ser menor que el total de preguntas (' + totalQuestions + '). Agrega más preguntas al banco.</span>';
+                        } else {
+                            infoText.innerHTML = 'Se seleccionarán <strong>' + perAttempt + '</strong> de <strong>' + totalQuestions + '</strong> preguntas para cada estudiante.';
+                        }
+                    } else {
+                        infoText.innerHTML = 'Agrega preguntas al banco primero.';
+                    }
+                }
+            };
+            
             // Función para agregar una opción de respuesta a una pregunta
             window.addQuestionOption = function(questionId) {
                 const optionsContainer = document.getElementById(`options-container-${questionId}`);
@@ -1972,6 +2038,9 @@ function showActivityModal(activityType) {
                 
                 // Actualizar porcentaje disponible en todas las preguntas
                 actualizarPuntosDisponiblesQuiz();
+                
+                // Actualizar info del banco de preguntas
+                if (typeof updateBankInfo === 'function') updateBankInfo();
             };
             
             // Función para calcular porcentaje total asignado del quiz
@@ -2021,6 +2090,9 @@ function showActivityModal(activityType) {
                 
                 // Actualizar puntos disponibles
                 actualizarPuntosDisponiblesQuiz();
+                
+                // Actualizar info del banco de preguntas
+                if (typeof updateBankInfo === 'function') updateBankInfo();
             };
             
             // Si es quiz o evaluación, agregar 1 pregunta por defecto para empezar
@@ -2177,10 +2249,31 @@ function showActivityModal(activityType) {
                     return false;
                 }
                 
+                // Recopilar configuración anti-fraude (banco de preguntas)
+                const enableBank = document.getElementById('quiz-enable-bank')?.checked || false;
+                const randomizeOrder = document.getElementById('quiz-randomize-order')?.checked || false;
+                const questionsPerAttempt = parseInt(document.getElementById('quiz-questions-per-attempt')?.value) || questions.length;
+                
+                // Validar banco de preguntas
+                if (enableBank && questionsPerAttempt >= questions.length) {
+                    Swal.showValidationMessage('Las preguntas por intento (' + questionsPerAttempt + ') deben ser menos que el total del banco (' + questions.length + '). Agrega más preguntas o reduce el número por intento.');
+                    return false;
+                }
+                
+                if (enableBank && questionsPerAttempt < 1) {
+                    Swal.showValidationMessage('Debe haber al menos 1 pregunta por intento');
+                    return false;
+                }
+                
                 quizData = {
                     duration: parseInt(duration),
                     questions: questions,
-                    totalPoints: totalQuestionPoints
+                    totalPoints: totalQuestionPoints,
+                    quizConfig: {
+                        enableQuestionBank: enableBank,
+                        questionsPerAttempt: enableBank ? questionsPerAttempt : questions.length,
+                        randomizeOrder: randomizeOrder
+                    }
                 };
             }
 

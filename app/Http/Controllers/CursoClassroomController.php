@@ -979,6 +979,40 @@ class CursoClassroomController extends Controller
             $preguntas = $quizData['questions'] ?? [];
             
             // ========================================================
+            // BANCO DE PREGUNTAS: Filtrar y redistribuir si aplica
+            // ========================================================
+            $quizConfig = $quizData['quizConfig'] ?? [];
+            $enableBank = $quizConfig['enableQuestionBank'] ?? false;
+            $questionIds = $request->input('question_ids', []);
+            
+            if ($enableBank && !empty($questionIds)) {
+                // Filtrar solo las preguntas que fueron servidas al estudiante
+                $preguntasFiltradas = [];
+                foreach ($preguntas as $pregunta) {
+                    if (in_array($pregunta['id'], $questionIds)) {
+                        $preguntasFiltradas[] = $pregunta;
+                    }
+                }
+                
+                // Redistribuir porcentajes proporcionalmente
+                $sumaSeleccionadas = 0;
+                foreach ($preguntasFiltradas as $p) {
+                    $sumaSeleccionadas += floatval($p['points'] ?? 0);
+                }
+                
+                $totalTarget = floatval($quizData['totalPoints'] ?? 100);
+                if ($sumaSeleccionadas > 0 && abs($sumaSeleccionadas - $totalTarget) > 0.01) {
+                    $factor = $totalTarget / $sumaSeleccionadas;
+                    foreach ($preguntasFiltradas as &$p) {
+                        $p['points'] = round(floatval($p['points']) * $factor, 2);
+                    }
+                    unset($p);
+                }
+                
+                $preguntas = $preguntasFiltradas;
+            }
+            
+            // ========================================================
             // SISTEMA DE AUTO-CALIFICACIÓN BASADO EN PORCENTAJES
             // ========================================================
             // Cada pregunta tiene un porcentaje (%) que suma máx 100%
@@ -1110,7 +1144,8 @@ class CursoClassroomController extends Controller
                     'contenido' => json_encode([
                         'respuestas' => $respuestas,
                         'resultados' => $resultados,
-                        'tiempo_transcurrido' => $request->tiempo_transcurrido
+                        'tiempo_transcurrido' => $request->tiempo_transcurrido,
+                        'preguntas_servidas' => ($enableBank && !empty($questionIds)) ? $questionIds : null,
                     ]),
                     'puntos_obtenidos' => $notaFinal,
                     'calificacion' => $notaFinal,
@@ -1225,14 +1260,76 @@ class CursoClassroomController extends Controller
                 ], 400);
             }
 
-            // Devolver solo los datos necesarios para el quiz
+            // Preparar datos del quiz con lógica anti-fraude (banco de preguntas)
+            $contenidoJson = $actividad->contenido_json;
+            $allQuestions = $contenidoJson['questions'] ?? [];
+            $quizConfig = $contenidoJson['quizConfig'] ?? [];
+            $enableBank = $quizConfig['enableQuestionBank'] ?? false;
+            $questionsPerAttempt = intval($quizConfig['questionsPerAttempt'] ?? count($allQuestions));
+            $randomizeOrder = $quizConfig['randomizeOrder'] ?? false;
+            
+            $selectedQuestions = $allQuestions;
+            $totalTarget = floatval($contenidoJson['totalPoints'] ?? 100);
+            
+            // Aplicar lógica de banco de preguntas
+            if ($enableBank && $questionsPerAttempt > 0 && $questionsPerAttempt < count($allQuestions)) {
+                $keys = array_keys($allQuestions);
+                shuffle($keys);
+                $selectedKeys = array_slice($keys, 0, $questionsPerAttempt);
+                
+                $selectedQuestions = [];
+                foreach ($selectedKeys as $key) {
+                    $selectedQuestions[] = $allQuestions[$key];
+                }
+                
+                // Redistribuir valoraciones proporcionalmente
+                $selectedSum = 0;
+                foreach ($selectedQuestions as $q) {
+                    $selectedSum += floatval($q['points'] ?? 0);
+                }
+                
+                if ($selectedSum > 0) {
+                    $factor = $totalTarget / $selectedSum;
+                    foreach ($selectedQuestions as &$q) {
+                        $q['points'] = round(floatval($q['points']) * $factor, 2);
+                    }
+                    unset($q);
+                }
+            }
+            
+            // Aleatorizar orden si está habilitado
+            if ($randomizeOrder) {
+                shuffle($selectedQuestions);
+            }
+            
+            // Obtener IDs de preguntas seleccionadas
+            $questionIds = array_map(function($q) { return $q['id']; }, $selectedQuestions);
+            
+            // Si hay configuración anti-fraude activa, limpiar respuestas correctas del envío
+            if ($enableBank || $randomizeOrder) {
+                foreach ($selectedQuestions as &$q) {
+                    $q['isMultipleChoice'] = $q['isMultipleChoice'] ?? false;
+                    unset($q['correctAnswers']);
+                    unset($q['correctAnswer']);
+                }
+                unset($q);
+            }
+            
+            // Preparar datos para el estudiante
+            $contenidoParaEstudiante = [
+                'duration' => $contenidoJson['duration'] ?? 30,
+                'totalPoints' => $totalTarget,
+                'questions' => $selectedQuestions,
+                'questionIds' => $questionIds,
+            ];
+
             return response()->json([
                 'success' => true,
                 'actividad' => [
                     'id' => $actividad->id,
                     'titulo' => $actividad->titulo,
                     'tipo' => $actividad->tipo,
-                    'contenido_json' => $actividad->contenido_json,
+                    'contenido_json' => $contenidoParaEstudiante,
                     'duracion_minutos' => $actividad->duracion_minutos,
                     'puntos_maximos' => $actividad->puntos_maximos,
                 ]

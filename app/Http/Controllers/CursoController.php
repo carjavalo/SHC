@@ -816,6 +816,15 @@ class CursoController extends Controller
                     'questions' => $questions
                 ];
                 
+                // Preservar configuración del banco de preguntas anti-fraude
+                if (isset($quizData['quizConfig'])) {
+                    $contenidoJson['quizConfig'] = [
+                        'enableQuestionBank' => $quizData['quizConfig']['enableQuestionBank'] ?? false,
+                        'questionsPerAttempt' => intval($quizData['quizConfig']['questionsPerAttempt'] ?? count($questions)),
+                        'randomizeOrder' => $quizData['quizConfig']['randomizeOrder'] ?? false,
+                    ];
+                }
+                
                 $data['contenido_json'] = $contenidoJson;
                 
                 // Actualizar puntos máximos con el total del quiz (redondeado)

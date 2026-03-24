@@ -520,6 +520,9 @@ function mostrarModalQuiz(actividadId, actividad) {
     const preguntas = quizData.questions || [];
     const duracion = quizData.duration || 30;
     
+    // Almacenar IDs de preguntas servidas para envío posterior (banco de preguntas)
+    window.currentQuizQuestionIds = quizData.questionIds || preguntas.map(p => p.id);
+    
     if (preguntas.length === 0) {
         Swal.fire('Error', 'Este quiz no tiene preguntas configuradas', 'error');
         return;
@@ -706,7 +709,8 @@ function enviarRespuestasQuiz(actividadId, respuestas) {
         data: {
             _token: '{{ csrf_token() }}',
             respuestas: respuestas,
-            tiempo_transcurrido: tiempoTranscurrido
+            tiempo_transcurrido: tiempoTranscurrido,
+            question_ids: window.currentQuizQuestionIds || []
         },
         success: function(response) {
             if (response.success) {
@@ -944,6 +948,45 @@ function editarActividadCompleta(actividadId, actividad) {
                    value="${actividad.contenido_json?.duration || 30}">
             <small class="form-text text-muted">Tiempo máximo para completar</small>
         </div>
+        <div class="card border-success mb-3">
+            <div class="card-header bg-success text-white py-2">
+                <strong><i class="fas fa-shield-alt"></i> Configuración Anti-fraude (Banco de Preguntas)</strong>
+            </div>
+            <div class="card-body py-2">
+                <div class="custom-control custom-switch mb-3">
+                    <input type="checkbox" class="custom-control-input" id="edit-randomize-order" ${(actividad.contenido_json?.quizConfig?.randomizeOrder) ? 'checked' : ''}>
+                    <label class="custom-control-label" for="edit-randomize-order">
+                        <i class="fas fa-random text-info"></i> Aleatorizar orden de preguntas para cada estudiante
+                    </label>
+                    <small class="form-text text-muted">Las preguntas se mostrarán en un orden diferente para cada estudiante.</small>
+                </div>
+                <hr class="my-2">
+                <div class="custom-control custom-switch mb-2">
+                    <input type="checkbox" class="custom-control-input" id="edit-enable-bank" onchange="toggleEditBankConfig()" ${(actividad.contenido_json?.quizConfig?.enableQuestionBank) ? 'checked' : ''}>
+                    <label class="custom-control-label" for="edit-enable-bank">
+                        <i class="fas fa-database text-warning"></i> Habilitar Banco de Preguntas
+                    </label>
+                    <small class="form-text text-muted">Crea más preguntas de las necesarias. Cada estudiante recibirá solo un subconjunto aleatorio.</small>
+                </div>
+                <div id="edit-bank-details" style="display: ${(actividad.contenido_json?.quizConfig?.enableQuestionBank) ? 'block' : 'none'};">
+                    <div class="form-group mt-3">
+                        <label for="edit-questions-per-attempt"><i class="fas fa-tasks"></i> Preguntas por intento *</label>
+                        <input type="number" class="form-control" id="edit-questions-per-attempt" min="1" value="${actividad.contenido_json?.quizConfig?.questionsPerAttempt || 5}" oninput="updateEditBankInfo()">
+                        <small class="form-text text-muted" id="edit-bank-info-text">
+                            Se seleccionarán aleatoriamente de las preguntas del banco para cada estudiante.
+                        </small>
+                    </div>
+                    <div class="alert alert-success py-2 mb-0">
+                        <i class="fas fa-shield-alt"></i> <strong>Anti-fraude activo:</strong>
+                        <ul class="mb-0 mt-1 small">
+                            <li>Cada estudiante recibirá un conjunto diferente de preguntas.</li>
+                            <li>Las valoraciones se redistribuirán automáticamente de forma proporcional.</li>
+                            <li>Minimiza la copia entre estudiantes.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="edit-actividad-questions-container">
             <!-- Las preguntas se cargarán aquí -->
         </div>
@@ -1041,6 +1084,33 @@ function editarActividadCompleta(actividadId, actividad) {
             window.editQuestions = [];
             window.editQuestionCounter = 0;
             window.editOptionCounters = {};
+            
+            // Funciones para configuración del banco de preguntas
+            window.toggleEditBankConfig = function() {
+                const enabled = document.getElementById('edit-enable-bank').checked;
+                document.getElementById('edit-bank-details').style.display = enabled ? 'block' : 'none';
+                if (enabled) {
+                    document.getElementById('edit-randomize-order').checked = true;
+                    updateEditBankInfo();
+                }
+            };
+            
+            window.updateEditBankInfo = function() {
+                const totalQuestions = window.editQuestions.length;
+                const perAttempt = parseInt(document.getElementById('edit-questions-per-attempt').value) || 1;
+                const infoText = document.getElementById('edit-bank-info-text');
+                if (infoText) {
+                    if (totalQuestions > 0) {
+                        if (perAttempt >= totalQuestions) {
+                            infoText.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Debe ser menor que el total (' + totalQuestions + '). Agrega más preguntas.</span>';
+                        } else {
+                            infoText.innerHTML = 'Se seleccionarán <strong>' + perAttempt + '</strong> de <strong>' + totalQuestions + '</strong> preguntas para cada estudiante.';
+                        }
+                    } else {
+                        infoText.innerHTML = 'Agrega preguntas al banco primero.';
+                    }
+                }
+            };
             
             // Función para actualizar puntos disponibles del quiz
             window.calcularPuntosTotalesQuizEdit = function() {
@@ -1211,7 +1281,27 @@ function editarActividadCompleta(actividadId, actividad) {
                     return false;
                 }
                 
-                quizData = { duration: parseInt(duration), questions: questions, totalPoints: totalQuestionPoints };
+                // Recopilar configuración anti-fraude
+                const editEnableBank = document.getElementById('edit-enable-bank')?.checked || false;
+                const editRandomizeOrder = document.getElementById('edit-randomize-order')?.checked || false;
+                const editQuestionsPerAttempt = parseInt(document.getElementById('edit-questions-per-attempt')?.value) || questions.length;
+                
+                // Validar banco de preguntas
+                if (editEnableBank && editQuestionsPerAttempt >= questions.length) {
+                    Swal.showValidationMessage('Las preguntas por intento (' + editQuestionsPerAttempt + ') deben ser menos que el total del banco (' + questions.length + '). Agrega más preguntas o reduce el número por intento.');
+                    return false;
+                }
+                
+                quizData = { 
+                    duration: parseInt(duration), 
+                    questions: questions, 
+                    totalPoints: totalQuestionPoints,
+                    quizConfig: {
+                        enableQuestionBank: editEnableBank,
+                        questionsPerAttempt: editEnableBank ? editQuestionsPerAttempt : questions.length,
+                        randomizeOrder: editRandomizeOrder
+                    }
+                };
             }
 
             return {
@@ -1222,28 +1312,6 @@ function editarActividadCompleta(actividadId, actividad) {
                 material_id: materialId ? parseInt(materialId) : null,
                 porcentaje_curso: porcentajeMaterial,
                 nota_minima_aprobacion: notaMinimaAprobacion
-            };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) actualizarActividadCompleta(actividadId, result.value);
-    });
-}
-                        id: questionId,
-                        text: questionText,
-                        points: parseInt(questionPoints),
-                        options: options,
-                        correctAnswers: correctAnswers,
-                        isMultipleChoice: correctAnswers.length > 1
-                    });
-                }
-                
-                quizData = { duration: parseInt(duration), questions: questions, totalPoints: totalQuestionPoints };
-            }
-
-            return {
-                titulo, descripcion, instrucciones, fecha_apertura: fechaApertura, fecha_cierre: fechaCierre,
-                puntos_maximos: parseInt(puntos), intentos_permitidos: parseInt(intentos),
-                contenido_json: quizData, linked_material_ids: linkedMaterials
             };
         }
     }).then((result) => {
@@ -1362,6 +1430,9 @@ function addEditQuestion() {
     
     // Actualizar puntos disponibles
     setTimeout(() => actualizarPuntosDisponiblesQuizEdit(), 50);
+    
+    // Actualizar info del banco de preguntas
+    if (typeof updateEditBankInfo === 'function') setTimeout(() => updateEditBankInfo(), 60);
 }
 
 function removeEditQuestion(questionId) {
@@ -1377,6 +1448,9 @@ function removeEditQuestion(questionId) {
     
     // Actualizar puntos disponibles
     actualizarPuntosDisponiblesQuizEdit();
+    
+    // Actualizar info del banco de preguntas
+    if (typeof updateEditBankInfo === 'function') updateEditBankInfo();
 }
 
 function addEditQuestionOptionWithData(questionId, letter, text, isCorrect) {

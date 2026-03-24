@@ -1658,6 +1658,45 @@
                         <input type="number" class="form-control" id="actividad-duration" min="5" max="180" value="30">
                         <small class="form-text text-muted">Tiempo máximo para completar</small>
                     </div>
+                    <div class="card border-success mb-3">
+                        <div class="card-header bg-success text-white py-2">
+                            <strong><i class="fas fa-shield-alt"></i> Configuración Anti-fraude (Banco de Preguntas)</strong>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="custom-control custom-switch mb-3">
+                                <input type="checkbox" class="custom-control-input" id="actividad-randomize-order">
+                                <label class="custom-control-label" for="actividad-randomize-order">
+                                    <i class="fas fa-random text-info"></i> Aleatorizar orden de preguntas para cada estudiante
+                                </label>
+                                <small class="form-text text-muted">Las preguntas se mostrarán en un orden diferente para cada estudiante.</small>
+                            </div>
+                            <hr class="my-2">
+                            <div class="custom-control custom-switch mb-2">
+                                <input type="checkbox" class="custom-control-input" id="actividad-enable-bank" onchange="toggleActBankConfig()">
+                                <label class="custom-control-label" for="actividad-enable-bank">
+                                    <i class="fas fa-database text-warning"></i> Habilitar Banco de Preguntas
+                                </label>
+                                <small class="form-text text-muted">Crea más preguntas de las necesarias. Cada estudiante recibirá solo un subconjunto aleatorio.</small>
+                            </div>
+                            <div id="actividad-bank-details" style="display: none;">
+                                <div class="form-group mt-3">
+                                    <label for="actividad-questions-per-attempt"><i class="fas fa-tasks"></i> Preguntas por intento *</label>
+                                    <input type="number" class="form-control" id="actividad-questions-per-attempt" min="1" value="5" oninput="updateActBankInfo()">
+                                    <small class="form-text text-muted" id="actividad-bank-info-text">
+                                        Se seleccionarán aleatoriamente de las preguntas del banco para cada estudiante.
+                                    </small>
+                                </div>
+                                <div class="alert alert-success py-2 mb-0">
+                                    <i class="fas fa-shield-alt"></i> <strong>Anti-fraude activo:</strong>
+                                    <ul class="mb-0 mt-1 small">
+                                        <li>Cada estudiante recibirá un conjunto diferente de preguntas.</li>
+                                        <li>Las valoraciones se redistribuirán automáticamente de forma proporcional.</li>
+                                        <li>Minimiza la copia entre estudiantes.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="actividad-questions-container">
                         <!-- Las preguntas se agregarán aquí -->
                     </div>
@@ -1726,6 +1765,33 @@
                         window.actividadQuestions = [];
                         window.actividadQuestionCounter = 0;
                         window.actividadOptionCounters = {};
+                        
+                        // Funciones para configuración del banco de preguntas
+                        window.toggleActBankConfig = function() {
+                            const enabled = document.getElementById('actividad-enable-bank').checked;
+                            document.getElementById('actividad-bank-details').style.display = enabled ? 'block' : 'none';
+                            if (enabled) {
+                                document.getElementById('actividad-randomize-order').checked = true;
+                                updateActBankInfo();
+                            }
+                        };
+                        
+                        window.updateActBankInfo = function() {
+                            const totalQuestions = window.actividadQuestions.length;
+                            const perAttempt = parseInt(document.getElementById('actividad-questions-per-attempt').value) || 1;
+                            const infoText = document.getElementById('actividad-bank-info-text');
+                            if (infoText) {
+                                if (totalQuestions > 0) {
+                                    if (perAttempt >= totalQuestions) {
+                                        infoText.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Debe ser menor que el total (' + totalQuestions + '). Agrega más preguntas.</span>';
+                                    } else {
+                                        infoText.innerHTML = 'Se seleccionarán <strong>' + perAttempt + '</strong> de <strong>' + totalQuestions + '</strong> preguntas para cada estudiante.';
+                                    }
+                                } else {
+                                    infoText.innerHTML = 'Agrega preguntas al banco primero.';
+                                }
+                            }
+                        };
                         
                         // Si es quiz o evaluación, agregar una pregunta por defecto
                         if (requierePreguntas) {
@@ -1820,7 +1886,12 @@
                             quizData = {
                                 duration: parseInt(duration),
                                 questions: questions,
-                                totalPoints: totalQuestionPoints
+                                totalPoints: totalQuestionPoints,
+                                quizConfig: {
+                                    enableQuestionBank: document.getElementById('actividad-enable-bank')?.checked || false,
+                                    questionsPerAttempt: (document.getElementById('actividad-enable-bank')?.checked) ? (parseInt(document.getElementById('actividad-questions-per-attempt')?.value) || questions.length) : questions.length,
+                                    randomizeOrder: document.getElementById('actividad-randomize-order')?.checked || false
+                                }
                             };
                         }
 
