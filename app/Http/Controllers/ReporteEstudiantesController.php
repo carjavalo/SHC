@@ -40,6 +40,15 @@ class ReporteEstudiantesController extends Controller
                 'curso_estudiantes.progreso'
             ]);
 
+        // Filtrar si el usuario es "Consultor Agesoc"
+        if (auth()->check() && auth()->user()->role === 'Consultor Agesoc') {
+            $query->where('users.role', 'Estudiante')
+                  ->where('vinculacion_contrato.nombre', 'Agesoc');
+        } elseif (auth()->check() && auth()->user()->role === 'Consultor Asstracud') {
+            $query->where('users.role', 'Estudiante')
+                  ->where('vinculacion_contrato.nombre', 'Asstracud');
+        }
+
         // Precargar cursos con sus materiales y actividades para calcular notas reales
         $cursoCache = [];
 

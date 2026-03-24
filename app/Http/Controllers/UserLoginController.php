@@ -49,16 +49,23 @@ class UserLoginController extends Controller
             // Incluir también los propios ingresos del docente
             $estudiantesIds[] = $currentUser->id;
             $query->whereIn('user_logins.user_id', $estudiantesIds);
+        } elseif ($userRole === 'Consultor Agesoc') {
+            // Consultor Agesoc solo ve estudiantes de tipo de vinculación Agesoc
+            $query->where('users.role', 'Estudiante')
+                  ->whereIn('users.vinculacion_contrato_id', function($q) {
+                      $q->select('id')->from('vinculacion_contrato')->where('nombre', 'Agesoc');
+                  });
+        } elseif ($userRole === 'Consultor Asstracud') {
+            // Consultor Asstracud solo ve estudiantes de tipo de vinculación Asstracud
+            $query->where('users.role', 'Estudiante')
+                  ->whereIn('users.vinculacion_contrato_id', function($q) {
+                      $q->select('id')->from('vinculacion_contrato')->where('nombre', 'Asstracud');
+                  });
         }
-        // Admin y Super Admin ven todo (sin filtro adicional)
-
+        
         // Aplicar filtros
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-
-        if ($request->filled('email_verified')) {
-            $query->where('email_verified', $request->email_verified);
         }
 
         if ($request->filled('date_from')) {

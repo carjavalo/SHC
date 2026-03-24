@@ -66,7 +66,35 @@ class ChatController extends Controller
                     $q->where('role', 'Operador')
                       ->orWhereIn('id', $estudiantesIds)
                       ->orWhereIn('id', $docentesIds);
+
+                    // Si el estudiante es de tipo Agesoc, puede ver a los Consultores Agesoc
+                    $vinculacion = \App\Models\VinculacionContrato::find($user->vinculacion_contrato_id);
+                    if ($vinculacion && $vinculacion->nombre === 'Agesoc') {
+                        $q->orWhere('role', 'Consultor Agesoc');
+                    } elseif ($vinculacion && $vinculacion->nombre === 'Asstracud') {
+                        $q->orWhere('role', 'Consultor Asstracud');
+                    }
                       
+                } elseif ($user->role === 'Consultor Agesoc') {
+                    // Consultor Agesoc: Puede ver Operadores + Estudiantes con vinculación Agesoc
+                    $q->where('role', 'Operador')
+                      ->orWhere(function($sub) {
+                          $sub->where('role', 'Estudiante')
+                              ->whereHas('vinculacionContrato', function($vc) {
+                                  $vc->where('nombre', 'Agesoc');
+                              });
+                      });
+
+                } elseif ($user->role === 'Consultor Asstracud') {
+                    // Consultor Asstracud: Puede ver Operadores + Estudiantes con vinculación Asstracud
+                    $q->where('role', 'Operador')
+                      ->orWhere(function($sub) {
+                          $sub->where('role', 'Estudiante')
+                              ->whereHas('vinculacionContrato', function($vc) {
+                                  $vc->where('nombre', 'Asstracud');
+                              });
+                      });
+
                 } else {
                     // Admin, Super Admin, Operador pueden ver todos
                     $q->whereNotNull('id');
@@ -348,6 +376,18 @@ class ChatController extends Controller
             if ($destinatario->role === 'Operador') {
                 return true;
             }
+            if ($destinatario->role === 'Consultor Agesoc') {
+                $vinculacion = \App\Models\VinculacionContrato::find($remitente->vinculacion_contrato_id);
+                if ($vinculacion && $vinculacion->nombre === 'Agesoc') {
+                    return true;
+                }
+            }
+            if ($destinatario->role === 'Consultor Asstracud') {
+                $vinculacion = \App\Models\VinculacionContrato::find($remitente->vinculacion_contrato_id);
+                if ($vinculacion && $vinculacion->nombre === 'Asstracud') {
+                    return true;
+                }
+            }
             
             $cursosIds = DB::table('curso_estudiantes')
                 ->where('estudiante_id', $remitente->id)
@@ -371,6 +411,34 @@ class ChatController extends Controller
                 ->exists();
                 
             return $esCompañero;
+        }
+
+        // Consultor Agesoc puede enviar a Operadores y Estudiantes con vinculación Agesoc
+        if ($remitente->role === 'Consultor Agesoc') {
+            if ($destinatario->role === 'Operador') {
+                return true;
+            }
+            if ($destinatario->role === 'Estudiante') {
+                $vinculacion = \App\Models\VinculacionContrato::find($destinatario->vinculacion_contrato_id);
+                if ($vinculacion && $vinculacion->nombre === 'Agesoc') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Consultor Asstracud puede enviar a Operadores y Estudiantes con vinculación Asstracud
+        if ($remitente->role === 'Consultor Asstracud') {
+            if ($destinatario->role === 'Operador') {
+                return true;
+            }
+            if ($destinatario->role === 'Estudiante') {
+                $vinculacion = \App\Models\VinculacionContrato::find($destinatario->vinculacion_contrato_id);
+                if ($vinculacion && $vinculacion->nombre === 'Asstracud') {
+                    return true;
+                }
+            }
+            return false;
         }
 
         return false;

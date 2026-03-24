@@ -49,7 +49,18 @@ class UserOperationController extends Controller
             
             // Incluir también las propias operaciones del docente
             $estudiantesIds[] = $currentUser->id;
-            $query->whereIn('user_operations.user_id', $estudiantesIds);
+            $query->whereIn('user_operations.user_id', $estudiantesIds);        } elseif ($userRole === 'Consultor Agesoc') {
+            // Consultor Agesoc solo ve operaciones de estudiantes con vinculación Agesoc
+            $query->where('users.role', 'Estudiante')
+                  ->whereIn('users.vinculacion_contrato_id', function($q) {
+                      $q->select('id')->from('vinculacion_contrato')->where('nombre', 'Agesoc');
+                  });
+        } elseif ($userRole === 'Consultor Asstracud') {
+            // Consultor Asstracud solo ve operaciones de estudiantes con vinculación Asstracud
+            $query->where('users.role', 'Estudiante')
+                  ->whereIn('users.vinculacion_contrato_id', function($q) {
+                      $q->select('id')->from('vinculacion_contrato')->where('nombre', 'Asstracud');
+                  });
         }
         // Admin y Super Admin ven todo (sin filtro adicional)
 
