@@ -1242,6 +1242,6 @@
     </script>
 
     <!-- Incluir funciones adicionales del wizard -->
-    <script src="{{ asset('js/course-wizard.js') }}"></script>
+    <script src="{{ asset('js/course-wizard.js') }}?v={{ time() }}"></script>
 @stop
 

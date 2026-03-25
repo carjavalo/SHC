@@ -708,6 +708,15 @@ class CursoClassroomController extends Controller
         }
 
         try {
+            // Procesar prerequisite_activity_ids
+            $prereqActivityIds = $request->input('prerequisite_activity_ids');
+            if (is_string($prereqActivityIds)) {
+                $prereqActivityIds = json_decode($prereqActivityIds, true);
+            }
+            if (!is_array($prereqActivityIds)) {
+                $prereqActivityIds = [];
+            }
+
             $actividad = CursoActividad::create([
                 'curso_id' => $curso->id,
                 'material_id' => $materialId,
@@ -722,7 +731,8 @@ class CursoClassroomController extends Controller
                 'contenido_json' => $request->contenido_json,
                 'porcentaje_curso' => $porcentajeSolicitado,
                 'habilitado' => in_array($request->tipo, ['quiz', 'evaluacion']) ? false : true,
-                'orden' => $curso->actividades()->count() + 1
+                'orden' => $curso->actividades()->count() + 1,
+                'prerequisite_activity_ids' => $prereqActivityIds,
             ]);
 
             return response()->json([

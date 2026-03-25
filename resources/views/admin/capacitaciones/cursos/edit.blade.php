@@ -1649,6 +1649,83 @@
                 const requierePreguntas = tipo === 'quiz' || tipo === 'evaluacion';
                 const tipoLabel = typeLabels[tipo];
 
+                // Generar sección de prerrequisitos de actividades
+                const actividadesExistentes = [];
+                @foreach($curso->actividades()->orderBy('orden')->get() as $act)
+                    actividadesExistentes.push({
+                        id: {{ $act->id }},
+                        titulo: @json($act->titulo),
+                        tipo: @json($act->tipo)
+                    });
+                @endforeach
+
+                const tipoIconsPrereq = {
+                    tarea: '📝',
+                    quiz: '❓',
+                    evaluacion: '📋',
+                    proyecto: '🔧'
+                };
+
+                let actividadesCheckboxes = '';
+                if (actividadesExistentes.length > 0) {
+                    actividadesExistentes.forEach(act => {
+                        const tipoIcon = tipoIconsPrereq[act.tipo] || '📝';
+                        actividadesCheckboxes += `
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input create-prereq-checkbox" id="create-prereq-${act.id}" value="${act.id}">
+                                <label class="custom-control-label" for="create-prereq-${act.id}">
+                                    ${tipoIcon} ${act.titulo}
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+
+                const prerequisitosSection = `
+                    <hr class="my-3">
+                    <div class="form-group">
+                        <label><i class="fas fa-link text-info"></i> Prerrequisitos de Actividades</label>
+                        <div class="custom-control custom-switch mb-2">
+                            <input type="checkbox" class="custom-control-input" id="actividad-has-prereqs" onchange="toggleCreatePrereqsSelection()" ${actividadesExistentes.length === 0 ? 'disabled' : ''}>
+                            <label class="custom-control-label" for="actividad-has-prereqs">
+                                Requiere completar otras actividades antes
+                            </label>
+                        </div>
+                        <div id="create-prereqs-selection-container" style="display: none;">
+                            ${actividadesExistentes.length > 0 ? `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">Selecciona las actividades que el estudiante debe completar:</small>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.querySelectorAll('.create-prereq-checkbox').forEach(cb => cb.checked = true)">
+                                        <i class="fas fa-check-double"></i> Todas
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.querySelectorAll('.create-prereq-checkbox').forEach(cb => cb.checked = false)">
+                                        <i class="fas fa-times"></i> Ninguna
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                ${actividadesCheckboxes}
+                            </div>
+                            <div class="custom-control custom-switch mt-2">
+                                <input type="checkbox" class="custom-control-input" id="actividad-prereqs-obligatorio">
+                                <label class="custom-control-label" for="actividad-prereqs-obligatorio">
+                                    <i class="fas fa-exclamation-circle text-warning"></i> Prerrequisito obligatorio
+                                    <small class="text-muted d-block">Si está activo, el estudiante no podrá acceder sin completar las actividades seleccionadas</small>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted mt-1">
+                                <i class="fas fa-info-circle"></i> El estudiante deberá completar las actividades seleccionadas antes de poder acceder a esta actividad.
+                            </small>
+                            ` : `
+                            <div class="alert alert-light py-2 mb-0">
+                                <i class="fas fa-info-circle text-muted"></i> <small class="text-muted">No hay otras actividades creadas aún. Crea primero otras actividades para poder establecer prerrequisitos.</small>
+                            </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+
                 // Campos específicos para Quiz y Evaluación
                 const quizFields = requierePreguntas ? `
                     <hr class="my-4">
@@ -1753,6 +1830,7 @@
                                     </div>
                                 </div>
                             </div>
+                            ${prerequisitosSection}
                             ${quizFields}
                         </div>
                     `,
@@ -1765,6 +1843,15 @@
                         window.actividadQuestions = [];
                         window.actividadQuestionCounter = 0;
                         window.actividadOptionCounters = {};
+
+                        // Función para mostrar/ocultar selección de prerrequisitos
+                        window.toggleCreatePrereqsSelection = function() {
+                            const hasPrereqs = document.getElementById('actividad-has-prereqs')?.checked || false;
+                            const container = document.getElementById('create-prereqs-selection-container');
+                            if (container) {
+                                container.style.display = hasPrereqs ? 'block' : 'none';
+                            }
+                        };
                         
                         // Funciones para configuración del banco de preguntas
                         window.toggleActBankConfig = function() {
@@ -1895,6 +1982,17 @@
                             };
                         }
 
+                        // Obtener actividades prerrequisito seleccionadas
+                        const hasPrereqs = document.getElementById('actividad-has-prereqs')?.checked || false;
+                        let prerequisiteActivityIds = [];
+                        let prereqsObligatorio = false;
+                        if (hasPrereqs) {
+                            document.querySelectorAll('.create-prereq-checkbox:checked').forEach(cb => {
+                                prerequisiteActivityIds.push(parseInt(cb.value));
+                            });
+                            prereqsObligatorio = document.getElementById('actividad-prereqs-obligatorio')?.checked || false;
+                        }
+
                         return {
                             tipo: tipo,
                             titulo: titulo,
@@ -1904,7 +2002,9 @@
                             fecha_cierre: fechaCierre,
                             puntos_maximos: parseInt(puntos),
                             intentos_permitidos: parseInt(intentos),
-                            contenido_json: quizData
+                            contenido_json: quizData,
+                            prerequisite_activity_ids: prerequisiteActivityIds,
+                            prereqs_obligatorio: prereqsObligatorio
                         };
                     }
                 }).then((result) => {

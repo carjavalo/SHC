@@ -1461,7 +1461,7 @@ function showActivityModal(activityType) {
             tarea: '📝',
             quiz: '❓',
             evaluacion: '📋',
-            proyecto: '�'
+            proyecto: '🔧'
         };
         actividadesExistentes.forEach(act => {
             const tipoIcon = typeIcons[act.type] || '📝';
@@ -1476,38 +1476,47 @@ function showActivityModal(activityType) {
         });
     }
 
-    // Sección de prerrequisitos de actividades (solo si hay actividades existentes)
-    const prerequisitosSection = actividadesExistentes.length > 0 ? `
+    // Contenido de la lista de prerrequisitos
+    const prereqListContent = actividadesExistentes.length > 0 ? `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">Selecciona las actividades que el estudiante debe completar:</small>
+            <div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="selectAllPrereqs()">
+                    <i class="fas fa-check-double"></i> Todas
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="deselectAllPrereqs()">
+                    <i class="fas fa-times"></i> Ninguna
+                </button>
+            </div>
+        </div>
+        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+            ${actividadesCheckboxes}
+        </div>
+        <small class="form-text text-muted">
+            <i class="fas fa-info-circle"></i> El estudiante deberá completar las actividades seleccionadas antes de poder acceder a esta actividad.
+        </small>
+    ` : `
+        <div class="alert alert-light py-2 mb-0">
+            <i class="fas fa-info-circle text-muted"></i> <small class="text-muted">No hay otras actividades creadas aún. Crea primero otras actividades para poder establecer prerrequisitos.</small>
+        </div>
+    `;
+
+    // Sección de prerrequisitos de actividades (siempre visible)
+    const prerequisitosSection = `
         <hr class="my-3">
         <div class="form-group">
             <label><i class="fas fa-link text-info"></i> Prerrequisitos de Actividades</label>
             <div class="custom-control custom-switch mb-2">
-                <input type="checkbox" class="custom-control-input" id="activity-has-prereqs" onchange="togglePrereqsSelection()">
+                <input type="checkbox" class="custom-control-input" id="activity-has-prereqs" onchange="togglePrereqsSelection()" ${actividadesExistentes.length === 0 ? 'disabled' : ''}>
                 <label class="custom-control-label" for="activity-has-prereqs">
                     Requiere completar otras actividades antes
                 </label>
             </div>
             <div id="prereqs-selection-container" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <small class="text-muted">Selecciona las actividades que el estudiante debe completar:</small>
-                    <div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="selectAllPrereqs()">
-                            <i class="fas fa-check-double"></i> Todas
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="deselectAllPrereqs()">
-                            <i class="fas fa-times"></i> Ninguna
-                        </button>
-                    </div>
-                </div>
-                <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                    ${actividadesCheckboxes}
-                </div>
-                <small class="form-text text-muted">
-                    <i class="fas fa-info-circle"></i> El estudiante deberá completar las actividades seleccionadas antes de poder acceder a esta actividad.
-                </small>
+                ${prereqListContent}
             </div>
         </div>
-    ` : '';
+    `;
 
     // Generar lista de materiales disponibles para vincular actividad
     const materialesDisponibles = courseData.materials || [];
@@ -2569,6 +2578,73 @@ function editActivity(activityId) {
         </div>
     `;
 
+    // Generar sección de prerrequisitos para edición
+    const otrasActividadesEdit = (courseData.activities || []).filter(a => a.id !== activityId);
+    const existingPrereqs = activity.prerequisiteActivityIds || [];
+    let actividadesCheckboxesEdit = '';
+    if (otrasActividadesEdit.length > 0) {
+        const tipoIconsEdit = {
+            tarea: '📝',
+            quiz: '❓',
+            evaluacion: '📋',
+            proyecto: '🔧'
+        };
+        otrasActividadesEdit.forEach(act => {
+            const tipoIcon = tipoIconsEdit[act.type] || '📝';
+            const isChecked = existingPrereqs.includes(act.id) ? 'checked' : '';
+            actividadesCheckboxesEdit += `
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input edit-activity-prereq-checkbox" id="edit-activity-prereq-${act.id}" value="${act.id}" ${isChecked}>
+                    <label class="custom-control-label" for="edit-activity-prereq-${act.id}">
+                        ${tipoIcon} ${act.title}
+                    </label>
+                </div>
+            `;
+        });
+    }
+
+    // Contenido de la lista de prerrequisitos en edición
+    const prereqListContentEdit = otrasActividadesEdit.length > 0 ? `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">Selecciona las actividades que el estudiante debe completar:</small>
+            <div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.querySelectorAll('.edit-activity-prereq-checkbox').forEach(cb => cb.checked = true)">
+                    <i class="fas fa-check-double"></i> Todas
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.querySelectorAll('.edit-activity-prereq-checkbox').forEach(cb => cb.checked = false)">
+                    <i class="fas fa-times"></i> Ninguna
+                </button>
+            </div>
+        </div>
+        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+            ${actividadesCheckboxesEdit}
+        </div>
+        <small class="form-text text-muted">
+            <i class="fas fa-info-circle"></i> El estudiante deberá completar las actividades seleccionadas antes de poder acceder a esta actividad.
+        </small>
+    ` : `
+        <div class="alert alert-light py-2 mb-0">
+            <i class="fas fa-info-circle text-muted"></i> <small class="text-muted">No hay otras actividades creadas aún. Crea primero otras actividades para poder establecer prerrequisitos.</small>
+        </div>
+    `;
+
+    // Sección de prerrequisitos para edición (siempre visible)
+    const prerequisitosSectionEdit = `
+        <hr class="my-3">
+        <div class="form-group">
+            <label><i class="fas fa-link text-info"></i> Prerrequisitos de Actividades</label>
+            <div class="custom-control custom-switch mb-2">
+                <input type="checkbox" class="custom-control-input" id="edit-activity-has-prereqs" ${existingPrereqs.length > 0 ? 'checked' : ''} onchange="toggleEditPrereqsSelection()" ${otrasActividadesEdit.length === 0 ? 'disabled' : ''}>
+                <label class="custom-control-label" for="edit-activity-has-prereqs">
+                    Requiere completar otras actividades antes
+                </label>
+            </div>
+            <div id="edit-prereqs-selection-container" style="display: ${existingPrereqs.length > 0 ? 'block' : 'none'};">
+                ${prereqListContentEdit}
+            </div>
+        </div>
+    `;
+
     // Campos editables para Quiz y Evaluación
     let quizFields = '';
     if ((activity.type === 'quiz' || activity.type === 'evaluacion') && activity.quizData) {
@@ -2660,6 +2736,7 @@ function editActivity(activityId) {
                     </div>
                 </div>
                 ${gradingSectionEdit}
+                ${prerequisitosSectionEdit}
                 ${quizFields}
             </div>
         `,
@@ -2668,6 +2745,15 @@ function editActivity(activityId) {
         cancelButtonText: 'Cancelar',
         width: '900px',
         didOpen: () => {
+            // Función para mostrar/ocultar selección de prerrequisitos en edición
+            window.toggleEditPrereqsSelection = function() {
+                const hasPrereqs = document.getElementById('edit-activity-has-prereqs')?.checked || false;
+                const container = document.getElementById('edit-prereqs-selection-container');
+                if (container) {
+                    container.style.display = hasPrereqs ? 'block' : 'none';
+                }
+            };
+
             // Función para actualizar el porcentaje disponible según el material seleccionado en edición
             // El porcentaje de la actividad es relativo al material (0-100%), no al curso
             window.updatePorcentajeDisponibleActividadEdit = function() {
@@ -3066,6 +3152,15 @@ function editActivity(activityId) {
                 };
             }
 
+            // Obtener actividades prerrequisito seleccionadas
+            const hasPrereqsEdit = document.getElementById('edit-activity-has-prereqs')?.checked || false;
+            let editPrerequisiteActivityIds = [];
+            if (hasPrereqsEdit) {
+                document.querySelectorAll('.edit-activity-prereq-checkbox:checked').forEach(cb => {
+                    editPrerequisiteActivityIds.push(parseInt(cb.value));
+                });
+            }
+
             return {
                 title: title,
                 description: description,
@@ -3079,7 +3174,8 @@ function editActivity(activityId) {
                 quizData: quizData,
                 materialId: materialId ? parseInt(materialId) : null,
                 porcentajeMaterial: porcentajeMaterial,
-                notaMinimaAprobacion: notaMinimaAprobacion
+                notaMinimaAprobacion: notaMinimaAprobacion,
+                prerequisiteActivityIds: editPrerequisiteActivityIds
             };
         }
     }).then((result) => {
@@ -3097,6 +3193,7 @@ function editActivity(activityId) {
             activity.materialId = result.value.materialId;
             activity.porcentajeMaterial = result.value.porcentajeMaterial;
             activity.notaMinimaAprobacion = result.value.notaMinimaAprobacion;
+            activity.prerequisiteActivityIds = result.value.prerequisiteActivityIds;
             
             // Actualizar datos del quiz si fueron modificados
             if (result.value.quizData) {
