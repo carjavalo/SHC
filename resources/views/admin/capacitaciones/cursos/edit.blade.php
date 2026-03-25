@@ -1659,6 +1659,57 @@
                     });
                 @endforeach
 
+                // Generar opciones de materiales para la sección de calificación
+                let materialesOptionsHtml = '<option value="">-- Selecciona un material --</option>';
+                @foreach($curso->materiales()->orderBy('orden')->get() as $mat)
+                    @php
+                        $porcentajeUsadoMat = $mat->actividades()->sum('porcentaje_curso');
+                        $porcentajeDisponibleMat = max(0, $mat->porcentaje_curso - $porcentajeUsadoMat);
+                        $estaLlenoMat = $porcentajeDisponibleMat <= 0;
+                    @endphp
+                    materialesOptionsHtml += `<option value="{{ $mat->id }}" data-porcentaje-disponible="{{ number_format($porcentajeDisponibleMat, 1) }}" data-porcentaje-material="{{ $mat->porcentaje_curso }}" {{ $estaLlenoMat ? 'style="color: #dc3545;"' : '' }}>{{ $mat->titulo }} ({{ $estaLlenoMat ? '✗ 100% asignado' : number_format($porcentajeDisponibleMat, 1) . '% disponible' }})</option>`;
+                @endforeach
+
+                // Sección de configuración de calificación
+                const gradingSection = `
+                    <hr class="my-3">
+                    <div class="card bg-light mb-3">
+                        <div class="card-header py-2">
+                            <strong><i class="fas fa-star text-warning"></i> Configuración de Calificación</strong>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="form-group mb-3">
+                                <label for="actividad-material"><i class="fas fa-book text-info"></i> Material al que pertenece *</label>
+                                <select class="form-control" id="actividad-material" onchange="updatePorcentajeDisponibleEdit()">
+                                    ${materialesOptionsHtml}
+                                </select>
+                                <small class="form-text text-muted">Selecciona el material al que pertenece esta actividad</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        <label for="actividad-porcentaje">Porcentaje de la Actividad (%) *</label>
+                                        <input type="number" class="form-control" id="actividad-porcentaje" 
+                                               min="0.1" max="100" step="0.1" value="" placeholder="Ej: 25"
+                                               oninput="validarPorcentajeActividadEdit()">
+                                        <small class="form-text text-muted" id="edit-porcentaje-disponible-info">
+                                            Selecciona un material para ver el porcentaje disponible
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-2">
+                                        <label for="actividad-nota-minima">Nota Mínima Aprobación *</label>
+                                        <input type="number" class="form-control" id="actividad-nota-minima" 
+                                               min="0" max="5" step="0.1" value="3.0" placeholder="3.0">
+                                        <small class="form-text text-muted">Escala: 0.0 - 5.0</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
                 const tipoIconsPrereq = {
                     tarea: '📝',
                     quiz: '❓',
@@ -1730,6 +1781,16 @@
                 const quizFields = requierePreguntas ? `
                     <hr class="my-4">
                     <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas de la ${tipoLabel}</h5>
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> — Cada pregunta tiene un <strong>porcentaje (%)</strong>. La suma de los porcentajes de todas las preguntas no puede exceder <strong>100%</strong>.<br>
+                        <small>La nota se calcula así: si una respuesta es correcta, su porcentaje se multiplica por 5. Si es incorrecta, por 0. Si hay varias respuestas correctas, el porcentaje se distribuye entre ellas.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Porcentaje total asignado:</label>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" id="edit-quiz-points-progress" style="width: 0%">0% / 100%</div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="actividad-duration">Duración (minutos)</label>
                         <input type="number" class="form-control" id="actividad-duration" min="5" max="180" value="30">
@@ -1830,6 +1891,19 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="actividad-obligatoria" checked>
+                                    <label class="custom-control-label" for="actividad-obligatoria">Actividad obligatoria</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="actividad-entregas-tardias">
+                                    <label class="custom-control-label" for="actividad-entregas-tardias">Permitir entregas tardías</label>
+                                </div>
+                            </div>
+                            ${gradingSection}
                             ${prerequisitosSection}
                             ${quizFields}
                         </div>
@@ -1894,6 +1968,11 @@
                         const puntos = document.getElementById('actividad-puntos').value;
                         const intentos = document.getElementById('actividad-intentos').value;
 
+                        // Datos de calificación
+                        const materialId = document.getElementById('actividad-material')?.value || '';
+                        const porcentajeCurso = parseFloat(document.getElementById('actividad-porcentaje')?.value) || 0;
+                        const notaMinimaAprobacion = parseFloat(document.getElementById('actividad-nota-minima')?.value) || 3.0;
+
                         if (!titulo.trim()) {
                             Swal.showValidationMessage('El título es requerido');
                             return false;
@@ -1957,17 +2036,45 @@
                                     Swal.showValidationMessage('Cada pregunta debe tener al menos una respuesta correcta');
                                     return false;
                                 }
+
+                                const puntosPregunta = parseFloat(questionPoints) || 0;
+
+                                if (puntosPregunta <= 0) {
+                                    Swal.showValidationMessage('Cada pregunta debe tener un porcentaje mayor a 0%');
+                                    return false;
+                                }
+
+                                if (puntosPregunta > 100) {
+                                    Swal.showValidationMessage('El porcentaje de cada pregunta no puede exceder 100%');
+                                    return false;
+                                }
                                 
-                                totalQuestionPoints += parseInt(questionPoints);
+                                totalQuestionPoints += puntosPregunta;
                                 
                                 questions.push({
                                     id: questionId,
                                     text: questionText,
-                                    points: parseInt(questionPoints),
+                                    points: puntosPregunta,
                                     options: options,
                                     correctAnswers: correctAnswers,
                                     isMultipleChoice: correctAnswers.length > 1
                                 });
+                            }
+
+                            // Validar que la suma total no exceda 100%
+                            if (totalQuestionPoints > 100) {
+                                Swal.showValidationMessage('La suma de porcentajes de todas las preguntas no puede exceder 100% (actual: ' + totalQuestionPoints.toFixed(1) + '%)');
+                                return false;
+                            }
+
+                            // Validar banco de preguntas
+                            const enableBank = document.getElementById('actividad-enable-bank')?.checked || false;
+                            const randomizeOrder = document.getElementById('actividad-randomize-order')?.checked || false;
+                            const questionsPerAttempt = parseInt(document.getElementById('actividad-questions-per-attempt')?.value) || questions.length;
+
+                            if (enableBank && questionsPerAttempt >= questions.length) {
+                                Swal.showValidationMessage('Las preguntas por intento (' + questionsPerAttempt + ') deben ser menos que el total del banco (' + questions.length + '). Agrega más preguntas o reduce el número por intento.');
+                                return false;
                             }
                             
                             quizData = {
@@ -1975,9 +2082,9 @@
                                 questions: questions,
                                 totalPoints: totalQuestionPoints,
                                 quizConfig: {
-                                    enableQuestionBank: document.getElementById('actividad-enable-bank')?.checked || false,
-                                    questionsPerAttempt: (document.getElementById('actividad-enable-bank')?.checked) ? (parseInt(document.getElementById('actividad-questions-per-attempt')?.value) || questions.length) : questions.length,
-                                    randomizeOrder: document.getElementById('actividad-randomize-order')?.checked || false
+                                    enableQuestionBank: enableBank,
+                                    questionsPerAttempt: enableBank ? questionsPerAttempt : questions.length,
+                                    randomizeOrder: randomizeOrder
                                 }
                             };
                         }
@@ -2003,6 +2110,9 @@
                             puntos_maximos: parseInt(puntos),
                             intentos_permitidos: parseInt(intentos),
                             contenido_json: quizData,
+                            material_id: materialId ? parseInt(materialId) : null,
+                            porcentaje_curso: porcentajeCurso,
+                            nota_minima_aprobacion: notaMinimaAprobacion,
                             prerequisite_activity_ids: prerequisiteActivityIds,
                             prereqs_obligatorio: prereqsObligatorio
                         };
@@ -2019,9 +2129,13 @@
                 const questionId = ++window.actividadQuestionCounter;
                 const container = document.getElementById('actividad-questions-container');
                 window.actividadOptionCounters[questionId] = 0;
+
+                // Calcular porcentaje disponible
+                const porcentajeUsado = calcularPorcentajeTotalQuizEdit();
+                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
                 
                 const questionHtml = `
-                    <div class="card mb-3 quiz-question-card" id="act-question-${questionId}">
+                    <div class="card mb-3 quiz-question-card" id="act-question-${questionId}" style="border-left: 3px solid #007bff;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0"><i class="fas fa-question-circle text-primary"></i> Pregunta ${window.actividadQuestions.length + 1}</h6>
@@ -2031,11 +2145,14 @@
                             </div>
                             <div class="form-group">
                                 <label>Texto de la Pregunta *</label>
-                                <input type="text" class="form-control" id="act-question-text-${questionId}" placeholder="Escribe la pregunta">
+                                <input type="text" class="form-control" id="act-question-text-${questionId}" placeholder="Escribe la pregunta aquí">
                             </div>
                             <div class="form-group">
-                                <label>Ponderación (puntos)</label>
-                                <input type="number" class="form-control" id="act-question-points-${questionId}" min="1" max="100" value="20">
+                                <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
+                                <input type="number" class="form-control act-question-points-input" id="act-question-points-${questionId}" 
+                                       min="0.1" max="100" step="0.1" value="" placeholder="Ej: 20"
+                                       oninput="actualizarPorcentajeDisponibleQuizEdit()">
+                                <small class="form-text text-muted">Disponible: <span class="act-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
@@ -2045,7 +2162,7 @@
                             </div>
                             <div id="act-options-container-${questionId}">
                             </div>
-                            <small class="text-muted"><i class="fas fa-info-circle"></i> Marca las respuestas correctas</small>
+                            <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
                         </div>
                     </div>
                 `;
@@ -2056,6 +2173,12 @@
                 // Agregar 2 opciones por defecto
                 addActividadQuestionOption(questionId);
                 addActividadQuestionOption(questionId);
+
+                // Actualizar porcentaje disponible en todas las preguntas
+                actualizarPorcentajeDisponibleQuizEdit();
+
+                // Actualizar info del banco de preguntas
+                if (typeof updateActBankInfo === 'function') updateActBankInfo();
             };
 
             // Eliminar pregunta
@@ -2074,6 +2197,10 @@
                         }
                     }
                 });
+
+                // Actualizar porcentajes disponibles
+                actualizarPorcentajeDisponibleQuizEdit();
+                if (typeof updateActBankInfo === 'function') updateActBankInfo();
             };
 
             // Agregar opción a una pregunta
@@ -2165,6 +2292,67 @@
                 removeButtons.forEach(btn => {
                     btn.style.display = optionRows.length > 2 ? 'block' : 'none';
                 });
+            };
+
+            // Calcular porcentaje total asignado del quiz (edit)
+            window.calcularPorcentajeTotalQuizEdit = function() {
+                let total = 0;
+                document.querySelectorAll('.act-question-points-input').forEach(input => {
+                    total += parseFloat(input.value) || 0;
+                });
+                return total;
+            };
+
+            // Actualizar porcentaje disponible en todas las preguntas (edit)
+            window.actualizarPorcentajeDisponibleQuizEdit = function() {
+                const porcentajeUsado = calcularPorcentajeTotalQuizEdit();
+                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+                document.querySelectorAll('.act-puntos-disponibles').forEach(span => {
+                    span.textContent = porcentajeDisponible;
+                    span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
+                });
+
+                // Actualizar barra de progreso si existe
+                const progressBar = document.getElementById('edit-quiz-points-progress');
+                if (progressBar) {
+                    const barWidth = Math.min(100, porcentajeUsado);
+                    progressBar.style.width = barWidth + '%';
+                    progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
+                    progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
+                }
+            };
+
+            // Actualizar porcentaje disponible al seleccionar material
+            window.updatePorcentajeDisponibleEdit = function() {
+                const select = document.getElementById('actividad-material');
+                const infoEl = document.getElementById('edit-porcentaje-disponible-info');
+                if (!select || !infoEl) return;
+
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const disponible = selectedOption.getAttribute('data-porcentaje-disponible');
+                    infoEl.innerHTML = `Disponible en este material: <strong>${disponible}%</strong>`;
+                } else {
+                    infoEl.textContent = 'Selecciona un material para ver el porcentaje disponible';
+                }
+            };
+
+            // Validar porcentaje de actividad en tiempo real
+            window.validarPorcentajeActividadEdit = function() {
+                const select = document.getElementById('actividad-material');
+                const porcentajeInput = document.getElementById('actividad-porcentaje');
+                if (!select || !porcentajeInput) return;
+
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const disponible = parseFloat(selectedOption.getAttribute('data-porcentaje-disponible')) || 0;
+                    const valor = parseFloat(porcentajeInput.value) || 0;
+                    if (valor > disponible) {
+                        porcentajeInput.style.borderColor = '#dc3545';
+                    } else {
+                        porcentajeInput.style.borderColor = '';
+                    }
+                }
             };
 
             // Guardar actividad en el servidor
