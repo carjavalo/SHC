@@ -1651,7 +1651,7 @@
 
                 // Generar sección de prerrequisitos de actividades
                 const actividadesExistentes = [];
-                @foreach($curso->actividades()->orderBy('orden')->get() as $act)
+                @foreach($curso->actividades as $act)
                     actividadesExistentes.push({
                         id: {{ $act->id }},
                         titulo: @json($act->titulo),
