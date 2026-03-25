@@ -730,6 +730,7 @@ class CursoClassroomController extends Controller
                 'intentos_permitidos' => $request->intentos_permitidos ?? 1,
                 'contenido_json' => $request->contenido_json,
                 'porcentaje_curso' => $porcentajeSolicitado,
+                'nota_minima_aprobacion' => $request->input('nota_minima_aprobacion', 3.0),
                 'habilitado' => in_array($request->tipo, ['quiz', 'evaluacion']) ? false : true,
                 'orden' => $curso->actividades()->count() + 1,
                 'prerequisite_activity_ids' => $prereqActivityIds,
