@@ -403,19 +403,73 @@
             
             // Campos para Quiz
             const quizFields = requierePreguntas ? `
-                <hr class="my-3">
-                <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas</h5>
+                <hr class="my-4">
+                <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas de la ${tipoLabel}</h5>
+                <div class="alert alert-info py-2">
+                    <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> — Cada pregunta tiene un <strong>porcentaje (%)</strong>. La suma de los porcentajes de todas las preguntas no puede exceder <strong>100%</strong>.<br>
+                    <small>La nota se calcula así: si una respuesta es correcta, su porcentaje se multiplica por 5. Si es incorrecta, por 0. Si hay varias respuestas correctas, el porcentaje se distribuye entre ellas.</small>
+                </div>
+                <div class="form-group">
+                    <label>Porcentaje total asignado:</label>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar" id="edit-quiz-points-progress" style="width: 0%">0% / 100%</div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="edit-actividad-duration">Duración (minutos)</label>
                     <input type="number" class="form-control" id="edit-actividad-duration" min="5" max="180" value="${contenidoJson.duration || 30}">
+                    <small class="form-text text-muted">Tiempo máximo para completar</small>
+                </div>
+                <div class="card border-success mb-3">
+                    <div class="card-header bg-success text-white py-2">
+                        <strong><i class="fas fa-shield-alt"></i> Configuración Anti-fraude (Banco de Preguntas)</strong>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="custom-control custom-switch mb-3">
+                            <input type="checkbox" class="custom-control-input" id="edit-randomize-order" ${(contenidoJson.quizConfig?.randomizeOrder) ? 'checked' : ''}>
+                            <label class="custom-control-label" for="edit-randomize-order">
+                                <i class="fas fa-random text-info"></i> Aleatorizar orden de preguntas para cada estudiante
+                            </label>
+                            <small class="form-text text-muted">Las preguntas se mostrarán en un orden diferente para cada estudiante.</small>
+                        </div>
+                        <hr class="my-2">
+                        <div class="custom-control custom-switch mb-2">
+                            <input type="checkbox" class="custom-control-input" id="edit-enable-bank" onchange="window.toggleEditBankConfig()" ${(contenidoJson.quizConfig?.enableQuestionBank) ? 'checked' : ''}>
+                            <label class="custom-control-label" for="edit-enable-bank">
+                                <i class="fas fa-database text-warning"></i> Habilitar Banco de Preguntas
+                            </label>
+                            <small class="form-text text-muted">Crea más preguntas de las necesarias. Cada estudiante recibirá solo un subconjunto aleatorio.</small>
+                        </div>
+                        <div id="edit-bank-details" style="display: ${(contenidoJson.quizConfig?.enableQuestionBank) ? 'block' : 'none'};">
+                            <div class="form-group mt-3">
+                                <label for="edit-questions-per-attempt"><i class="fas fa-tasks"></i> Preguntas por intento *</label>
+                                <input type="number" class="form-control" id="edit-questions-per-attempt" min="1" value="${contenidoJson.quizConfig?.questionsPerAttempt || 5}" oninput="window.updateEditBankInfo()">
+                                <small class="form-text text-muted" id="edit-bank-info-text">
+                                    Se seleccionarán aleatoriamente de las preguntas del banco para cada estudiante.
+                                </small>
+                            </div>
+                            <div class="alert alert-success py-2 mb-0">
+                                <i class="fas fa-shield-alt"></i> <strong>Anti-fraude activo:</strong>
+                                <ul class="mb-0 mt-1 small">
+                                    <li>Cada estudiante recibirá un conjunto diferente de preguntas.</li>
+                                    <li>Las valoraciones se redistribuirán automáticamente de forma proporcional.</li>
+                                    <li>Minimiza la copia entre estudiantes.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div id="edit-actividad-questions-container"></div>
-                <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="window.addEditQuestion()">
-                    <i class="fas fa-plus"></i> Agregar Pregunta</button>` : '';
+                <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="window.addEditQuestion()" id="add-edit-question-btn">
+                    <i class="fas fa-plus"></i> Agregar Pregunta
+                </button>
+                <small class="form-text text-muted text-center d-block mt-2">
+                    <i class="fas fa-info-circle"></i> Cada pregunta puede tener de 2 a 10 opciones. Marca las respuestas correctas.
+                </small>` : '';
             
             Swal.fire({
-                title: `<i class="fas fa-edit"></i> Modificar Actividad`,
-                html: `<div class="text-left">
+                title: `<i class="fas fa-edit"></i> Modificar Actividad: ${tipoLabel}`,
+                html: `<div class="text-left" style="max-height: 600px; overflow-y: auto;">
                     <div class="form-group">
                         <label>Título *</label>
                         <input type="text" class="form-control" id="edit-actividad-titulo" value="${tituloEscapado}">
@@ -462,12 +516,72 @@
                 confirmButtonText: '<i class="fas fa-save"></i> Guardar',
                 cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                 confirmButtonColor: '#28a745',
-                width: '800px',
+                width: '900px',
                 didOpen: () => {
                     console.log('Modal opened. contenidoJson:', contenidoJson);
                     window.editQuestions = [];
                     window.editQuestionCounter = 0;
                     window.editOptionCounters = {};
+                    
+                    // Funciones para configuración del banco de preguntas
+                    window.toggleEditBankConfig = function() {
+                        const enabled = document.getElementById('edit-enable-bank').checked;
+                        document.getElementById('edit-bank-details').style.display = enabled ? 'block' : 'none';
+                        if (enabled) {
+                            document.getElementById('edit-randomize-order').checked = true;
+                            window.updateEditBankInfo();
+                        }
+                    };
+                    
+                    window.updateEditBankInfo = function() {
+                        const totalQuestions = window.editQuestions.length;
+                        const perAttempt = parseInt(document.getElementById('edit-questions-per-attempt').value) || 1;
+                        const infoText = document.getElementById('edit-bank-info-text');
+                        if (infoText) {
+                            if (totalQuestions > 0) {
+                                if (perAttempt >= totalQuestions) {
+                                    infoText.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Debe ser menor que el total (' + totalQuestions + '). Agrega más preguntas.</span>';
+                                } else {
+                                    infoText.innerHTML = 'Se seleccionarán <strong>' + perAttempt + '</strong> de <strong>' + totalQuestions + '</strong> preguntas para cada estudiante.';
+                                }
+                            } else {
+                                infoText.innerHTML = 'Agrega preguntas al banco primero.';
+                            }
+                        }
+                    };
+                    
+                    // Función para calcular porcentaje total del quiz
+                    window.calcularPorcentajeTotalQuizEdit = function() {
+                        let total = 0;
+                        document.querySelectorAll('.edit-question-points-input').forEach(input => {
+                            total += parseFloat(input.value) || 0;
+                        });
+                        return total;
+                    };
+                    
+                    // Función para actualizar porcentaje disponible
+                    window.actualizarPorcentajeDisponibleQuizEdit = function() {
+                        const porcentajeUsado = window.calcularPorcentajeTotalQuizEdit();
+                        const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+                        
+                        document.querySelectorAll('.edit-puntos-disponibles').forEach(span => {
+                            span.textContent = porcentajeDisponible;
+                            span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
+                        });
+                        
+                        const progressBar = document.getElementById('edit-quiz-points-progress');
+                        if (progressBar) {
+                            const barWidth = Math.min(100, porcentajeUsado);
+                            progressBar.style.width = barWidth + '%';
+                            progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
+                            progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
+                        }
+                        
+                        const addBtn = document.getElementById('add-edit-question-btn');
+                        if (addBtn) {
+                            addBtn.disabled = porcentajeUsado >= 100;
+                        }
+                    };
 
                     if (requierePreguntas && contenidoJson && contenidoJson.questions) {
                         let questionsArray = contenidoJson.questions;
@@ -494,6 +608,7 @@
                                 console.error('Error loading question', q, e);
                             }
                         });
+                        setTimeout(() => window.actualizarPorcentajeDisponibleQuizEdit(), 100);
                     } else {
                         console.log('No questions to load or requierePreguntas is false');
                     }
@@ -503,29 +618,90 @@
                     if (!titulo.trim()) { Swal.showValidationMessage('El título es requerido'); return false; }
                     
                     let quizData = null;
-                    if (requierePreguntas && window.editQuestions.length > 0) {
+                    if (requierePreguntas) {
                         const duration = document.getElementById('edit-actividad-duration').value;
+                        
+                        if (window.editQuestions.length < 1) {
+                            Swal.showValidationMessage('Debes crear al menos 1 pregunta');
+                            return false;
+                        }
+                        
                         const questions = [];
+                        let totalQuestionPoints = 0;
+                        
                         for (const qId of window.editQuestions) {
                             const qText = document.getElementById(`edit-question-text-${qId}`).value;
-                            const qPoints = parseFloat(document.getElementById(`edit-question-points-${qId}`).value) || 1;
+                            const qPoints = parseFloat(document.getElementById(`edit-question-points-${qId}`).value) || 0;
+                            
                             if (!qText.trim()) { Swal.showValidationMessage('Todas las preguntas deben tener texto'); return false; }
+                            
+                            if (qPoints <= 0) {
+                                Swal.showValidationMessage('Cada pregunta debe tener un porcentaje mayor a 0%');
+                                return false;
+                            }
+                            
+                            if (qPoints > 100) {
+                                Swal.showValidationMessage('El porcentaje de cada pregunta no puede exceder 100%');
+                                return false;
+                            }
                             
                             const optContainer = document.getElementById(`edit-options-container-${qId}`);
                             const optRows = optContainer.querySelectorAll('.option-row');
                             const options = {};
                             const correctAnswers = [];
+                            
+                            if (optRows.length < 2) {
+                                Swal.showValidationMessage('Cada pregunta debe tener al menos 2 opciones');
+                                return false;
+                            }
+                            
+                            let hasEmptyOption = false;
                             optRows.forEach((row, idx) => {
                                 const letter = window.optionLetters[idx];
                                 const textInput = row.querySelector('input[type="text"]');
                                 const checkbox = row.querySelector('input[type="checkbox"]');
+                                if (!textInput.value.trim()) hasEmptyOption = true;
                                 options[letter] = textInput.value;
                                 if (checkbox && checkbox.checked) correctAnswers.push(letter);
                             });
+                            
+                            if (hasEmptyOption) {
+                                Swal.showValidationMessage('Todas las opciones deben tener texto');
+                                return false;
+                            }
+                            
                             if (correctAnswers.length === 0) { Swal.showValidationMessage('Cada pregunta debe tener al menos una respuesta correcta'); return false; }
+                            
+                            totalQuestionPoints += qPoints;
                             questions.push({ id: qId, text: qText, points: qPoints, options, correctAnswers, isMultipleChoice: correctAnswers.length > 1 });
                         }
-                        quizData = { duration: parseInt(duration), questions };
+                        
+                        // Validar que la suma total no exceda 100%
+                        if (totalQuestionPoints > 100) {
+                            Swal.showValidationMessage('La suma de porcentajes de todas las preguntas no puede exceder 100% (actual: ' + totalQuestionPoints.toFixed(1) + '%)');
+                            return false;
+                        }
+                        
+                        // Recopilar configuración anti-fraude
+                        const editEnableBank = document.getElementById('edit-enable-bank')?.checked || false;
+                        const editRandomizeOrder = document.getElementById('edit-randomize-order')?.checked || false;
+                        const editQuestionsPerAttempt = parseInt(document.getElementById('edit-questions-per-attempt')?.value) || questions.length;
+                        
+                        if (editEnableBank && editQuestionsPerAttempt >= questions.length) {
+                            Swal.showValidationMessage('Las preguntas por intento (' + editQuestionsPerAttempt + ') deben ser menos que el total del banco (' + questions.length + '). Agrega más preguntas o reduce el número por intento.');
+                            return false;
+                        }
+                        
+                        quizData = { 
+                            duration: parseInt(duration), 
+                            questions: questions, 
+                            totalPoints: totalQuestionPoints,
+                            quizConfig: {
+                                enableQuestionBank: editEnableBank,
+                                questionsPerAttempt: editEnableBank ? editQuestionsPerAttempt : questions.length,
+                                randomizeOrder: editRandomizeOrder
+                            }
+                        };
                     }
                     
                     return {
@@ -752,26 +928,57 @@
             const container = document.getElementById('edit-actividad-questions-container');
             window.editOptionCounters[qId] = 0;
             
-            const qHtml = `<div class="card mb-2" id="edit-question-${qId}">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between mb-2">
-                        <strong>Pregunta ${window.editQuestions.length + 1}</strong>
+            const questionText = String(question.text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const questionPoints = question.points || 20;
+            const porcentajeUsado = window.calcularPorcentajeTotalQuizEdit ? window.calcularPorcentajeTotalQuizEdit() : 0;
+            const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+            
+            const qHtml = `<div class="card mb-3 quiz-question-card" id="edit-question-${qId}" style="border-left: 3px solid #007bff;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0"><i class="fas fa-question-circle text-primary"></i> Pregunta ${window.editQuestions.length + 1}</h6>
                         <button type="button" class="btn btn-sm btn-danger" onclick="window.removeEditQuestion(${qId})"><i class="fas fa-trash"></i></button>
                     </div>
-                    <input type="text" class="form-control mb-2" id="edit-question-text-${qId}" value="${String(question.text || '').replace(/"/g, '&quot;')}" placeholder="Texto de la pregunta">
-                    <input type="number" class="form-control mb-2" id="edit-question-points-${qId}" min="0" max="5" step="0.1" value="${question.points || 1}" placeholder="Puntos">
+                    <div class="form-group">
+                        <label>Texto de la Pregunta *</label>
+                        <input type="text" class="form-control" id="edit-question-text-${qId}" value="${questionText}" placeholder="Escribe la pregunta aquí">
+                    </div>
+                    <div class="form-group">
+                        <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
+                        <input type="number" class="form-control edit-question-points-input" id="edit-question-points-${qId}" 
+                               min="0.1" max="100" step="0.1" value="${questionPoints}" oninput="window.actualizarPorcentajeDisponibleQuizEdit()">
+                        <small class="form-text text-muted">Disponible: <span class="edit-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="window.addEditQuestionOption(${qId})"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
                     <div id="edit-options-container-${qId}"></div>
-                    <button type="button" class="btn btn-sm btn-outline-success" onclick="window.addEditQuestionOption(${qId})"><i class="fas fa-plus"></i> Opción</button>
+                    <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
                 </div>
             </div>`;
             container.insertAdjacentHTML('beforeend', qHtml);
             window.editQuestions.push(qId);
             
             if (question.options) {
-                const correctAnswers = question.correctAnswers || [];
-                Object.keys(question.options).forEach(letter => {
-                    window.addEditQuestionOptionWithData(qId, letter, question.options[letter], correctAnswers.includes(letter));
-                });
+                if (Array.isArray(question.options)) {
+                    question.options.forEach((option, index) => {
+                        const letter = window.optionLetters[index] || String.fromCharCode(65 + index);
+                        const text = option.text || '';
+                        const isCorrect = option.isCorrect || false;
+                        window.addEditQuestionOptionWithData(qId, letter, text, isCorrect);
+                    });
+                } else {
+                    const correctAnswers = question.correctAnswers || [];
+                    Object.keys(question.options).forEach(letter => {
+                        window.addEditQuestionOptionWithData(qId, letter, question.options[letter], correctAnswers.includes(letter));
+                    });
+                }
+            }
+            
+            if (!question.options || (Array.isArray(question.options) && question.options.length === 0)) {
+                window.addEditQuestionOption(qId);
+                window.addEditQuestionOption(qId);
             }
         };
 
@@ -780,39 +987,77 @@
             const container = document.getElementById('edit-actividad-questions-container');
             window.editOptionCounters[qId] = 0;
             
-            const qHtml = `<div class="card mb-2" id="edit-question-${qId}">
-                <div class="card-body p-2">
-                    <div class="d-flex justify-content-between mb-2">
-                        <strong>Pregunta ${window.editQuestions.length + 1}</strong>
+            const porcentajeUsado = window.calcularPorcentajeTotalQuizEdit ? window.calcularPorcentajeTotalQuizEdit() : 0;
+            const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+            
+            const qHtml = `<div class="card mb-3 quiz-question-card" id="edit-question-${qId}" style="border-left: 3px solid #007bff;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0"><i class="fas fa-question-circle text-primary"></i> Pregunta ${window.editQuestions.length + 1}</h6>
                         <button type="button" class="btn btn-sm btn-danger" onclick="window.removeEditQuestion(${qId})"><i class="fas fa-trash"></i></button>
                     </div>
-                    <input type="text" class="form-control mb-2" id="edit-question-text-${qId}" placeholder="Texto de la pregunta">
-                    <input type="number" class="form-control mb-2" id="edit-question-points-${qId}" min="0" max="5" step="0.1" value="1" placeholder="Puntos">
+                    <div class="form-group">
+                        <label>Texto de la Pregunta *</label>
+                        <input type="text" class="form-control" id="edit-question-text-${qId}" placeholder="Escribe la pregunta aquí">
+                    </div>
+                    <div class="form-group">
+                        <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
+                        <input type="number" class="form-control edit-question-points-input" id="edit-question-points-${qId}" 
+                               min="0.1" max="100" step="0.1" value="" placeholder="Ej: 20" oninput="window.actualizarPorcentajeDisponibleQuizEdit()">
+                        <small class="form-text text-muted">Disponible: <span class="edit-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="window.addEditQuestionOption(${qId})"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
                     <div id="edit-options-container-${qId}"></div>
-                    <button type="button" class="btn btn-sm btn-outline-success" onclick="window.addEditQuestionOption(${qId})"><i class="fas fa-plus"></i> Opción</button>
+                    <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
                 </div>
             </div>`;
             container.insertAdjacentHTML('beforeend', qHtml);
             window.editQuestions.push(qId);
             window.addEditQuestionOption(qId);
             window.addEditQuestionOption(qId);
+            
+            setTimeout(() => {
+                if (typeof window.actualizarPorcentajeDisponibleQuizEdit === 'function') window.actualizarPorcentajeDisponibleQuizEdit();
+                if (typeof window.updateEditBankInfo === 'function') window.updateEditBankInfo();
+            }, 50);
         };
 
         window.removeEditQuestion = function(qId) {
             document.getElementById(`edit-question-${qId}`).remove();
             window.editQuestions = window.editQuestions.filter(id => id !== qId);
+            
+            // Renumerar preguntas
+            window.editQuestions.forEach((id, index) => {
+                const card = document.getElementById(`edit-question-${id}`);
+                if (card) {
+                    const header = card.querySelector('h6');
+                    if (header) header.innerHTML = `<i class="fas fa-question-circle text-primary"></i> Pregunta ${index + 1}`;
+                }
+            });
+            
+            if (typeof window.actualizarPorcentajeDisponibleQuizEdit === 'function') window.actualizarPorcentajeDisponibleQuizEdit();
+            if (typeof window.updateEditBankInfo === 'function') window.updateEditBankInfo();
         };
 
         window.addEditQuestionOptionWithData = function(qId, letter, text, isCorrect) {
             const container = document.getElementById(`edit-options-container-${qId}`);
-            const optHtml = `<div class="input-group mb-1 option-row">
+            const currentOptions = container.querySelectorAll('.option-row').length;
+            const escapedText = String(text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const optHtml = `<div class="input-group mb-2 option-row" id="edit-option-${qId}-${letter}">
                 <div class="input-group-prepend">
-                    <div class="input-group-text"><input type="checkbox" ${isCorrect ? 'checked' : ''}></div>
+                    <div class="input-group-text"><input type="checkbox" value="${letter}" ${isCorrect ? 'checked' : ''}></div>
                     <span class="input-group-text"><strong>${letter}</strong></span>
                 </div>
-                <input type="text" class="form-control" value="${String(text || '').replace(/"/g, '&quot;')}">
+                <input type="text" class="form-control" value="${escapedText}" placeholder="Opción ${letter}">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="window.removeEditQuestionOption(${qId}, '${letter}')" style="display: ${currentOptions >= 1 ? 'block' : 'none'}"><i class="fas fa-times"></i></button>
+                </div>
             </div>`;
             container.insertAdjacentHTML('beforeend', optHtml);
+            window.updateEditOptionRemoveButtons(qId);
         };
 
         window.addEditQuestionOption = function(qId) {
@@ -820,14 +1065,54 @@
             const count = container.querySelectorAll('.option-row').length;
             if (count >= 10) return;
             const letter = window.optionLetters[count];
-            const optHtml = `<div class="input-group mb-1 option-row">
+            const optHtml = `<div class="input-group mb-2 option-row" id="edit-option-${qId}-${letter}">
                 <div class="input-group-prepend">
-                    <div class="input-group-text"><input type="checkbox"></div>
+                    <div class="input-group-text"><input type="checkbox" value="${letter}"></div>
                     <span class="input-group-text"><strong>${letter}</strong></span>
                 </div>
                 <input type="text" class="form-control" placeholder="Opción ${letter}">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="window.removeEditQuestionOption(${qId}, '${letter}')" style="display: ${count >= 1 ? 'block' : 'none'}"><i class="fas fa-times"></i></button>
+                </div>
             </div>`;
             container.insertAdjacentHTML('beforeend', optHtml);
+            window.updateEditOptionRemoveButtons(qId);
+        };
+
+        window.removeEditQuestionOption = function(qId, letter) {
+            const container = document.getElementById(`edit-options-container-${qId}`);
+            if (container.querySelectorAll('.option-row').length <= 2) return;
+            const el = document.getElementById(`edit-option-${qId}-${letter}`);
+            if (el) {
+                el.remove();
+                window.renumberEditOptions(qId);
+            }
+        };
+
+        window.renumberEditOptions = function(qId) {
+            const container = document.getElementById(`edit-options-container-${qId}`);
+            const rows = container.querySelectorAll('.option-row');
+            rows.forEach((row, index) => {
+                const newLetter = window.optionLetters[index];
+                row.id = `edit-option-${qId}-${newLetter}`;
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.value = newLetter;
+                const letterSpan = row.querySelector('.input-group-text strong');
+                if (letterSpan) letterSpan.textContent = newLetter;
+                const textInput = row.querySelector('input[type="text"]');
+                if (textInput) textInput.placeholder = `Opción ${newLetter}`;
+                const removeBtn = row.querySelector('.btn-outline-danger');
+                if (removeBtn) removeBtn.setAttribute('onclick', `window.removeEditQuestionOption(${qId}, '${newLetter}')`);
+            });
+            window.updateEditOptionRemoveButtons(qId);
+        };
+
+        window.updateEditOptionRemoveButtons = function(qId) {
+            const container = document.getElementById(`edit-options-container-${qId}`);
+            const rows = container.querySelectorAll('.option-row');
+            container.querySelectorAll('.btn-outline-danger').forEach(btn => {
+                btn.style.display = rows.length > 2 ? 'block' : 'none';
+            });
         };
 
         $(document).ready(function() {

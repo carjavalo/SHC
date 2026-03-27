@@ -934,12 +934,13 @@ function editarActividadCompleta(actividadId, actividad) {
         <hr class="my-4">
         <h5 class="text-primary"><i class="fas fa-list-ol"></i> Preguntas de la ${tipoLabel}</h5>
         <div class="alert alert-info py-2">
-            <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> - La suma de puntos de todas las preguntas no puede exceder 5.0
+            <i class="fas fa-info-circle"></i> <strong>Nota máxima: 5.0</strong> — Cada pregunta tiene un <strong>porcentaje (%)</strong>. La suma de los porcentajes de todas las preguntas no puede exceder <strong>100%</strong>.<br>
+            <small>La nota se calcula así: si una respuesta es correcta, su porcentaje se multiplica por 5. Si es incorrecta, por 0. Si hay varias respuestas correctas, el porcentaje se distribuye entre ellas.</small>
         </div>
         <div class="form-group">
-            <label>Puntos totales asignados:</label>
+            <label>Porcentaje total asignado:</label>
             <div class="progress" style="height: 25px;">
-                <div class="progress-bar bg-success" role="progressbar" id="edit-quiz-points-progress" style="width: 0%">0 / 5.0</div>
+                <div class="progress-bar bg-success" role="progressbar" id="edit-quiz-points-progress" style="width: 0%">0% / 100%</div>
             </div>
         </div>
         <div class="form-group">
@@ -1112,7 +1113,7 @@ function editarActividadCompleta(actividadId, actividad) {
                 }
             };
             
-            // Función para actualizar puntos disponibles del quiz
+            // Función para actualizar porcentaje disponible del quiz
             window.calcularPuntosTotalesQuizEdit = function() {
                 let total = 0;
                 document.querySelectorAll('.edit-question-points-input').forEach(input => {
@@ -1122,19 +1123,27 @@ function editarActividadCompleta(actividadId, actividad) {
             };
             
             window.actualizarPuntosDisponiblesQuizEdit = function() {
-                const puntosUsados = calcularPuntosTotalesQuizEdit();
+                const porcentajeUsado = calcularPuntosTotalesQuizEdit();
+                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+                
+                // Actualizar textos de disponible en cada pregunta
+                document.querySelectorAll('.edit-puntos-disponibles').forEach(span => {
+                    span.textContent = porcentajeDisponible;
+                    span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
+                });
+                
                 const progressBar = document.getElementById('edit-quiz-points-progress');
                 if (progressBar) {
-                    const porcentaje = Math.min(100, (puntosUsados / 5) * 100);
-                    progressBar.style.width = porcentaje + '%';
-                    progressBar.textContent = puntosUsados.toFixed(1) + ' / 5.0';
-                    progressBar.className = 'progress-bar ' + (puntosUsados > 5 ? 'bg-danger' : 'bg-success');
+                    const barWidth = Math.min(100, porcentajeUsado);
+                    progressBar.style.width = barWidth + '%';
+                    progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
+                    progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
                 }
                 
                 // Actualizar botón de agregar pregunta
                 const addBtn = document.getElementById('add-edit-question-btn');
                 if (addBtn) {
-                    addBtn.disabled = puntosUsados >= 5;
+                    addBtn.disabled = porcentajeUsado >= 100;
                 }
             };
             
@@ -1227,9 +1236,14 @@ function editarActividadCompleta(actividadId, actividad) {
                         return false;
                     }
                     
-                    // Validar puntos por pregunta (0-5)
-                    if (questionPoints < 0 || questionPoints > 5) {
-                        Swal.showValidationMessage('Los puntos por pregunta deben estar entre 0 y 5');
+                    // Validar porcentaje por pregunta (0-100%)
+                    if (questionPoints <= 0) {
+                        Swal.showValidationMessage('Cada pregunta debe tener un porcentaje mayor a 0%');
+                        return false;
+                    }
+                    
+                    if (questionPoints > 100) {
+                        Swal.showValidationMessage('El porcentaje de cada pregunta no puede exceder 100%');
                         return false;
                     }
                     
@@ -1275,9 +1289,9 @@ function editarActividadCompleta(actividadId, actividad) {
                     });
                 }
                 
-                // Validar suma total de puntos
-                if (totalQuestionPoints > 5.0) {
-                    Swal.showValidationMessage('La suma de puntos de todas las preguntas no puede exceder 5.0 (actual: ' + totalQuestionPoints.toFixed(1) + ')');
+                // Validar que la suma total no exceda 100%
+                if (totalQuestionPoints > 100) {
+                    Swal.showValidationMessage('La suma de porcentajes de todas las preguntas no puede exceder 100% (actual: ' + totalQuestionPoints.toFixed(1) + '%)');
                     return false;
                 }
                 
@@ -1329,15 +1343,19 @@ function loadEditQuestion(question) {
     
     // Escapar el texto de la pregunta para evitar problemas con caracteres especiales
     const questionText = (question.text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    const questionPoints = question.points || 1.0;
+    const questionPoints = question.points || 20;
     
     console.log('questionId:', questionId);
     console.log('questionText:', questionText);
     console.log('questionPoints:', questionPoints);
     console.log('options:', question.options);
     
+    // Calcular porcentaje disponible
+    const porcentajeUsado = calcularPuntosTotalesQuizEdit();
+    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+    
     const questionHtml = `
-        <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}">
+        <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}" style="border-left: 3px solid #007bff;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="mb-0"><i class="fas fa-question-circle text-primary"></i> Pregunta ${window.editQuestions.length + 1}</h6>
@@ -1345,19 +1363,20 @@ function loadEditQuestion(question) {
                 </div>
                 <div class="form-group">
                     <label>Texto de la Pregunta *</label>
-                    <input type="text" class="form-control" id="edit-question-text-${questionId}" value="${questionText}" placeholder="Escribe la pregunta">
+                    <input type="text" class="form-control" id="edit-question-text-${questionId}" value="${questionText}" placeholder="Escribe la pregunta aquí">
                 </div>
                 <div class="form-group">
-                    <label>Ponderación (puntos) <small class="text-muted">Máx: 5.0</small></label>
+                    <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
                     <input type="number" class="form-control edit-question-points-input" id="edit-question-points-${questionId}" 
-                           min="0" max="5" step="0.1" value="${questionPoints}" onchange="actualizarPuntosDisponiblesQuizEdit()">
-                    <small class="form-text text-muted">Puntos de esta pregunta (0-5)</small>
+                           min="0.1" max="100" step="0.1" value="${questionPoints}" oninput="actualizarPuntosDisponiblesQuizEdit()">
+                    <small class="form-text text-muted">Disponible: <span class="edit-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
                     <button type="button" class="btn btn-outline-success btn-sm" onclick="addEditQuestionOption(${questionId})"><i class="fas fa-plus"></i> Agregar</button>
                 </div>
                 <div id="edit-options-container-${questionId}"></div>
+                <small class="text-muted"><i class="fas fa-info-circle"></i> Marca con el checkbox las respuestas correctas. Si hay varias correctas, el porcentaje se distribuye entre ellas.</small>
             </div>
         </div>
     `;
@@ -1397,8 +1416,12 @@ function addEditQuestion() {
     const container = document.getElementById('edit-actividad-questions-container');
     window.editOptionCounters[questionId] = 0;
     
+    // Calcular porcentaje disponible
+    const porcentajeUsado = calcularPuntosTotalesQuizEdit();
+    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+    
     const questionHtml = `
-        <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}">
+        <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}" style="border-left: 3px solid #007bff;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="mb-0"><i class="fas fa-question-circle text-primary"></i> Pregunta ${window.editQuestions.length + 1}</h6>
@@ -1406,13 +1429,13 @@ function addEditQuestion() {
                 </div>
                 <div class="form-group">
                     <label>Texto de la Pregunta *</label>
-                    <input type="text" class="form-control" id="edit-question-text-${questionId}" placeholder="Escribe la pregunta">
+                    <input type="text" class="form-control" id="edit-question-text-${questionId}" placeholder="Escribe la pregunta aquí">
                 </div>
                 <div class="form-group">
-                    <label>Ponderación (puntos) <small class="text-muted">Máx: 5.0</small></label>
+                    <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
                     <input type="number" class="form-control edit-question-points-input" id="edit-question-points-${questionId}" 
-                           min="0" max="5" step="0.1" value="1.0" onchange="actualizarPuntosDisponiblesQuizEdit()">
-                    <small class="form-text text-muted">Puntos de esta pregunta (0-5)</small>
+                           min="0.1" max="100" step="0.1" value="" placeholder="Ej: 20" oninput="actualizarPuntosDisponiblesQuizEdit()">
+                    <small class="form-text text-muted">Disponible: <span class="edit-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="mb-0">Opciones de Respuesta * <small class="text-muted">(marca las correctas)</small></label>
