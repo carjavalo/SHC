@@ -163,7 +163,7 @@
                         <tr>
                             <td>
                                 @if($producto['imagen'])
-                                    <img src="{{ asset('storage/' . $producto['imagen']) }}" class="img-thumbnail" style="max-width: 60px;">
+                                    <img src="{{ url('/media/' . $producto['imagen']) }}" class="img-thumbnail" style="max-width: 60px;">
                                 @else
                                     <span class="badge badge-secondary">Sin imagen</span>
                                 @endif

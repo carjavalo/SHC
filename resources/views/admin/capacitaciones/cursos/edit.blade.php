@@ -521,6 +521,15 @@
                                     <input type="number" class="form-control" id="orden" name="orden" min="0" placeholder="Automático">
                                     <div class="invalid-feedback"></div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="porcentaje_curso">Porcentaje del Curso (%) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="porcentaje_curso" name="porcentaje_curso" min="0" max="100" step="0.1" value="0" required>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> Porcentaje que representa en el curso
+                                    </small>
+                                    <div class="invalid-feedback"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -1690,7 +1699,7 @@
                                     <div class="form-group mb-2">
                                         <label for="actividad-porcentaje">Porcentaje de la Actividad (%) *</label>
                                         <input type="number" class="form-control" id="actividad-porcentaje" 
-                                               min="0.1" max="100" step="0.1" value="" placeholder="Ej: 25"
+                                               min="0" max="100" step="0.1" value="" placeholder="Ej: 25"
                                                oninput="validarPorcentajeActividadEdit()">
                                         <small class="form-text text-muted" id="edit-porcentaje-disponible-info">
                                             Selecciona un material para ver el porcentaje disponible
@@ -2161,7 +2170,7 @@
                             <div class="form-group">
                                 <label>Porcentaje de la Pregunta (%) <small class="text-muted">Suma máx: 100%</small></label>
                                 <input type="number" class="form-control act-question-points-input" id="act-question-points-${questionId}" 
-                                       min="0.1" max="100" step="0.1" value="" placeholder="Ej: 20"
+                                       min="0" max="100" step="0.1" value="" placeholder="Ej: 20"
                                        oninput="actualizarPorcentajeDisponibleQuizEdit()">
                                 <small class="form-text text-muted">Disponible: <span class="act-puntos-disponibles">${porcentajeDisponible}</span>% de 100%</small>
                             </div>
@@ -2341,14 +2350,24 @@
 
             // Actualizar porcentaje disponible al seleccionar material
             window.updatePorcentajeDisponibleEdit = function() {
-                const select = document.getElementById('actividad-material');
-                const infoEl = document.getElementById('edit-porcentaje-disponible-info');
+                const popup = Swal.getPopup();
+                const container = popup ? popup : document;
+                const select = container.querySelector('#actividad-material');
+                const infoEl = container.querySelector('#edit-porcentaje-disponible-info');
                 if (!select || !infoEl) return;
 
                 const selectedOption = select.options[select.selectedIndex];
                 if (selectedOption && selectedOption.value) {
                     const disponible = selectedOption.getAttribute('data-porcentaje-disponible');
                     infoEl.innerHTML = `Disponible en este material: <strong>${disponible}%</strong>`;
+                    
+                    const inputPorcentaje = container.querySelector('#actividad-porcentaje');
+                    if (inputPorcentaje) {
+                        inputPorcentaje.value = disponible;
+                        if(typeof window.validarPorcentajeActividadEdit === 'function') {
+                            window.validarPorcentajeActividadEdit();
+                        }
+                    }
                 } else {
                     infoEl.textContent = 'Selecciona un material para ver el porcentaje disponible';
                 }

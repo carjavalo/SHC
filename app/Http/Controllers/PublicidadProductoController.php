@@ -33,7 +33,7 @@ class PublicidadProductoController extends Controller
         return datatables()->of($productos)
             ->addColumn('imagen_html', function($producto) {
                 if ($producto['imagen']) {
-                    return '<img src="' . asset('storage/' . $producto['imagen']) . '" class="img-thumbnail" style="max-width: 60px;">';
+                    return '<img src="' . url('/media/' . $producto['imagen']) . '" class="img-thumbnail" style="max-width: 60px;">';
                 }
                 return '<span class="badge badge-secondary">Sin imagen</span>';
             })

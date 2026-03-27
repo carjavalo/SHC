@@ -650,6 +650,7 @@ class CursoClassroomController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Validation oopsie:', $validator->errors()->toArray());
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -698,10 +699,10 @@ class CursoClassroomController extends Controller
                 foreach ($contenido['questions'] as $pregunta) {
                     $totalPuntos += floatval($pregunta['points'] ?? 0);
                 }
-                if ($totalPuntos > 5.0) {
+                if ($totalPuntos > 100.0) {
                     return response()->json([
                         'success' => false,
-                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede la nota máxima de 5.0"
+                        'message' => "La suma de puntos de las preguntas ({$totalPuntos}) excede el 100%"
                     ], 422);
                 }
             }
@@ -1883,4 +1884,6 @@ class CursoClassroomController extends Controller
         }
     }
 }
+
+
 
