@@ -188,7 +188,7 @@
                             <td>{{ $producto['orden'] }}</td>
                             <td>
                                 @can('publicidad.edit')
-                                <button class="btn btn-sm btn-info btn-editar" data-producto-id="{{ $producto['id'] ?? '' }}">
+                                <button class="btn btn-sm btn-info btn-editar" data-producto="{{ json_encode($producto) }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 @endcan
