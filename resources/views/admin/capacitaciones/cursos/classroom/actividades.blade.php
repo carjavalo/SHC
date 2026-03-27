@@ -1116,34 +1116,39 @@ function editarActividadCompleta(actividadId, actividad) {
             // Función para actualizar porcentaje disponible del quiz
             window.calcularPuntosTotalesQuizEdit = function() {
                 let total = 0;
-                document.querySelectorAll('.edit-question-points-input').forEach(input => {
+                const popup = Swal.getPopup ? Swal.getPopup() : document;
+                const container = popup ? popup : document;
+                container.querySelectorAll('.edit-question-points-input').forEach(input => {
                     total += parseFloat(input.value) || 0;
                 });
-                return total;
+                return Math.round(total * 100) / 100;
             };
             
             window.actualizarPuntosDisponiblesQuizEdit = function() {
                 const porcentajeUsado = calcularPuntosTotalesQuizEdit();
-                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+                const porcentajeRedondeado = Math.round(porcentajeUsado * 10) / 10;
+                const porcentajeDisponible = Math.max(0, Math.round((100 - porcentajeUsado) * 10) / 10).toFixed(1);
                 
                 // Actualizar textos de disponible en cada pregunta
-                document.querySelectorAll('.edit-puntos-disponibles').forEach(span => {
+                const popup = Swal.getPopup ? Swal.getPopup() : document;
+                const container = popup ? popup : document;
+                container.querySelectorAll('.edit-puntos-disponibles').forEach(span => {
                     span.textContent = porcentajeDisponible;
-                    span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
+                    span.style.color = porcentajeRedondeado > 100 ? 'red' : 'inherit';
                 });
                 
                 const progressBar = document.getElementById('edit-quiz-points-progress');
                 if (progressBar) {
-                    const barWidth = Math.min(100, porcentajeUsado);
+                    const barWidth = Math.min(100, porcentajeRedondeado);
                     progressBar.style.width = barWidth + '%';
-                    progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
-                    progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
+                    progressBar.textContent = porcentajeRedondeado.toFixed(1) + '% / 100%';
+                    progressBar.className = 'progress-bar ' + (porcentajeRedondeado > 100 ? 'bg-danger' : porcentajeRedondeado >= 100 ? 'bg-success' : 'bg-info');
                 }
                 
                 // Actualizar botón de agregar pregunta
                 const addBtn = document.getElementById('add-edit-question-btn');
                 if (addBtn) {
-                    addBtn.disabled = porcentajeUsado >= 100;
+                    addBtn.disabled = porcentajeRedondeado >= 100;
                 }
             };
             
@@ -1164,6 +1169,20 @@ function editarActividadCompleta(actividadId, actividad) {
             
             // Inicializar
             updateEditPorcentajeDisponible();
+            
+            // Delegación de eventos para inputs de porcentaje (más robusto que oninput inline)
+            if (requierePreguntas) {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.addEventListener('input', function(e) {
+                        if (e.target && e.target.classList.contains('edit-question-points-input')) {
+                            if (typeof window.actualizarPuntosDisponiblesQuizEdit === 'function') {
+                                window.actualizarPuntosDisponiblesQuizEdit();
+                            }
+                        }
+                    });
+                }
+            }
             
             if (requierePreguntas && actividad.contenido_json && actividad.contenido_json.questions) {
                 actividad.contenido_json.questions.forEach(question => {
@@ -1352,7 +1371,7 @@ function loadEditQuestion(question) {
     
     // Calcular porcentaje disponible
     const porcentajeUsado = calcularPuntosTotalesQuizEdit();
-    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+    const porcentajeDisponible = Math.max(0, Math.round((100 - porcentajeUsado) * 10) / 10).toFixed(1);
     
     const questionHtml = `
         <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}" style="border-left: 3px solid #007bff;">
@@ -1418,7 +1437,7 @@ function addEditQuestion() {
     
     // Calcular porcentaje disponible
     const porcentajeUsado = calcularPuntosTotalesQuizEdit();
-    const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+    const porcentajeDisponible = Math.max(0, Math.round((100 - porcentajeUsado) * 10) / 10).toFixed(1);
     
     const questionHtml = `
         <div class="card mb-3 quiz-question-card" id="edit-question-${questionId}" style="border-left: 3px solid #007bff;">

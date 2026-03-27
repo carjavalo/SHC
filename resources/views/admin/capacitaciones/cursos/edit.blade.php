@@ -1954,8 +1954,19 @@
                             }
                         };
                         
-                        // Si es quiz o evaluación, agregar una pregunta por defecto
+                        // Delegación de eventos para inputs de porcentaje (más robusto que oninput inline)
                         if (requierePreguntas) {
+                            const popup = Swal.getPopup();
+                            if (popup) {
+                                popup.addEventListener('input', function(e) {
+                                    if (e.target && e.target.classList.contains('act-question-points-input')) {
+                                        if (typeof window.actualizarPorcentajeDisponibleQuizEdit === 'function') {
+                                            window.actualizarPorcentajeDisponibleQuizEdit();
+                                        }
+                                    }
+                                });
+                            }
+                            // Agregar una pregunta por defecto
                             setTimeout(() => addActividadQuestion(), 100);
                         }
                     },
@@ -2132,7 +2143,7 @@
 
                 // Calcular porcentaje disponible
                 const porcentajeUsado = calcularPorcentajeTotalQuizEdit();
-                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
+                const porcentajeDisponible = Math.max(0, Math.round((100 - porcentajeUsado) * 10) / 10).toFixed(1);
                 
                 const questionHtml = `
                     <div class="card mb-3 quiz-question-card" id="act-question-${questionId}" style="border-left: 3px solid #007bff;">
@@ -2297,28 +2308,34 @@
             // Calcular porcentaje total asignado del quiz (edit)
             window.calcularPorcentajeTotalQuizEdit = function() {
                 let total = 0;
-                document.querySelectorAll('.act-question-points-input').forEach(input => {
+                const popup = Swal.getPopup ? Swal.getPopup() : document;
+                const container = popup ? popup : document;
+                container.querySelectorAll('.act-question-points-input').forEach(input => {
                     total += parseFloat(input.value) || 0;
                 });
-                return total;
+                return Math.round(total * 100) / 100;
             };
 
             // Actualizar porcentaje disponible en todas las preguntas (edit)
             window.actualizarPorcentajeDisponibleQuizEdit = function() {
                 const porcentajeUsado = calcularPorcentajeTotalQuizEdit();
-                const porcentajeDisponible = Math.max(0, 100 - porcentajeUsado).toFixed(1);
-                document.querySelectorAll('.act-puntos-disponibles').forEach(span => {
+                const porcentajeRedondeado = Math.round(porcentajeUsado * 10) / 10;
+                const porcentajeDisponible = Math.max(0, Math.round((100 - porcentajeUsado) * 10) / 10).toFixed(1);
+                
+                const popup = Swal.getPopup ? Swal.getPopup() : document;
+                const container = popup ? popup : document;
+                container.querySelectorAll('.act-puntos-disponibles').forEach(span => {
                     span.textContent = porcentajeDisponible;
-                    span.style.color = porcentajeUsado > 100 ? 'red' : 'inherit';
+                    span.style.color = porcentajeRedondeado > 100 ? 'red' : 'inherit';
                 });
 
                 // Actualizar barra de progreso si existe
                 const progressBar = document.getElementById('edit-quiz-points-progress');
                 if (progressBar) {
-                    const barWidth = Math.min(100, porcentajeUsado);
+                    const barWidth = Math.min(100, porcentajeRedondeado);
                     progressBar.style.width = barWidth + '%';
-                    progressBar.textContent = porcentajeUsado.toFixed(1) + '% / 100%';
-                    progressBar.className = 'progress-bar ' + (porcentajeUsado > 100 ? 'bg-danger' : porcentajeUsado === 100 ? 'bg-success' : 'bg-info');
+                    progressBar.textContent = porcentajeRedondeado.toFixed(1) + '% / 100%';
+                    progressBar.className = 'progress-bar ' + (porcentajeRedondeado > 100 ? 'bg-danger' : porcentajeRedondeado >= 100 ? 'bg-success' : 'bg-info');
                 }
             };
 
