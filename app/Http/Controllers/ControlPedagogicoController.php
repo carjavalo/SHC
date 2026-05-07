@@ -369,13 +369,19 @@ class ControlPedagogicoController extends Controller
      */
     private function getEstudiantesConCalificaciones($curso, $estudiantesFiltro = null)
     {
-        $query = User::whereHas('inscripciones', function($q) use ($curso) {
-            $q->where('curso_id', $curso->id)
-              ->where('curso_estudiantes.estado', 'activo');
-        })
-        ->with(['inscripciones' => function($q) use ($curso) {
-            $q->where('curso_id', $curso->id);
-        }]);
+        // Fuente de verdad: estudiantes asignados al curso desde
+        // /configuracion/asignacion-cursos (tabla curso_asignaciones).
+        // Antes se usaba whereHas('inscripciones') (tabla curso_estudiantes),
+        // lo cual excluía a los estudiantes que aún no se habían auto-inscrito,
+        // provocando que el docente viera pocos o ningún estudiante.
+        $estudiantesAsignados = \App\Models\CursoAsignacion::where('curso_id', $curso->id)
+            ->where('estado', 'activo')
+            ->pluck('estudiante_id');
+
+        $query = User::whereIn('id', $estudiantesAsignados)
+            ->with(['inscripciones' => function($q) use ($curso) {
+                $q->where('curso_id', $curso->id);
+            }]);
 
         // Si hay un filtro de estudiantes (para docentes asignados), aplicarlo
         if ($estudiantesFiltro !== null) {
