@@ -12,7 +12,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row align-items-center">
-                <div class="col-md-6">
+                <div class="col-md-{{ ($esAdmin ?? false) ? 4 : 6 }}">
                     <label class="font-weight-bold mb-2">
                         <i class="fas fa-book-open text-primary"></i> Seleccionar Curso
                     </label>
@@ -24,7 +24,22 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-6">
+                @if(!empty($esAdmin) && $esAdmin)
+                <div class="col-md-4">
+                    <label class="font-weight-bold mb-2">
+                        <i class="fas fa-chalkboard-teacher text-primary"></i> Docente (Salón)
+                    </label>
+                    <select id="docenteSelector" class="form-control form-control-lg">
+                        <option value="">Todos los docentes</option>
+                        @foreach($docentes as $docente)
+                            <option value="{{ $docente->id }}" {{ (string)$docente->id === (string)$docenteSeleccionadoId ? 'selected' : '' }}>
+                                {{ $docente->name }} {{ $docente->apellido1 ?? '' }} {{ $docente->apellido2 ?? '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+                <div class="col-md-{{ ($esAdmin ?? false) ? 4 : 6 }}">
                     <div class="stats-grid">
                         <div class="stat-item">
                             <div class="stat-icon bg-primary">
@@ -1569,7 +1584,22 @@
         // Cambiar curso
         $('#cursoSelector').on('change', function() {
             const cursoId = $(this).val();
-            window.location.href = '{{ route("academico.control-pedagogico.index") }}?curso_id=' + cursoId;
+            const docenteId = $('#docenteSelector').val();
+            let url = '{{ route("academico.control-pedagogico.index") }}?curso_id=' + cursoId;
+            if (docenteId) {
+                url += '&docente_id=' + docenteId;
+            }
+            window.location.href = url;
+        });
+
+        // Cambiar docente (solo Admin/Operador/Super Admin)
+        $('#docenteSelector').on('change', function() {
+            const docenteId = $(this).val();
+            let url = '{{ route("academico.control-pedagogico.index") }}';
+            if (docenteId) {
+                url += '?docente_id=' + docenteId;
+            }
+            window.location.href = url;
         });
 
         // Toggle de activar/desactivar quiz/evaluaciones

@@ -22,22 +22,55 @@ class ControlPedagogicoController extends Controller
         }
         
         $user = Auth::user();
-        
-        // Obtener cursos según el rol
-        $cursos = $this->getCursosSegunRol($user);
-        
+        $rolesAdmin = ['Super Admin', 'Administrador', 'Operador'];
+        $esAdmin = in_array($user->role, $rolesAdmin);
+
+        // Para Admin/Operador/Super Admin: cargar docentes que tengan al menos un salón
+        // (asignación activa) y permitir filtrar por docente seleccionado.
+        $docentes = collect();
+        $docenteSeleccionadoId = null;
+        if ($esAdmin) {
+            $docentesIds = \App\Models\CursoAsignacion::where('estado', 'activo')
+                ->whereNotNull('docente_id')
+                ->pluck('docente_id')
+                ->unique();
+            $docentes = User::whereIn('id', $docentesIds)
+                ->where('role', 'Docente')
+                ->orderBy('name')
+                ->get();
+            $docenteSeleccionadoId = $request->get('docente_id');
+            if ($docenteSeleccionadoId && !$docentes->contains('id', (int) $docenteSeleccionadoId)) {
+                $docenteSeleccionadoId = null;
+            }
+        }
+
+        // Obtener cursos según el rol (y según docente seleccionado si aplica)
+        if ($esAdmin && $docenteSeleccionadoId) {
+            $cursosIds = \App\Models\CursoAsignacion::where('docente_id', $docenteSeleccionadoId)
+                ->where('estado', 'activo')
+                ->pluck('curso_id')
+                ->unique();
+            $cursos = Curso::whereIn('id', $cursosIds)
+                ->where('estado', 'activo')
+                ->get();
+        } else {
+            $cursos = $this->getCursosSegunRol($user);
+        }
+
         // Curso seleccionado (por defecto el primero)
         $cursoId = $request->get('curso_id', $cursos->first()->id ?? null);
         $cursoActual = Curso::with(['materiales' => function($query) {
             $query->select('*'); // Asegurar que se seleccionen todos los campos
         }, 'actividades', 'plantillaCertificado'])->find($cursoId);
-        
+
         if (!$cursoActual) {
             return redirect()->back()->with('error', 'No hay cursos disponibles');
         }
-        
+
         // Obtener estudiantes inscritos con sus calificaciones
-        // El Docente solo ve los estudiantes que tiene asignados en este curso
+        // - Docente: solo ve los estudiantes que tiene asignados en este curso.
+        // - Admin/Operador/Super Admin con docente seleccionado: ve los estudiantes
+        //   de ese salón (curso + docente).
         $estudiantesFiltro = null;
         if ($user->role === 'Docente') {
             $estudiantesFiltro = \App\Models\CursoAsignacion::where('curso_id', $cursoId)
@@ -45,18 +78,27 @@ class ControlPedagogicoController extends Controller
                 ->where('estado', 'activo')
                 ->pluck('estudiante_id')
                 ->toArray();
+        } elseif ($esAdmin && $docenteSeleccionadoId) {
+            $estudiantesFiltro = \App\Models\CursoAsignacion::where('curso_id', $cursoId)
+                ->where('docente_id', $docenteSeleccionadoId)
+                ->where('estado', 'activo')
+                ->pluck('estudiante_id')
+                ->toArray();
         }
-        
+
         $estudiantes = $this->getEstudiantesConCalificaciones($cursoActual, $estudiantesFiltro);
-        
+
         // Obtener estructura de evaluación
         $estructuraEvaluacion = $this->getEstructuraEvaluacion($cursoActual);
-        
+
         return view('academico.control-pedagogico.index', compact(
             'cursos',
             'cursoActual',
             'estudiantes',
-            'estructuraEvaluacion'
+            'estructuraEvaluacion',
+            'docentes',
+            'docenteSeleccionadoId',
+            'esAdmin'
         ));
     }
     
