@@ -304,12 +304,14 @@ class AsignacionCursoController extends Controller
             'estudiante_id' => 'required|exists:users,id',
             'cursos' => 'required|array|min:1',
             'cursos.*' => 'exists:cursos,id',
-            'docente_id' => 'nullable|exists:users,id',
+            'docente_id' => 'required|exists:users,id',
         ], [
             'estudiante_id.required' => 'Debe seleccionar un estudiante',
             'estudiante_id.exists' => 'El estudiante seleccionado no existe',
             'cursos.required' => 'Debe seleccionar al menos un curso',
             'cursos.min' => 'Debe seleccionar al menos un curso',
+            'docente_id.required' => 'Debe seleccionar un docente para conformar el salón',
+            'docente_id.exists' => 'El docente seleccionado no existe',
         ]);
 
         $docenteId = $request->docente_id;
@@ -531,10 +533,12 @@ class AsignacionCursoController extends Controller
         
         $request->validate([
             'curso_id' => 'required|exists:cursos,id',
-            'docente_id' => 'nullable|exists:users,id',
+            'docente_id' => 'required|exists:users,id',
         ], [
             'curso_id.required' => 'Debe seleccionar un curso',
             'curso_id.exists' => 'El curso seleccionado no existe',
+            'docente_id.required' => 'Debe seleccionar un docente para conformar el salón',
+            'docente_id.exists' => 'El docente seleccionado no existe',
         ]);
 
         try {
