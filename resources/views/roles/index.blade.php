@@ -75,6 +75,16 @@
     <style>
         .dt-buttons { white-space: nowrap; }
         .dt-buttons .btn { margin-right: 6px; }
+        /* Paginación (Anterior, numeración, Siguiente) en la parte inferior derecha */
+        #roles-table_wrapper .dataTables_paginate {
+            float: right;
+            text-align: right;
+            margin-top: 8px;
+        }
+        #roles-table_wrapper .dataTables_paginate .pagination {
+            justify-content: flex-end;
+            margin-bottom: 0;
+        }
     </style>
 @stop
 
@@ -102,7 +112,7 @@
             },
             responsive: true,
             autoWidth: false,
-            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-3"p><"col-sm-12 col-md-3"f>>rt<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>',
+            dom: '<"row"<"col-sm-12 col-md-9"B><"col-sm-12 col-md-3"f>>rt<"row"<"col-sm-12 col-md-6"li><"col-sm-12 col-md-6"p>>',
             buttons: [
                 { extend: 'copy', text: '<i class="fas fa-copy"></i> Copiar', className: 'btn btn-secondary' },
                 { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success' },

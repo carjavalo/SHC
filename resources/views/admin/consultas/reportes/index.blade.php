@@ -96,6 +96,16 @@
     <style>
         .dt-buttons { white-space: nowrap; margin-bottom: 10px; }
         .dt-buttons .btn { margin-right: 6px; }
+        /* Paginación (Anterior, numeración, Siguiente) en la parte inferior derecha */
+        #reportes-table_wrapper .dataTables_paginate {
+            float: right;
+            text-align: right;
+            margin-top: 8px;
+        }
+        #reportes-table_wrapper .dataTables_paginate .pagination {
+            justify-content: flex-end;
+            margin-bottom: 0;
+        }
     </style>
 @stop
 
@@ -142,7 +152,7 @@
             },
             responsive: true,
             autoWidth: false,
-            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i><"col-sm-12 mt-2"p>>',
+            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"li><"col-sm-12 col-md-6"p>>',
             buttons: [
                 { extend: 'copy', text: '<i class="fas fa-copy"></i> Copiar', className: 'btn btn-secondary btn-sm' },
                 @can('reportes.export')
