@@ -213,6 +213,16 @@
         .dt-buttons .btn {
             margin-right: 6px;
         }
+        /* Paginación (Anterior, numeración, Siguiente) en la parte inferior derecha */
+        #users-table_wrapper .dataTables_paginate {
+            float: right;
+            text-align: right;
+            margin-top: 8px;
+        }
+        #users-table_wrapper .dataTables_paginate .pagination {
+            justify-content: flex-end;
+            margin-bottom: 0;
+        }
     </style>
 @stop
 
@@ -222,7 +232,7 @@
             $('#users-table').DataTable({
                 responsive: true,
                 autoWidth: false,
-                dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-3"p><"col-sm-12 col-md-3"f>>rt<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>',
+                dom: '<"row"<"col-sm-12 col-md-9"B><"col-sm-12 col-md-3"f>>rt<"row"<"col-sm-12 col-md-6"li><"col-sm-12 col-md-6"p>>',
                 buttons: [
                     {
                         extend: 'copy',
