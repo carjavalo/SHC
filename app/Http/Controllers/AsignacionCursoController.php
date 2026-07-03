@@ -11,23 +11,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Yajra\DataTables\Facades\DataTables;
 
 class AsignacionCursoController extends Controller
 {
     /**
-     * Roles permitidos para acceder a la asignación de cursos
-     */
-    protected $rolesPermitidos = ['Super Admin', 'Administrador', 'Operador'];
-
-    /**
      * Verificar permisos de acceso
+     *
+     * Usa el permiso dinámico 'config.asignacion' (el mismo que controla la
+     * visibilidad del menú), de modo que cualquier rol al que se le otorgue
+     * ese permiso desde la gestión de permisos tenga acceso automáticamente.
      */
     private function verificarAcceso(): void
     {
-        $user = Auth::user();
-        
-        if (!$user || !in_array($user->role, $this->rolesPermitidos)) {
+        if (!Auth::check() || !Gate::allows('config.asignacion')) {
             abort(403, 'No tiene permisos para acceder a esta sección.');
         }
     }
