@@ -104,7 +104,7 @@
                                 <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
-                                        @can('users.edit')
+                                        @can('users.verify')
                                             @if($user->hasVerifiedEmail())
                                                 <button type="button" class="btn btn-secondary btn-sm" disabled
                                                         title="Correo verificado el {{ $user->email_verified_at->format('d/m/Y H:i') }}">

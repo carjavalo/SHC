@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
             'tracking.logins', 'tracking.operations',
             'academic.courses', 'academic.control',
             'menu.configuracion', 'asignar-cursos',
-            'users.view', 'users.create', 'users.edit', 'users.delete', 'users.import',
+            'users.view', 'users.create', 'users.edit', 'users.delete', 'users.import', 'users.verify',
             'roles.manage', 'permissions.manage',
             'config.categorias', 'config.areas', 'config.cursos',
             'config.servicios', 'config.vinculacion', 'config.sedes',

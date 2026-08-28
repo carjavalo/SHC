@@ -241,7 +241,7 @@ class UserController extends Controller
      */
     public function verificarEmail(string $id)
     {
-        Gate::authorize('users.edit');
+        Gate::authorize('users.verify');
 
         $user = User::findOrFail($id);
 

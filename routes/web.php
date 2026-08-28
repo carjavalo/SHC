@@ -115,7 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('users/{user}', [UserController::class, 'update'])->middleware('check.permission:users.edit');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('check.permission:users.delete');
     // Verificacion manual del correo (cuando al usuario no le llega el correo de verificacion)
-    Route::patch('users/{user}/verificar', [UserController::class, 'verificarEmail'])->name('users.verificar')->middleware('check.permission:users.edit');
+    Route::patch('users/{user}/verificar', [UserController::class, 'verificarEmail'])->name('users.verificar')->middleware('check.permission:users.verify');
     
     // Roles solo accesible por Super Admin
     Route::resource('roles', \App\Http\Controllers\RoleController::class)->middleware(\App\Http\Middleware\CheckSuperAdminRole::class);
