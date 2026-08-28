@@ -10,6 +10,8 @@ use App\Models\ServicioArea;
 use App\Models\VinculacionContrato;
 use App\Models\Sede;
 use App\Mail\AsignacionCurso;
+use App\Services\OperationLogger;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -229,6 +231,52 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    /**
+     * Marcar manualmente el correo de un usuario como verificado.
+     *
+     * Se usa cuando el correo de verificación no llega al usuario recién
+     * creado o registrado y el administrador necesita habilitarlo a mano.
+     */
+    public function verificarEmail(string $id)
+    {
+        Gate::authorize('users.edit');
+
+        $user = User::findOrFail($id);
+
+        // Un Operador no puede manipular cuentas de Super Admin
+        if (auth()->user()->role === 'Operador' && $user->role === 'Super Admin') {
+            return redirect()->route('users.index')
+                ->with('error', 'No tiene permisos para verificar este usuario.');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('users.index')
+                ->with('success', "El correo de {$user->email} ya se encontraba verificado.");
+        }
+
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+
+        try {
+            OperationLogger::log(
+                'update',
+                'Usuario',
+                $user->id,
+                "Verificó manualmente el correo de: {$user->email}",
+                [
+                    'email' => $user->email,
+                    'verificado_por' => auth()->user()->email,
+                    'fecha_verificacion' => now()->toDateTimeString(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::error('No se pudo registrar la operación de verificación manual: ' . $e->getMessage());
+        }
+
+        return redirect()->route('users.index')
+            ->with('success', "Correo de {$user->email} verificado correctamente.");
     }
 
     /**

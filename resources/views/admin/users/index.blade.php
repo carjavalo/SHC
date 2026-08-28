@@ -28,6 +28,15 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
             <div class="table-responsive">
                 <table id="users-table" class="table table-striped table-hover table-bordered responsive nowrap" width="100%">
                     <thead class="bg-primary text-white">
@@ -95,6 +104,22 @@
                                 <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
+                                        @can('users.edit')
+                                            @if($user->hasVerifiedEmail())
+                                                <button type="button" class="btn btn-secondary btn-sm" disabled
+                                                        title="Correo verificado el {{ $user->email_verified_at->format('d/m/Y H:i') }}">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
+                                            @else
+                                                <form action="{{ route('users.verificar', $user->id) }}" method="POST" class="d-inline verify-form">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-success btn-sm verify-btn" data-email="{{ $user->email }}" title="Verificar correo manualmente">
+                                                        <i class="fas fa-user-check"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @endcan
                                         <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm" title="Ver">
                                             <i class="fas fa-eye"></i>
                                         </a>
@@ -312,8 +337,31 @@
                     { responsivePriority: 4, targets: 5 }, // Documento es prioridad 4
                     { responsivePriority: 5, targets: 9 }, // Rol es prioridad 5
                     { responsivePriority: 6, targets: 11 }, // Acciones es prioridad 6
-                    { width: '120px', targets: 11 } // Ancho para columna Acciones
+                    { width: '150px', targets: 11 } // Ancho para columna Acciones
                 ]
+            });
+
+            // Confirmación para verificar el correo manualmente
+            // Delegado para que también funcione en las filas de otras páginas de la tabla
+            $(document).on('submit', '.verify-form', function(e) {
+                e.preventDefault();
+                var form = this;
+                var email = $(this).find('.verify-btn').data('email');
+                var emailSeguro = $('<span>').text(email).html();
+                Swal.fire({
+                    title: '¿Verificar correo?',
+                    html: 'Se marcará el correo <strong>' + emailSeguro + '</strong> como verificado, sin necesidad de que el usuario abra el enlace enviado por correo.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, verificar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
             });
 
             // Confirmación para eliminar
