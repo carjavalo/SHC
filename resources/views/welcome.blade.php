@@ -33,10 +33,11 @@
             font-family: 'Figtree', sans-serif;
             background: url('{{ asset('images/huv.jpg') }}') no-repeat center center fixed;
             background-size: cover;
-            height: 100vh;
-            height: 100dvh;
+            min-height: 100vh;
+            min-height: 100dvh;
             margin: 0;
             color: #fff;
+            overflow-x: hidden;
         }
 
         .overlay {
@@ -44,10 +45,15 @@
             min-height: 100vh;
             min-height: 100dvh;
             width: 100%;
-            position: fixed;
-            overflow-y: auto;
+            /* 'relative' en lugar de 'fixed' + overflow-y:auto: esa combinacion
+               nunca generaba barra de desplazamiento porque la caja crecia con
+               el contenido, y al estar fuera del flujo el documento tampoco
+               podia desplazarse. Asi los ultimos campos del formulario de
+               registro quedaban inalcanzables en pantallas pequenas. */
+            position: relative;
             display: flex;
             flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         /* ====== BANNER SUPERIOR ====== */
@@ -83,7 +89,9 @@
 
         /* ====== CONTENEDOR PRINCIPAL (Grid · mobile-first) ====== */
         .main-content {
-            flex: 1;
+            /* 1 0 auto: crece para llenar la pantalla cuando sobra espacio, pero
+               nunca se comprime por debajo de la altura real del formulario. */
+            flex: 1 0 auto;
             display: grid;
             grid-template-columns: 1fr;
             align-items: start;
@@ -356,6 +364,7 @@
             .auth-card {
                 max-width: 100%;
                 border-radius: var(--radius-sm);
+                scroll-margin-top: var(--space-sm);
             }
             .card-left {
                 padding: var(--space-md);
@@ -381,6 +390,9 @@
             }
             .media-area {
                 aspect-ratio: 2 / 1;
+                /* Limita el area multimedia para que el formulario comience mas
+                   arriba y se vean mas campos en la primera pantalla. */
+                max-height: 30vh;
                 border-radius: var(--radius-sm);
             }
             .media-area iframe,
@@ -742,6 +754,27 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- ====== ACCESO MOVIL AL FORMULARIO DE REGISTRO ====== --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var registerTab = document.getElementById('register-tab');
+        var authCard = document.querySelector('.auth-card');
+        if (!registerTab || !authCard) return;
+
+        // Al abrir la pestana "Registrarse" en movil, deja la tarjeta al inicio
+        // de la pantalla: se ven los primeros campos y el resto del formulario
+        // queda accesible con el scroll normal del documento.
+        registerTab.addEventListener('shown.bs.tab', function () {
+            if (window.innerWidth > 767) return;
+            try {
+                authCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) {
+                authCard.scrollIntoView(true);
+            }
+        });
+    });
+    </script>
     
     {{-- ====== CAROUSEL AUTO-ROTACIÓN ====== --}}
     @if(isset($banners) && $banners->count() > 1)
