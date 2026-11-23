@@ -20,6 +20,18 @@ class Curso extends Model
     const NOTA_MAXIMA = 5.0;
 
     /**
+     * Nota mínima de aprobación usada cuando el curso no la tiene configurada.
+     * Coincide con el valor por defecto de la migración.
+     */
+    const NOTA_MINIMA_APROBACION_DEFAULT = 3.0;
+
+    /**
+     * Margen (en puntos) por debajo de la nota mínima dentro del cual se
+     * considera que el estudiante está "en riesgo" y no reprobado.
+     */
+    const MARGEN_RIESGO = 0.5;
+
+    /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
@@ -153,6 +165,16 @@ class Curso extends Model
     public function actividades(): HasMany
     {
         return $this->hasMany(CursoActividad::class)->orderBy('fecha_apertura');
+    }
+
+    /**
+     * Actividades que cuelgan directamente del curso, sin pertenecer a un
+     * material. Su porcentaje_curso pesa sobre el curso completo, igual que
+     * el de un material.
+     */
+    public function actividadesIndependientes(): HasMany
+    {
+        return $this->actividades()->whereNull('material_id');
     }
 
     /**
@@ -316,15 +338,67 @@ class Curso extends Model
     public function calcularNotaFinalEstudiante($userId): float
     {
         $notaFinal = 0;
-        
+
+        // Materiales (módulos): calcularNotaEstudiante() ya devuelve el promedio
+        // ponderado de sus actividades en escala 0-5, así que aquí solo se aplica
+        // el peso del material dentro del curso.
         foreach ($this->materiales as $material) {
             $notaMaterial = $material->calcularNotaEstudiante($userId);
-            // Ponderar la nota del material según su porcentaje en el curso
             $notaFinal += ($notaMaterial * floatval($material->porcentaje_curso ?? 0) / 100);
         }
-        
+
+        // Actividades independientes (sin material): pesan directamente sobre el
+        // curso, igual que un material. El libro de calificaciones ya las sumaba
+        // y esta función no, por eso la nota del certificado no coincidía con la
+        // que veía el administrador.
+        foreach ($this->actividadesIndependientes as $actividad) {
+            $notaActividad = $actividad->calcularNotaEstudiante($userId);
+            $notaFinal += ($notaActividad * floatval($actividad->porcentaje_curso ?? 0) / 100);
+        }
+
         // La nota final está en escala 0-5.0
         return min(round($notaFinal, 2), self::NOTA_MAXIMA);
+    }
+
+    /**
+     * Nota mínima de aprobación efectiva del curso (escala 0-5).
+     *
+     * Es la ÚNICA fuente de verdad para decidir si un estudiante aprobó.
+     * Todo lo que muestre un estado (badge de "Cursos Disponibles", libro de
+     * calificaciones, vista previa del certificado y emisión del certificado)
+     * debe pasar por aquí para que nunca se contradigan entre sí.
+     */
+    public function getNotaMinimaAprobacionEfectiva(): float
+    {
+        $minima = $this->nota_minima_aprobacion;
+
+        if ($minima === null || $minima === '') {
+            return self::NOTA_MINIMA_APROBACION_DEFAULT;
+        }
+
+        return floatval($minima);
+    }
+
+    /**
+     * Estado de un estudiante en el curso a partir de su nota final (0-5).
+     *
+     * 'passed'  => alcanzó la nota mínima del curso
+     * 'at_risk' => está a MARGEN_RIESGO puntos o menos de alcanzarla
+     * 'failed'  => por debajo de eso
+     */
+    public function determinarEstadoEstudiante(float $notaFinal): string
+    {
+        $minima = $this->getNotaMinimaAprobacionEfectiva();
+
+        if ($notaFinal >= $minima) {
+            return 'passed';
+        }
+
+        if ($notaFinal >= max($minima - self::MARGEN_RIESGO, 0)) {
+            return 'at_risk';
+        }
+
+        return 'failed';
     }
 
     /**
@@ -333,7 +407,7 @@ class Curso extends Model
     public function estudianteAprobo($userId): bool
     {
         $notaFinal = $this->calcularNotaFinalEstudiante($userId);
-        return $notaFinal >= $this->nota_minima_aprobacion;
+        return $notaFinal >= $this->getNotaMinimaAprobacionEfectiva();
     }
 
     /**
@@ -343,7 +417,7 @@ class Curso extends Model
     {
         $resumen = [
             'nota_final' => $this->calcularNotaFinalEstudiante($userId),
-            'nota_minima_aprobacion' => $this->nota_minima_aprobacion,
+            'nota_minima_aprobacion' => $this->getNotaMinimaAprobacionEfectiva(),
             'aprobado' => $this->estudianteAprobo($userId),
             'materiales' => [],
         ];

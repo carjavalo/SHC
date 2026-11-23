@@ -189,14 +189,18 @@ class AcademicoController extends Controller
                     
                     // Solo para estudiantes normales (no administradores en vista de estudiante, o si queremos mostrarlo a todos, está bien)
                     // Mostrar badge del estado al lado de los botones de acciones
+                    // El estado se decide con la nota mínima configurada en el curso,
+                    // la misma regla que valida la emisión del certificado. Antes aquí
+                    // había un 60% fijo, por eso el badge decía "Aprobado" a estudiantes
+                    // a los que luego el certificado les devolvía 403.
                     $notaFinal = $curso->calcularNotaFinalEstudiante($user->id);
-                    $porcentaje = ($notaFinal / 5.0) * 100;
-                    
-                    if ($porcentaje >= 60) {
+                    $estadoEstudiante = $curso->determinarEstadoEstudiante($notaFinal);
+
+                    if ($estadoEstudiante === 'passed') {
                         $estadoStr = 'Aprobado';
                         $estadoCls = 'status-passed';
                         $icono = 'fas fa-check-circle';
-                    } elseif ($porcentaje >= 50) {
+                    } elseif ($estadoEstudiante === 'at_risk') {
                         $estadoStr = 'En Riesgo';
                         $estadoCls = 'status-at_risk';
                         $icono = 'fas fa-exclamation-triangle';
@@ -858,7 +862,11 @@ class AcademicoController extends Controller
         $notaFinal = number_format($resumen['nota_final'], 1);
 
         if (!$resumen['aprobado']) {
-            abort(403, 'Aún no has aprobado este curso.');
+            abort(403, sprintf(
+                'Aún no has aprobado este curso. Tu nota final es %s y la nota mínima de aprobación es %s.',
+                $notaFinal,
+                number_format($curso->getNotaMinimaAprobacionEfectiva(), 1)
+            ));
         }
 
         // Encontrar plantilla

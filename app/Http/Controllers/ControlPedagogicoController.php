@@ -437,8 +437,10 @@ class ControlPedagogicoController extends Controller
             // Calcular calificaciones por material/actividad
             $calificaciones = $this->calcularCalificaciones($estudiante, $curso);
             
-            // Calcular progreso general (nota final ponderada del curso)
-            $progreso = $this->calcularProgreso($calificaciones, $curso);
+            // Nota final ponderada del curso. Se usa el cálculo del modelo para
+            // que el libro de calificaciones, el badge de Cursos Disponibles y
+            // el certificado muestren siempre el mismo número.
+            $progreso = $curso->calcularNotaFinalEstudiante($estudiante->id);
             
             return [
                 'id' => $estudiante->id,
@@ -451,7 +453,7 @@ class ControlPedagogicoController extends Controller
                 'avatar' => $estudiante->avatar ?? null,
                 'calificaciones' => $calificaciones,
                 'progreso' => $progreso,
-                'estado' => $this->determinarEstado($progreso),
+                'estado' => $this->determinarEstado($progreso, $curso),
             ];
         });
     }
@@ -492,118 +494,15 @@ class ControlPedagogicoController extends Controller
         return $calificaciones;
     }
     
-    /**
-     * Calcular progreso general (nota final ponderada del curso)
-     * Retorna un valor en escala 0-5.0
-     * 
-     * Proceso:
-     * 1. Por cada actividad: nota × porcentaje_actividad
-     * 2. Sumar actividades del mismo material
-     * 3. Multiplicar suma por porcentaje_material
-     * 4. Sumar todos los materiales
-     */
-    private function calcularProgreso($calificaciones, $curso)
-    {
-        if (empty($calificaciones)) {
-            \Log::info('calcularProgreso: calificaciones vacías');
-            return 0;
-        }
-        
-        $notaFinal = 0;
-        \Log::info('=== INICIO CÁLCULO PROGRESO ===', ['curso_id' => $curso->id]);
-        
-        // Calcular nota ponderada por materiales
-        foreach ($curso->materiales as $material) {
-            $materialKey = 'material_' . $material->id;
-            if (!isset($calificaciones[$materialKey])) {
-                \Log::info('Material sin calificaciones', ['material_id' => $material->id]);
-                continue;
-            }
-            
-            $calificacionesMaterial = $calificaciones[$materialKey];
-            $sumaActividadesMaterial = 0;
-            
-            \Log::info('Procesando material', [
-                'material_id' => $material->id,
-                'material_nombre' => $material->titulo,
-                'porcentaje_material' => $material->porcentaje_curso
-            ]);
-            
-            // Paso 1 y 2: Multiplicar cada nota por su porcentaje de actividad y sumar
-            foreach ($material->actividades as $actividad) {
-                $actividadKey = $actividad->tipo . '_' . $actividad->id;
-                if (isset($calificacionesMaterial[$actividadKey]) && $calificacionesMaterial[$actividadKey] > 0) {
-                    $nota = $calificacionesMaterial[$actividadKey]; // Nota en escala 0-5
-                    $porcentajeActividad = floatval($actividad->porcentaje_curso ?? 0) / 100; // Convertir a decimal
-                    
-                    // Multiplicar nota por porcentaje de actividad
-                    $notaPonderadaActividad = $nota * $porcentajeActividad;
-                    $sumaActividadesMaterial += $notaPonderadaActividad;
-                    
-                    \Log::info('Actividad procesada', [
-                        'actividad_id' => $actividad->id,
-                        'actividad_nombre' => $actividad->titulo,
-                        'nota' => $nota,
-                        'porcentaje_actividad' => $actividad->porcentaje_curso,
-                        'nota_ponderada' => $notaPonderadaActividad
-                    ]);
-                }
-            }
-            
-            // Paso 3: Multiplicar la suma de actividades por el porcentaje del material
-            $porcentajeMaterial = floatval($material->porcentaje_curso ?? 0) / 100; // Convertir a decimal
-            $notaPonderadaMaterial = $sumaActividadesMaterial * $porcentajeMaterial;
-            
-            \Log::info('Material calculado', [
-                'suma_actividades' => $sumaActividadesMaterial,
-                'porcentaje_material' => $material->porcentaje_curso,
-                'nota_ponderada_material' => $notaPonderadaMaterial
-            ]);
-            
-            // Paso 4: Agregar al total
-            $notaFinal += $notaPonderadaMaterial;
-        }
-        
-        // Calcular nota ponderada por actividades independientes (sin material)
-        foreach ($curso->actividades()->whereNull('material_id')->get() as $actividad) {
-            $actividadKey = 'actividad_' . $actividad->id;
-            if (isset($calificaciones[$actividadKey]) && $calificaciones[$actividadKey] > 0) {
-                $nota = $calificaciones[$actividadKey]; // Nota en escala 0-5
-                $porcentaje = floatval($actividad->porcentaje_curso ?? 0) / 100; // Convertir a decimal
-                
-                // Multiplicar nota por porcentaje
-                $notaPonderada = $nota * $porcentaje;
-                $notaFinal += $notaPonderada;
-                
-                \Log::info('Actividad independiente procesada', [
-                    'actividad_id' => $actividad->id,
-                    'nota' => $nota,
-                    'porcentaje' => $actividad->porcentaje_curso,
-                    'nota_ponderada' => $notaPonderada
-                ]);
-            }
-        }
-        
-        \Log::info('=== FIN CÁLCULO PROGRESO ===', ['nota_final' => $notaFinal]);
-        
-        return round($notaFinal, 2);
-    }
     
     /**
      * Determinar estado según progreso (escala 0-5)
      */
-    private function determinarEstado($progreso)
+    private function determinarEstado($progreso, $curso)
     {
-        // Convertir de escala 0-5 a porcentaje para determinar estado
-        $porcentaje = ($progreso / 5.0) * 100;
-        
-        if ($porcentaje >= 60) {
-            return 'passed';
-        } elseif ($porcentaje >= 50) {
-            return 'at_risk';
-        } else {
-            return 'failed';
-        }
+        // Manda la nota mínima configurada en el curso, para que el estado del
+        // libro de calificaciones coincida con la validación del certificado.
+        return $curso->determinarEstadoEstudiante(floatval($progreso));
     }
     
     /**
@@ -708,6 +607,17 @@ class ControlPedagogicoController extends Controller
             // Obtener resumen y nota final de forma segura
             $resumen = $curso->getResumenCalificacionesEstudiante($estudiante->id);
             $notaFinal = number_format(floatval($resumen['nota_final'] ?? 0), 1);
+
+            // Misma regla que para el estudiante: sin aprobación no hay certificado.
+            // Antes esta vista previa no validaba la nota, así que un administrador
+            // veía el certificado de estudiantes que no habían aprobado.
+            if (empty($resumen['aprobado'])) {
+                return $this->certificadoError(sprintf(
+                    'El estudiante aún no ha aprobado este curso. Nota final: %s; nota mínima de aprobación: %s.',
+                    $notaFinal,
+                    number_format($curso->getNotaMinimaAprobacionEfectiva(), 1)
+                ));
+            }
 
             // Obtener o crear registro de certificado emitido con código de verificación
             $certificadoEmitido = null;

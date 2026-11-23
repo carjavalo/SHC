@@ -486,10 +486,9 @@
                                     @endif
                                 @endforeach
                                 <td class="final-col text-center sticky-right">
-                                    @php
-                                        $porcentajeProgreso = ($estudiante['progreso'] / 5.0) * 100;
-                                    @endphp
-                                    <span class="final-grade grade-{{ $porcentajeProgreso >= 60 ? 'good' : ($porcentajeProgreso >= 50 ? 'warning' : 'poor') }}">
+                                    {{-- El color sigue el mismo estado que el badge, calculado
+                                         con la nota mínima configurada en el curso --}}
+                                    <span class="final-grade grade-{{ $estudiante['estado'] == 'passed' ? 'good' : ($estudiante['estado'] == 'at_risk' ? 'warning' : 'poor') }}">
                                         {{ number_format($estudiante['progreso'], 2) }}/5.0
                                     </span>
                                 </td>
