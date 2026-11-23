@@ -303,15 +303,30 @@
 
     <!-- Gradebook Table -->
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap">
             <h5 class="mb-0"><i class="fas fa-table"></i> Libro de Calificaciones</h5>
-            <div class="header-actions">
-                <button class="btn btn-sm btn-light" onclick="exportarGradebook()">
-                    <i class="fas fa-download"></i> Exportar
-                </button>
-                <button class="btn btn-sm btn-light" onclick="imprimirGradebook()">
-                    <i class="fas fa-print"></i> Imprimir
-                </button>
+            <div class="header-tools">
+                <div class="student-search">
+                    <input type="text"
+                           id="buscadorEstudiante"
+                           class="form-control form-control-sm student-search-input"
+                           placeholder="Buscar por nombre, documento o correo..."
+                           autocomplete="off"
+                           aria-label="Buscar estudiante por nombre, documento o correo">
+                    <i class="fas fa-search student-search-icon"></i>
+                    <button type="button" id="limpiarBusquedaEstudiante" class="student-search-clear" title="Limpiar búsqueda" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <span id="contadorBusqueda" class="search-counter" style="display: none;"></span>
+                <div class="header-actions">
+                    <button class="btn btn-sm btn-light" onclick="exportarGradebook()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-sm btn-light" onclick="imprimirGradebook()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
             </div>
         </div>
         <div class="card-body p-0">
@@ -381,7 +396,10 @@
                     </thead>
                     <tbody>
                         @forelse($estudiantes as $estudiante)
-                            <tr class="student-row">
+                            <tr class="student-row"
+                                data-nombre="{{ trim($estudiante['nombre'] . ' ' . $estudiante['apellido1'] . ' ' . $estudiante['apellido2']) }}"
+                                data-documento="{{ $estudiante['numero_documento'] }}"
+                                data-email="{{ $estudiante['email'] }}">
                                 <td class="student-col sticky-col">
                                     <div class="student-info">
                                         <div class="student-avatar">
@@ -512,6 +530,12 @@
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="filaSinResultadosBusqueda" style="display: none;">
+                            <td colspan="100" class="text-center py-5">
+                                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No se encontraron estudiantes que coincidan con la búsqueda</p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -620,6 +644,105 @@
         border-radius: 6px;
         font-size: 0.875rem;
         padding: 0.375rem 0.75rem;
+    }
+
+    /* Buscador de estudiantes */
+    .header-tools {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .student-search {
+        position: relative;
+        min-width: 330px;
+    }
+
+    .student-search-input {
+        padding-left: 2.1rem;
+        padding-right: 2.1rem;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .student-search-input::placeholder {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .student-search-input:focus {
+        background: #fff;
+        color: #212529;
+        border-color: #fff;
+        box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.35);
+    }
+
+    .student-search-input:focus::placeholder {
+        color: #adb5bd;
+    }
+
+    .student-search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        pointer-events: none;
+    }
+
+    .student-search-clear {
+        position: absolute;
+        right: 0.45rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        padding: 0 0.35rem;
+        line-height: 1;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.85);
+        cursor: pointer;
+    }
+
+    .student-search-input:focus ~ .student-search-icon,
+    .student-search-input:focus ~ .student-search-clear {
+        color: #6c757d;
+    }
+
+    .search-counter {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 20px;
+        padding: 0.2rem 0.7rem;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 991.98px) {
+        .header-tools {
+            width: 100%;
+            margin-top: 0.75rem;
+            justify-content: space-between;
+        }
+
+        .student-search {
+            min-width: 100%;
+            order: -1;
+        }
+    }
+
+    @media print {
+        .student-search,
+        .search-counter,
+        .header-actions {
+            display: none !important;
+        }
     }
 
     /* Stats Grid */
@@ -1705,6 +1828,94 @@
                 });
             });
         }
+
+        // ============================================
+        // Buscador de estudiantes del Libro de Calificaciones
+        // ============================================
+        (function initBuscadorEstudiantes() {
+            const $input = $('#buscadorEstudiante');
+            if (!$input.length) return;
+
+            const $limpiar       = $('#limpiarBusquedaEstudiante');
+            const $contador      = $('#contadorBusqueda');
+            const $sinResultados = $('#filaSinResultadosBusqueda');
+            const $filas         = $('.gradebook-table tbody tr.student-row');
+            const total          = $filas.length;
+
+            // minusculas, sin acentos y sin espacios redundantes
+            function normalizar(texto) {
+                return (texto === null || texto === undefined ? '' : String(texto))
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            // quita puntos, guiones y espacios (documentos tipo 1.234.567)
+            function sinSeparadores(texto) {
+                return normalizar(texto).replace(/[.\-\s]/g, '');
+            }
+
+            // Indice de busqueda precalculado por fila
+            $filas.each(function() {
+                const $fila     = $(this);
+                const documento = normalizar($fila.attr('data-documento'));
+                $fila.attr('data-busqueda', [
+                    normalizar($fila.attr('data-nombre')),
+                    documento,
+                    documento.replace(/[.\-\s]/g, ''),
+                    normalizar($fila.attr('data-email'))
+                ].join(' | '));
+            });
+
+            function aplicarFiltro() {
+                const termino = normalizar($input.val());
+                $limpiar.toggle(termino.length > 0);
+
+                if (termino === '') {
+                    $filas.show();
+                    $sinResultados.hide();
+                    $contador.hide().text('');
+                    return;
+                }
+
+                const terminos = termino.split(' ').filter(Boolean);
+                let visibles = 0;
+
+                $filas.each(function() {
+                    const indice = $(this).attr('data-busqueda') || '';
+                    const coincide = terminos.every(function(t) {
+                        if (indice.indexOf(t) !== -1) return true;
+                        const plano = sinSeparadores(t);
+                        return plano !== '' && indice.indexOf(plano) !== -1;
+                    });
+                    $(this).toggle(coincide);
+                    if (coincide) visibles++;
+                });
+
+                $sinResultados.toggle(visibles === 0);
+                $contador.show().text(visibles + ' de ' + total + (total === 1 ? ' estudiante' : ' estudiantes'));
+            }
+
+            let temporizador = null;
+            $input.on('input', function() {
+                clearTimeout(temporizador);
+                temporizador = setTimeout(aplicarFiltro, 150);
+            });
+
+            $input.on('keydown', function(e) {
+                if (e.key === 'Escape' || e.keyCode === 27) {
+                    $input.val('');
+                    aplicarFiltro();
+                }
+            });
+
+            $limpiar.on('click', function() {
+                $input.val('').trigger('focus');
+                aplicarFiltro();
+            });
+        })();
 
         console.log('Control Pedagógico cargado correctamente');
     });
